@@ -24,7 +24,7 @@ export default function Hero() {
             Reserve a Table
           </a>
           <a
-            href="#menu"
+            href="/menu"
             className="rounded-full border border-white/25 px-8 py-3.5 text-sm font-medium text-foreground/90 backdrop-blur transition-colors hover:border-gold hover:text-gold"
           >
             Explore Menu

@@ -471,7 +471,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                           <input
                               type="number"
                               min="0"
-                              value={quantity}
+                              value={quantity ?? ""}
                               onChange={(e) => {
                                   setQuantity(e.target.value === "" ? "" : Number(e.target.value));
                                   if (errors.quantity) setErrors(prev => ({ ...prev, quantity: "" }));
@@ -620,7 +620,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                                               <input
                                                   type="number"
                                                   min="0"
-                                                  value={variant.quantity}
+                                                  value={variant.quantity ?? ""}
                                                   onChange={(e) => updateVariant(index, 'quantity', e.target.value === "" ? "" : Number(e.target.value))}
                                                   placeholder="Unlimited"
                                                   className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold transition-colors"
@@ -657,7 +657,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                                                   ))}
                                                   <label className="flex flex-col items-center justify-center w-16 h-16 border-2 border-dashed border-white/10 rounded-md cursor-pointer hover:border-gold/50 hover:bg-white/5 transition-all shrink-0">
                                                       <Plus className="w-4 h-4 text-muted-foreground" />
-                                                      <input type="file" className="hidden" accept="image/*" multiple onChange={(e) => handleVariantImageChange(index, e, true)} />
+                                                      <input type="file" className="hidden" accept="image/*" multiple onChange={(e) => handleVariantImageChange(index, e)} />
                                                   </label>
                                               </div>
                                           </div>
