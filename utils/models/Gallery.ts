@@ -20,6 +20,11 @@ const GallerySchema = new Schema(
       default: "Interior",
       enum: ["Food", "Drinks", "Interior", "Events"],
     },
+    description: {
+      type: String,
+      trim: true,
+      default: "",
+    },
   },
   { timestamps: true }
 );

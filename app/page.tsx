@@ -18,7 +18,7 @@ import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import FloatingButtons from "@/components/FloatingButtons";
 
-function useReveal() {
+function useReveal(deps: any[] = []) {
   useEffect(() => {
     const els = document.querySelectorAll<HTMLElement>(".reveal");
     const io = new IntersectionObserver(
@@ -34,7 +34,7 @@ function useReveal() {
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
-  }, []);
+  }, deps);
 }
 
 export default function Page() {
@@ -42,8 +42,10 @@ export default function Page() {
   const [settings, setSettings] = useState<any>(null);
   const [gallery, setGallery] = useState<any[]>([]);
   const [chefs, setChefs] = useState<any[]>([]);
+  const [faqs, setFaqs] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
 
-  useReveal();
+  useReveal([gallery, chefs, faqs, reviews]);
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 800);
@@ -73,6 +75,20 @@ export default function Page() {
         if (chefsData && chefsData.success) {
           setChefs(chefsData.chefs);
         }
+
+        // Fetch FAQs
+        const faqsRes = await fetch("/api/faqs");
+        const faqsData = await faqsRes.json();
+        if (faqsData && faqsData.success) {
+          setFaqs(faqsData.faqs);
+        }
+
+        // Fetch Reviews
+        const reviewsRes = await fetch("/api/reviews");
+        const reviewsData = await reviewsRes.json();
+        if (reviewsData && reviewsData.success) {
+          setReviews(reviewsData.reviews);
+        }
       } catch (err) {
         console.error("Failed to load landing datasets", err);
       }
@@ -92,10 +108,10 @@ export default function Page() {
         <Features />
         <Chefs chefs={chefs} />
         <Gallery gallery={gallery} />
-        <Testimonials />
+        <Testimonials reviews={reviews} />
         <Reservation />
         <Stats />
-        <Faq />
+        <Faq faqs={faqs} />
         <Contact settings={settings} />
         <Footer settings={settings} />
       </main>

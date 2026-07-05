@@ -16,6 +16,11 @@ const SettingSchema = new Schema(
       default: "+33 1 45 67 89 00",
       trim: true,
     },
+    whatsappNumber: {
+      type: String,
+      default: "+33145678900",
+      trim: true,
+    },
     shopEmail: {
       type: String,
       default: "reserve@aurea.dining",
@@ -59,6 +64,11 @@ const SettingSchema = new Schema(
     twitterUsername: {
       type: String,
       default: "aurea.dining",
+      trim: true,
+    },
+    shopDescription: {
+      type: String,
+      default: "A modern sanctuary of fine dining. Since 2012.",
       trim: true,
     },
   },

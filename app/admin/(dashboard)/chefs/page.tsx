@@ -5,11 +5,13 @@ import { Trash2, Upload, Plus, ArrowLeft } from "lucide-react";
 import BasicProvider from "@/utils/BasicProvider";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
 interface ChefItem {
   _id: string;
   name: string;
   role: string;
+  experience?: string;
   image: string;
   publicId: string;
   facebook: string;
@@ -23,16 +25,20 @@ export default function ChefsManager() {
   const [chefs, setChefs] = useState<ChefItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // Form states
   const [filePreview, setFilePreview] = useState("");
+  const [publicId, setPublicId] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
+  const [experience, setExperience] = useState("");
   const [facebook, setFacebook] = useState("");
   const [instagram, setInstagram] = useState("");
   const [twitter, setTwitter] = useState("");
 
-  const { getMethod, postMethod, deleteMethod } = BasicProvider();
+  const { getMethod, postMethod, putMethod, deleteMethod } = BasicProvider();
 
   const fetchChefs = async () => {
     setLoading(true);
@@ -61,70 +67,129 @@ export default function ChefsManager() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setFilePreview(reader.result as string);
+        if (errors.filePreview) setErrors(prev => ({ ...prev, filePreview: "" }));
       };
       reader.readAsDataURL(selectedFile);
     }
   };
 
-  const handleAddChef = async (e: React.FormEvent) => {
+  const handleEditChef = (chef: ChefItem) => {
+    setEditingId(chef._id);
+    setFilePreview(chef.image);
+    setPublicId(chef.publicId);
+    setName(chef.name);
+    setRole(chef.role);
+    setExperience(chef.experience || "");
+    setFacebook(chef.facebook || "");
+    setInstagram(chef.instagram || "");
+    setTwitter(chef.twitter || "");
+    setErrors({});
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setFilePreview("");
+    setPublicId("");
+    setName("");
+    setRole("");
+    setExperience("");
+    setFacebook("");
+    setInstagram("");
+    setTwitter("");
+    setErrors({});
+  };
+
+  const handleSaveChef = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!filePreview) {
-      toast.error("Please upload a profile photo for the chef.");
+    
+    const newErrors: Record<string, string> = {};
+    
+    if (!filePreview) newErrors.filePreview = "Please upload a profile photo";
+    
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      newErrors.name = "Chef name is required";
+    } else if (trimmedName.length < 3) {
+      newErrors.name = "Name must be at least 3 characters";
+    }
+    
+    if (!role.trim()) newErrors.role = "Role is required";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
-    if (!name.trim() || !role.trim()) {
-      toast.error("Please enter both the chef's name and role.");
-      return;
-    }
+    setErrors({});
 
     setUploading(true);
     try {
-      // 1. Upload to Cloudinary via server upload API
-      const uploadRes = await fetch("/api/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ file: filePreview }),
-      });
+      let finalImageUrl = filePreview;
+      let finalPublicId = publicId;
 
-      const uploadData = await uploadRes.json();
-      if (!uploadData || !uploadData.success) {
-        throw new Error(uploadData?.message || "Cloudinary upload failed.");
+      // Only upload if it's a new base64 image
+      if (filePreview.startsWith("data:")) {
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ file: filePreview }),
+        });
+
+        const uploadData = await uploadRes.json();
+        if (!uploadData || !uploadData.success) {
+          throw new Error(uploadData?.message || "Cloudinary upload failed.");
+        }
+        finalImageUrl = uploadData.url;
+        finalPublicId = uploadData.public_id;
       }
 
-      // 2. Save reference to MongoDB
       const payload = {
         name: name.trim(),
         role: role.trim(),
-        image: uploadData.url,
-        publicId: uploadData.public_id,
+        experience: experience.trim(),
+        image: finalImageUrl,
+        publicId: finalPublicId,
         facebook: facebook.trim(),
         instagram: instagram.trim(),
         twitter: twitter.trim(),
       };
 
-      const saveRes = await postMethod("/api/chefs", payload);
+      let saveRes;
+      if (editingId) {
+        saveRes = await putMethod(`/api/chefs/${editingId}`, payload);
+      } else {
+        saveRes = await postMethod("/api/chefs", payload);
+      }
+      
       if (saveRes && saveRes.success) {
-        toast.success("Chef profile created successfully!");
-        setFilePreview("");
-        setName("");
-        setRole("");
-        setFacebook("");
-        setInstagram("");
-        setTwitter("");
+        toast.success(editingId ? "Chef profile updated successfully!" : "Chef profile created successfully!");
+        handleCancelEdit();
         fetchChefs();
       } else {
         toast.error(saveRes.message || "Failed to save chef profile.");
       }
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Something went wrong during chef profile creation.");
+      toast.error(err.message || "Something went wrong during chef profile save.");
     } finally {
       setUploading(false);
     }
   };
 
   const handleDeleteChef = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this chef profile?")) return;
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this chef profile deletion!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d4af37',
+      cancelButtonColor: '#ef4444',
+      confirmButtonText: 'Yes, delete it!',
+      background: '#1a1a1a',
+      color: '#ffffff',
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       const data = await deleteMethod(`/api/chefs/${id}`);
@@ -161,9 +226,9 @@ export default function ChefsManager() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Upload/Add Form */}
-        <form onSubmit={handleAddChef} className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6 h-fit">
+        <form noValidate onSubmit={handleSaveChef} className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6 h-fit">
           <h3 className="font-serif text-lg font-bold text-foreground border-b border-white/5 pb-2.5">
-            Add Chef Profile
+            {editingId ? "Edit Chef Profile" : "Add Chef Profile"}
           </h3>
 
           <div className="space-y-4">
@@ -198,6 +263,7 @@ export default function ChefsManager() {
                   </label>
                 )}
               </div>
+              {errors.filePreview && <span className="text-[10px] text-red-400 mt-1 block">{errors.filePreview}</span>}
             </div>
 
             {/* Name */}
@@ -209,10 +275,15 @@ export default function ChefsManager() {
                 type="text"
                 placeholder="e.g. Jean-Luc Auréa"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="w-full bg-background/50 border border-white/10 px-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
+                onChange={(e) => {
+                  setName(e.target.value);
+                  if (errors.name) setErrors({ ...errors, name: "" });
+                }}
+                className={`w-full bg-background/50 border px-4 py-2.5 rounded-xl text-xs text-foreground outline-none transition-colors ${
+                  errors.name ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                }`}
               />
+              {errors.name && <span className="text-[10px] text-red-400 mt-1 block">{errors.name}</span>}
             </div>
 
             {/* Role */}
@@ -224,9 +295,28 @@ export default function ChefsManager() {
                 type="text"
                 placeholder="e.g. Executive Chef"
                 value={role}
-                onChange={(e) => setRole(e.target.value)}
-                required
-                className="w-full bg-background/50 border border-white/10 px-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
+                onChange={(e) => {
+                  setRole(e.target.value);
+                  if (errors.role) setErrors({ ...errors, role: "" });
+                }}
+                className={`w-full bg-background/50 border px-4 py-2.5 rounded-xl text-xs text-foreground outline-none transition-colors ${
+                  errors.role ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                }`}
+              />
+              {errors.role && <span className="text-[10px] text-red-400 mt-1 block">{errors.role}</span>}
+            </div>
+
+            {/* Experience */}
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold uppercase tracking-widest text-gold">
+                Experience
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. 15 Years, Michelin Starred"
+                value={experience}
+                onChange={(e) => setExperience(e.target.value)}
+                className="w-full bg-background/50 border border-white/10 px-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold transition-colors"
               />
             </div>
 
@@ -291,26 +381,38 @@ export default function ChefsManager() {
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={uploading}
-            className="w-full rounded-full bg-gradient-gold px-6 py-3.5 text-xs font-semibold text-primary-foreground shadow-gold transition-all duration-300 hover:scale-[1.01] disabled:opacity-75 disabled:pointer-events-none flex items-center justify-center gap-2"
-          >
-            {uploading ? (
-              <>
-                <svg className="animate-spin h-4 w-4 text-primary-foreground" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                <span>Creating profile...</span>
-              </>
-            ) : (
-              <>
-                <Plus className="h-4 w-4" />
-                <span>Add Chef Profile</span>
-              </>
+          <div className="flex gap-4">
+            <button
+              type="submit"
+              disabled={uploading}
+              className="flex-1 rounded-full bg-gradient-gold px-6 py-3.5 text-xs font-semibold text-primary-foreground shadow-gold transition-all duration-300 hover:scale-[1.01] disabled:opacity-75 disabled:pointer-events-none flex items-center justify-center gap-2"
+            >
+              {uploading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-primary-foreground" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <span>{editingId ? "Updating..." : "Creating profile..."}</span>
+                </>
+              ) : (
+                <>
+                  {editingId ? null : <Plus className="h-4 w-4" />}
+                  <span>{editingId ? "Update Profile" : "Add Chef Profile"}</span>
+                </>
+              )}
+            </button>
+            {editingId && (
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                disabled={uploading}
+                className="rounded-full bg-white/5 border border-white/10 px-6 py-3.5 text-xs font-semibold text-muted-foreground transition-all duration-300 hover:bg-white/10 hover:text-foreground disabled:opacity-75"
+              >
+                Cancel
+              </button>
             )}
-          </button>
+          </div>
         </form>
 
         {/* Chefs Grid */}
@@ -342,6 +444,7 @@ export default function ChefsManager() {
                   <div className="min-w-0 flex-1">
                     <h4 className="font-serif text-base font-bold text-foreground truncate">{chef.name}</h4>
                     <p className="text-xs text-gold uppercase tracking-wider font-semibold truncate mt-0.5">{chef.role}</p>
+                    {chef.experience && <p className="text-[11px] text-muted-foreground truncate mt-1">{chef.experience}</p>}
                     
                     <div className="flex gap-2.5 mt-2.5 text-muted-foreground">
                       {chef.instagram && (
@@ -363,13 +466,22 @@ export default function ChefsManager() {
                       )}
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleDeleteChef(chef._id)}
-                    className="p-2 bg-white/5 hover:bg-destructive/15 border border-white/10 hover:border-destructive/30 text-muted-foreground hover:text-destructive-foreground rounded-lg transition-colors cursor-pointer shrink-0 align-self-start"
-                    title="Delete Chef Profile"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  <div className="flex flex-col gap-2 shrink-0">
+                    <button
+                      onClick={() => handleEditChef(chef)}
+                      className="p-2 bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-muted-foreground hover:text-gold rounded-lg transition-colors cursor-pointer"
+                      title="Edit Chef Profile"
+                    >
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteChef(chef._id)}
+                      className="p-2 bg-white/5 hover:bg-destructive/15 border border-white/10 hover:border-destructive/30 text-muted-foreground hover:text-destructive-foreground rounded-lg transition-colors cursor-pointer"
+                      title="Delete Chef Profile"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

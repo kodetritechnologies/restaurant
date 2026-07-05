@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 
 const navLinks = [
-  { href: "#home", label: "Home" },
-  { href: "#menu", label: "Menu" },
-  { href: "#about", label: "About" },
-  { href: "#gallery", label: "Gallery" },
-  { href: "#reservation", label: "Reservation" },
-  { href: "#testimonials", label: "Testimonials" },
-  { href: "#contact", label: "Contact" },
+  { href: "/#home", label: "Home" },
+  { href: "/menu", label: "Menu" },
+  { href: "/#about", label: "About" },
+  { href: "/#gallery", label: "Gallery" },
+  { href: "/#reservation", label: "Reservation" },
+  { href: "/#testimonials", label: "Testimonials" },
+  { href: "/#contact", label: "Contact" },
 ];
 
 export default function Header() {
@@ -42,7 +42,7 @@ export default function Header() {
         }`}
       >
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 md:px-8">
-          <a href="#home" className="flex items-center gap-2">
+          <a href="/" className="flex items-center gap-2">
             <span className="font-serif text-2xl md:text-3xl text-gradient-gold">Auréa</span>
           </a>
           <ul className="hidden items-center gap-8 lg:flex">
@@ -56,7 +56,7 @@ export default function Header() {
           </ul>
           <div className="flex items-center gap-3">
             <a
-              href="#reservation"
+              href="/#reservation"
               className="hidden rounded-full border border-gold/60 bg-gold/10 px-5 py-2.5 text-sm font-medium text-gold transition-all hover:bg-gold hover:text-primary-foreground md:inline-flex"
             >
               Reserve a Table
@@ -86,7 +86,7 @@ export default function Header() {
               ))}
               <li>
                 <a
-                  href="#reservation"
+                  href="/#reservation"
                   onClick={() => setMenuOpen(false)}
                   className="mt-2 block rounded-full bg-gold px-4 py-2.5 text-center text-primary-foreground"
                 >

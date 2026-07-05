@@ -12,6 +12,11 @@ const ChefSchema = new Schema(
       required: [true, "Chef role is required"],
       trim: true,
     },
+    experience: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     image: {
       type: String,
       required: [true, "Chef profile image URL is required"],

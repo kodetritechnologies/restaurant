@@ -1,22 +1,49 @@
 "use client";
 
-const d1 = "/assets/dish-1.jpg";
-const d2 = "/assets/dish-2.jpg";
-const d3 = "/assets/dish-3.jpg";
-const d4 = "/assets/dish-4.jpg";
-const d5 = "/assets/dish-5.jpg";
-const d8 = "/assets/dish-8.jpg";
+import { useEffect, useState } from "react";
+import Image from "next/image";
 
-const categories = [
-  { title: "Breakfast", desc: "Morning classics, freshly prepared.", img: d5 },
-  { title: "Lunch", desc: "Light plates for a refined midday.", img: d3 },
-  { title: "Dinner", desc: "Signature courses under candlelight.", img: d1 },
-  { title: "Desserts", desc: "Sweet finales crafted with care.", img: d4 },
-  { title: "Coffee", desc: "Single-origin, slow brewed.", img: d8 },
-  { title: "Beverages", desc: "Sommelier-curated pairings.", img: d2 },
-];
+interface Category {
+  _id: string;
+  name: string;
+  image?: string;
+  description?: string;
+  featured?: boolean;
+  type?: string;
+}
 
 export default function Categories() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch("/api/categories?type=product");
+        const data = await res.json();
+        if (data && data.success) {
+          setCategories(data.categories);
+        }
+      } catch (error) {
+        console.error("Failed to fetch featured categories:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  if (loading) {
+    return (
+      <section id="categories" className="mx-auto max-w-7xl px-5 py-24 md:px-8 md:py-32 flex justify-center">
+        <div className="w-8 h-8 border-4 border-gold border-t-transparent rounded-full animate-spin"></div>
+      </section>
+    );
+  }
+
+
+
   return (
     <section id="categories" className="mx-auto max-w-7xl px-5 py-24 md:px-8 md:py-32">
       <div className="reveal mb-14 text-center">
@@ -25,19 +52,27 @@ export default function Categories() {
       </div>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {categories.map((c) => (
-          <article key={c.title} className="reveal group relative overflow-hidden rounded-2xl border border-white/5 bg-surface">
-            <div className="aspect-[4/3] overflow-hidden">
-              <img
-                src={c.img}
-                alt={c.title}
-                loading="lazy"
-                className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-110"
-              />
+          <article key={c._id} className="reveal group relative overflow-hidden rounded-2xl border border-white/5 bg-surface">
+            <div className="aspect-[4/3] overflow-hidden relative">
+              {c.image ? (
+                <Image
+                  src={c.image}
+                  alt={c.name}
+                  fill
+                  className="object-cover transition-transform duration-[1200ms] group-hover:scale-110"
+                />
+              ) : (
+                <div className="h-full w-full bg-surface/50 flex items-center justify-center text-gold">
+                  <span className="text-4xl">✨</span>
+                </div>
+              )}
             </div>
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-6">
-              <h3 className="font-serif text-2xl text-foreground">{c.title}</h3>
-              <p className="mt-1 text-sm text-foreground/70">{c.desc}</p>
+            <div className="absolute inset-x-0 bottom-0 p-6 z-10 pointer-events-none">
+              <h3 className="font-serif text-2xl text-foreground">{c.name}</h3>
+              {c.description && (
+                <p className="mt-1 text-sm text-foreground/70">{c.description}</p>
+              )}
               <div className="mt-3 h-px w-10 bg-gold transition-all duration-500 group-hover:w-24" />
             </div>
           </article>

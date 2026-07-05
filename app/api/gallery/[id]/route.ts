@@ -40,3 +40,42 @@ export async function DELETE(
     );
   }
 }
+
+export async function PUT(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const admin = await verifyAdmin(req);
+    if (!admin) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized credentials." },
+        { status: 401 }
+      );
+    }
+
+    const { id } = await params;
+    const body = await req.json();
+
+    await dbConnect();
+    const updatedItem = await Gallery.findByIdAndUpdate(id, body, { new: true, runValidators: true });
+
+    if (!updatedItem) {
+      return NextResponse.json(
+        { success: false, message: "Gallery item not found." },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: true, message: "Gallery item updated successfully.", item: updatedItem },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error("PUT Gallery Error:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to update gallery item.", error: error.message },
+      { status: 500 }
+    );
+  }
+}

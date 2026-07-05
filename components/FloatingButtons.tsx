@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 interface FloatingButtonsProps {
   settings?: {
     shopPhone?: string;
+    whatsappNumber?: string;
   } | null;
 }
 
@@ -24,11 +25,12 @@ export default function FloatingButtons({ settings }: FloatingButtonsProps) {
   };
 
   const rawPhone = settings?.shopPhone || "+33 1 45 67 89 00";
-  // Remove non-digit characters except possibly the leading plus if needed, 
-  // but for wa.me and tel, plain digits work best (e.g. 33145678900)
+  const rawWhatsapp = settings?.whatsappNumber || "+33145678900";
+  
   const cleanedPhone = rawPhone.replace(/\D/g, "");
+  const cleanedWhatsapp = rawWhatsapp.replace(/\D/g, "");
 
-  const whatsappUrl = `https://wa.me/${cleanedPhone || "33145678900"}`;
+  const whatsappUrl = `https://wa.me/${cleanedWhatsapp || "33145678900"}`;
   const telUrl = `tel:+${cleanedPhone || "33145678900"}`;
 
   return (

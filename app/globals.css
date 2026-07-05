@@ -144,3 +144,63 @@
 
 .hover-lift { transition: transform .4s ease, box-shadow .4s ease; }
 .hover-lift:hover { transform: translateY(-6px); box-shadow: var(--shadow-elegant); }
+
+/* Global Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: color-mix(in oklab, var(--foreground) 5%, transparent);
+}
+::-webkit-scrollbar-thumb {
+  background-color: color-mix(in oklab, var(--gold) 60%, transparent);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--gold);
+}
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--gold) 60%, transparent) color-mix(in oklab, var(--foreground) 5%, transparent);
+}
+
+/* Quill Editor Dark Theme */
+.quill-dark .ql-toolbar {
+  border: none !important;
+  border-bottom: 1px solid var(--border) !important;
+  background-color: transparent !important;
+}
+.quill-dark .ql-container {
+  border: none !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+}
+.quill-dark .ql-editor {
+  min-height: 100px;
+  color: var(--foreground);
+}
+.quill-dark .ql-editor.ql-blank::before {
+  color: var(--muted-foreground);
+  font-style: normal;
+}
+.quill-dark .ql-stroke {
+  stroke: var(--foreground) !important;
+}
+.quill-dark .ql-fill {
+  fill: var(--foreground) !important;
+}
+.quill-dark .ql-picker {
+  color: var(--foreground) !important;
+}
+.quill-dark .ql-active .ql-stroke {
+  stroke: var(--gold) !important;
+}
+.quill-dark .ql-active .ql-fill {
+  fill: var(--gold) !important;
+}
+.quill-dark .ql-picker-options {
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+}

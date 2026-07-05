@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Info, Lock, Phone, Mail, MapPin, Clock } from "lucide-react";
+import { Info, Lock, Phone, Mail, MapPin, Clock, MessageSquare } from "lucide-react";
 import BasicProvider from "@/utils/BasicProvider";
 import toast from "react-hot-toast";
 
@@ -11,8 +11,10 @@ export default function SettingsManager() {
   
   // Operational details state
   const [shopPhone, setShopPhone] = useState("");
+  const [whatsappNumber, setWhatsappNumber] = useState("");
   const [shopEmail, setShopEmail] = useState("");
   const [shopAddress, setShopAddress] = useState("");
+  const [shopDescription, setShopDescription] = useState("");
   const [shortHours, setShortHours] = useState("");
   const [openHoursTueFri, setOpenHoursTueFri] = useState("");
   const [openHoursSatSun, setOpenHoursSatSun] = useState("");
@@ -28,6 +30,7 @@ export default function SettingsManager() {
   
   const [loading, setLoading] = useState(true);
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { getMethod, postMethod } = BasicProvider();
 
@@ -39,8 +42,10 @@ export default function SettingsManager() {
         setBannerText(s.bannerText || "");
         setShowBanner(!!s.showBanner);
         setShopPhone(s.shopPhone || "");
+        setWhatsappNumber(s.whatsappNumber || "");
         setShopEmail(s.shopEmail || "");
         setShopAddress(s.shopAddress || "");
+        setShopDescription(s.shopDescription || "");
         setShortHours(s.shortHours || "");
         setOpenHoursTueFri(s.openHoursTueFri || "");
         setOpenHoursSatSun(s.openHoursSatSun || "");
@@ -84,16 +89,47 @@ export default function SettingsManager() {
 
   const handleSaveOperational = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!shopPhone.trim() || !shopEmail.trim() || !shopAddress.trim()) {
-      toast.error("Contact details (Phone, Email, Address) are required.");
+    
+    const newErrors: Record<string, string> = {};
+    
+    // Phone validation (exactly 10 digits)
+    if (!shopPhone.trim()) {
+      newErrors.shopPhone = "Phone number is required";
+    } else if (!/^\d{10}$/.test(shopPhone.trim())) {
+      newErrors.shopPhone = "Phone number must be exactly 10 digits";
+    }
+
+    // WhatsApp validation (exactly 10 digits)
+    if (!whatsappNumber.trim()) {
+      newErrors.whatsappNumber = "WhatsApp number is required";
+    } else if (!/^\d{10}$/.test(whatsappNumber.trim())) {
+      newErrors.whatsappNumber = "WhatsApp number must be exactly 10 digits";
+    }
+
+    // Email validation (regex)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!shopEmail.trim()) {
+      newErrors.shopEmail = "Email address is required";
+    } else if (!emailRegex.test(shopEmail.trim())) {
+      newErrors.shopEmail = "Please enter a valid email address";
+    }
+
+    if (!shopAddress.trim()) newErrors.shopAddress = "Physical address is required";
+    if (!shopDescription.trim()) newErrors.shopDescription = "Shop description is required";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
+    setErrors({});
 
     try {
       const data = await postMethod("/api/settings", {
         shopPhone,
+        whatsappNumber,
         shopEmail,
         shopAddress,
+        shopDescription,
         shortHours,
         openHoursTueFri,
         openHoursSatSun,
@@ -173,7 +209,7 @@ export default function SettingsManager() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Dynamic Operational & Social Details Form */}
-        <form onSubmit={handleSaveOperational} className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6 lg:col-span-2">
+        <form noValidate onSubmit={handleSaveOperational} className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6 lg:col-span-2">
           <h3 className="font-serif text-lg font-bold text-foreground border-b border-white/5 pb-2.5">
             Operational, Contact & Social Details
           </h3>
@@ -194,11 +230,41 @@ export default function SettingsManager() {
                   <input
                     type="text"
                     value={shopPhone}
-                    onChange={(e) => setShopPhone(e.target.value)}
-                    required
-                    className="w-full bg-background/50 border border-white/10 pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                      setShopPhone(val);
+                      if (errors.shopPhone) setErrors({ ...errors, shopPhone: "" });
+                    }}
+                    className={`w-full bg-background/50 border pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none transition-colors ${
+                      errors.shopPhone ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                    }`}
                   />
                 </div>
+                {errors.shopPhone && <span className="text-[10px] text-red-400 mt-1 block">{errors.shopPhone}</span>}
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  WhatsApp Number
+                </label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+                    <MessageSquare className="h-3.5 w-3.5" />
+                  </span>
+                  <input
+                    type="text"
+                    value={whatsappNumber}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                      setWhatsappNumber(val);
+                      if (errors.whatsappNumber) setErrors({ ...errors, whatsappNumber: "" });
+                    }}
+                    className={`w-full bg-background/50 border pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none transition-colors ${
+                      errors.whatsappNumber ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                    }`}
+                  />
+                </div>
+                {errors.whatsappNumber && <span className="text-[10px] text-red-400 mt-1 block">{errors.whatsappNumber}</span>}
               </div>
 
               <div className="space-y-2">
@@ -212,11 +278,16 @@ export default function SettingsManager() {
                   <input
                     type="email"
                     value={shopEmail}
-                    onChange={(e) => setShopEmail(e.target.value)}
-                    required
-                    className="w-full bg-background/50 border border-white/10 pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
+                    onChange={(e) => {
+                      setShopEmail(e.target.value);
+                      if (errors.shopEmail) setErrors({ ...errors, shopEmail: "" });
+                    }}
+                    className={`w-full bg-background/50 border pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none transition-colors ${
+                      errors.shopEmail ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                    }`}
                   />
                 </div>
+                {errors.shopEmail && <span className="text-[10px] text-red-400 mt-1 block">{errors.shopEmail}</span>}
               </div>
 
               <div className="space-y-2">
@@ -230,11 +301,35 @@ export default function SettingsManager() {
                   <input
                     type="text"
                     value={shopAddress}
-                    onChange={(e) => setShopAddress(e.target.value)}
-                    required
-                    className="w-full bg-background/50 border border-white/10 pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
+                    onChange={(e) => {
+                      setShopAddress(e.target.value);
+                      if (errors.shopAddress) setErrors({ ...errors, shopAddress: "" });
+                    }}
+                    className={`w-full bg-background/50 border pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none transition-colors ${
+                      errors.shopAddress ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                    }`}
                   />
                 </div>
+                {errors.shopAddress && <span className="text-[10px] text-red-400 mt-1 block">{errors.shopAddress}</span>}
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Shop Description (Footer)
+                </label>
+                <textarea
+                  value={shopDescription}
+                  onChange={(e) => {
+                    setShopDescription(e.target.value);
+                    if (errors.shopDescription) setErrors({ ...errors, shopDescription: "" });
+                  }}
+                  placeholder="A modern sanctuary of fine dining. Since 2012."
+                  rows={2}
+                  className={`w-full bg-background/50 border px-4 py-2.5 rounded-xl text-xs text-foreground outline-none transition-colors ${
+                    errors.shopDescription ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                  }`}
+                />
+                {errors.shopDescription && <span className="text-[10px] text-red-400 mt-1 block">{errors.shopDescription}</span>}
               </div>
             </div>
 

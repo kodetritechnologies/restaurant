@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Search, Trash2, CheckCircle2, XCircle, Check, ArrowLeft, RefreshCw } from "lucide-react";
 import BasicProvider from "@/utils/BasicProvider";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 interface Reservation {
   _id: string;
@@ -78,7 +79,20 @@ export default function BookingsManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this reservation record?")) return;
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this deleted reservation!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d4af37",
+      cancelButtonColor: "#ef4444",
+      confirmButtonText: "Yes, delete it!",
+      background: "#1a1a1a",
+      color: "#ffffff",
+    });
+
+    if (!result.isConfirmed) return;
+    
     try {
       const data = await deleteMethod(`/api/reservations/${id}`);
       if (data && data.success) {
@@ -173,12 +187,12 @@ export default function BookingsManager() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-white/5 bg-surface/70 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                <th className="py-4 px-6">Client Details</th>
-                <th className="py-4 px-6 text-center">Covers</th>
-                <th className="py-4 px-6">Reserved Slot</th>
-                <th className="py-4 px-6">Special Requests</th>
-                <th className="py-4 px-6 text-center">Status</th>
-                <th className="py-4 px-6 text-right">Actions</th>
+                <th className="py-4 px-3 md:px-4">Client Details</th>
+                <th className="py-4 px-3 md:px-4 text-center">Guests</th>
+                <th className="py-4 px-3 md:px-4">Reserved Slot</th>
+                <th className="py-4 px-3 md:px-4">Special Requests</th>
+                <th className="py-4 px-3 md:px-4 text-center">Status</th>
+                <th className="py-4 px-3 md:px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5 text-sm">
@@ -216,29 +230,29 @@ export default function BookingsManager() {
 
                   return (
                     <tr key={b._id} className="hover:bg-white/[0.02] transition-colors">
-                      <td className="py-4 px-6">
+                      <td className="py-4 px-3 md:px-4">
                         <div className="font-semibold text-foreground">{b.name}</div>
                         <div className="text-xs text-muted-foreground mt-0.5">{b.phone}</div>
                         <div className="text-xs text-muted-foreground">{b.email}</div>
                       </td>
-                      <td className="py-4 px-6 text-center font-serif text-lg font-bold text-foreground">
+                      <td className="py-4 px-3 md:px-4 text-center font-serif text-lg font-bold text-foreground">
                         {b.guests}
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-4 px-3 md:px-4">
                         <div className="font-semibold text-foreground">{b.date}</div>
                         <div className="text-xs text-muted-foreground mt-0.5">{b.time}</div>
                       </td>
-                      <td className="py-4 px-6 max-w-xs truncate" title={b.request}>
+                      <td className="py-4 px-3 md:px-4 max-w-[150px] md:max-w-xs truncate" title={b.request}>
                         <span className="text-xs text-foreground/80 italic">
                           {b.request || "None"}
                         </span>
                       </td>
-                      <td className="py-4 px-6 text-center">
-                        <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold border ${badgeClass}`}>
+                      <td className="py-4 px-3 md:px-4 text-center">
+                        <span className={`inline-flex px-2 md:px-3 py-1 rounded-full text-[10px] md:text-xs font-bold border ${badgeClass}`}>
                           {b.status}
                         </span>
                       </td>
-                      <td className="py-4 px-6 text-right">
+                      <td className="py-4 px-3 md:px-4 text-right">
                         <div className="flex justify-end gap-1.5">
                           {b.status === "Pending" && (
                             <>

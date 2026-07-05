@@ -1,7 +1,5 @@
 "use client";
 
-import { FormEvent } from "react";
-
 const navLinks = [
   { href: "#home", label: "Home" },
   { href: "#menu", label: "Menu" },
@@ -15,26 +13,23 @@ interface FooterProps {
     openHoursTueFri?: string;
     openHoursSatSun?: string;
     openHoursMon?: string;
+    shopDescription?: string;
   } | null;
 }
 
 export default function Footer({ settings }: FooterProps) {
-  const handleSubscribe = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    alert("Subscribed.");
-  };
-
-  const tueFri = settings?.openHoursTueFri || "Tuesday – Friday · 17:00 – 23:00";
-  const satSun = settings?.openHoursSatSun || "Saturday – Sunday · 12:00 – 23:30";
-  const mon = settings?.openHoursMon || "Monday · Closed";
+  const tueFri = settings?.openHoursTueFri || "";
+  const satSun = settings?.openHoursSatSun || "";
+  const mon = settings?.openHoursMon || "";
+  const shopDescription = settings?.shopDescription;
 
   return (
     <footer className="border-t border-white/5 bg-surface/70">
-      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 md:grid-cols-4 md:px-8">
+      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 md:grid-cols-3 md:px-8">
         <div>
           <div className="font-serif text-3xl text-gradient-gold">Auréa</div>
           <p className="mt-4 text-sm text-foreground/60">
-            A modern sanctuary of fine dining. Since 2012.
+            {shopDescription}
           </p>
         </div>
         <div>
@@ -57,20 +52,20 @@ export default function Footer({ settings }: FooterProps) {
             <li>{mon}</li>
           </ul>
         </div>
-        <div>
-          <h4 className="font-serif text-lg text-gold">Newsletter</h4>
-          <p className="mt-4 text-sm text-foreground/60">Seasonal menus & private events.</p>
-          <form
-            onSubmit={handleSubscribe}
-            className="mt-4 flex overflow-hidden rounded-full border border-white/10"
-          >
-            <input type="email" required placeholder="Your email" className="flex-1 bg-transparent px-4 py-2.5 text-sm outline-none" />
-            <button className="bg-gold px-4 text-primary-foreground">→</button>
-          </form>
-        </div>
       </div>
-      <div className="border-t border-white/5 py-6 text-center text-xs text-foreground/50">
-        © {new Date().getFullYear()} Auréa Dining. All rights reserved.
+      <div className="border-t border-white/5 py-6 flex flex-col items-center gap-2 text-center text-xs text-foreground/50">
+        <p>© {new Date().getFullYear()} Auréa Dining. All rights reserved.</p>
+        <p>
+          Website designed by{" "}
+          <a
+            href="https://kodetri.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gold hover:underline transition-all"
+          >
+            Kodetri Technologies
+          </a>
+        </p>
       </div>
     </footer>
   );

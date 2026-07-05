@@ -13,6 +13,7 @@ export async function GET() {
         showBanner: false,
         bannerText: "",
         shopPhone: "+33 1 45 67 89 00",
+        whatsappNumber: "+33145678900",
         shopEmail: "reserve@aurea.dining",
         shopAddress: "12 Rue de l'Élégance, 75008 Paris",
         shortHours: "Tue–Sun · 17:00 – 23:30",
@@ -22,6 +23,7 @@ export async function GET() {
         instagramUsername: "aurea.dining",
         facebookUsername: "aurea.dining",
         twitterUsername: "aurea.dining",
+        shopDescription: "A modern sanctuary of fine dining. Since 2012.",
       });
     }
 
