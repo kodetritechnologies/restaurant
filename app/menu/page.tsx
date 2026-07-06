@@ -8,8 +8,10 @@ import Footer from "@/components/Footer";
 import FloatingButtons from "@/components/FloatingButtons";
 import { ShoppingBag, Star, Plus, Minus, X, Package, ShoppingCart } from "lucide-react";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 export default function MenuPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -19,6 +21,7 @@ export default function MenuPage() {
 
   // Cart State
   const [cartItems, setCartItems] = useState<{ productId: string, variantId?: string, quantity: number }[]>([]);
+  const [cartLoaded, setCartLoaded] = useState(false);
   
   // Variant Modal State
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
@@ -54,6 +57,21 @@ export default function MenuPage() {
       return [...prev, { productId, variantId, quantity: newQuantity }];
     });
   };
+
+  // Persist cart to localStorage whenever it changes (after initial load)
+  useEffect(() => {
+    if (!cartLoaded) return;
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+  }, [cartItems, cartLoaded]);
+
+  // Restore cart from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("cartItems");
+      if (stored) setCartItems(JSON.parse(stored));
+    } catch {}
+    setCartLoaded(true);
+  }, []);
 
   const cartTotalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -222,7 +240,11 @@ export default function MenuPage() {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         />
                       ) : (
-                        <ShoppingBag className="w-12 h-12 text-white/10" />
+                        <img
+                          src="/assets/no-image-food.png"
+                          alt="No image"
+                          className="w-full h-full object-cover"
+                        />
                       )}
                       {product.featured && (
                         <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-white/10">
@@ -528,7 +550,7 @@ export default function MenuPage() {
                     return (
                       <div key={`${item.productId}-${item.variantId || idx}`} className="flex gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 relative group">
                         <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-black/20">
-                          <img src={image || "/placeholder.jpg"} alt={title} className="w-full h-full object-cover" />
+                          <img src={image || "/assets/no-image-food.png"} alt={title} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 flex flex-col justify-center">
                           <h4 className="font-bold text-white text-sm line-clamp-1">{title}</h4>
@@ -578,8 +600,8 @@ export default function MenuPage() {
                   </div>
                   <button 
                     onClick={() => {
-                      toast.success("Checkout flow coming soon!");
                       setIsCartOpen(false);
+                      router.push("/checkout");
                     }}
                     className="w-full h-14 rounded-xl bg-gold text-primary-foreground font-bold text-lg hover:bg-gold/90 transition-colors flex items-center justify-center gap-2"
                   >

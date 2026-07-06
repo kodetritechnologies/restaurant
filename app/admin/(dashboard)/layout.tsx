@@ -21,7 +21,8 @@ import {
   Package,
   ChevronDown,
   ChevronUp,
-  CircleDollarSign
+  CircleDollarSign,
+  User
 } from "lucide-react";
 import Cookies from "js-cookie";
 import BasicProvider from "@/utils/BasicProvider";
@@ -103,6 +104,14 @@ export default function AdminDashboardLayout({
       ]
     },
     { href: "/admin/categories", label: "Categories", icon: ListTree },
+    {
+      label: "Customers",
+      icon: User,
+      subItems: [
+        { href: "/admin/customers", label: "All Customers" },
+        { href: "/admin/customers/trash", label: "Trash" },
+      ],
+    },
     { href: "/admin/bookings", label: "Reservations", icon: CalendarDays },
     { href: "/admin/messages", label: "Messages", icon: MessageSquare },
     { href: "/admin/reviews", label: "Reviews", icon: Star },

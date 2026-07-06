@@ -16,6 +16,8 @@ export async function GET(req: Request) {
     let query: any = { deletedAt: null };
     
     if (featured === "true") query.featured = true;
+    const signature = searchParams.get("signature");
+    if (signature === "true") query.signature = true;
     if (productType) query.productType = productType;
     if (status) query.status = status;
     if (category && category !== "all") query.categories = category;
@@ -60,6 +62,7 @@ export async function POST(req: Request) {
       salePrice,
       quantity,
       featured,
+      signature,
       categories,
       productType,
       status,
@@ -108,6 +111,7 @@ export async function POST(req: Request) {
       salePrice,
       quantity,
       featured,
+      signature,
       categories: categories || [],
       productType,
       status,

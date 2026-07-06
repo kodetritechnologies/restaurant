@@ -36,6 +36,7 @@ interface Product {
   salePrice?: number;
   quantity: number | null;
   featured: boolean;
+  signature: boolean;
   categories?: string[];
   productType: "simple" | "variable";
   status: "active" | "inactive";
@@ -56,6 +57,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
   const [salePrice, setSalePrice] = useState<number | "">(initialData?.salePrice ?? "");
   const [quantity, setQuantity] = useState<number | "">(initialData?.quantity === null ? "" : (initialData?.quantity ?? 0));
   const [featured, setFeatured] = useState(initialData?.featured || false);
+  const [signature, setSignature] = useState((initialData as any)?.signature || false);
   const [productType, setProductType] = useState<"simple" | "variable">(initialData?.productType || "simple");
   const [status, setStatus] = useState<"active" | "inactive">(initialData?.status || "active");
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initialData?.categories || []);
@@ -245,6 +247,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
         salePrice: salePrice === "" ? undefined : Number(salePrice),
         quantity: quantity === "" ? null : Number(quantity),
         featured,
+        signature,
         categories: selectedCategories,
         productType,
         status,
@@ -422,6 +425,27 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                         <span
                             className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-primary-foreground shadow ring-0 transition duration-200 ease-in-out ${
                             featured ? "translate-x-5" : "translate-x-0"
+                            }`}
+                        />
+                        </button>
+                    </div>
+                    <div className="flex items-center justify-between bg-surface/50 border border-white/10 rounded-xl px-4 py-3">
+                        <div>
+                          <label className="text-sm font-medium text-foreground cursor-pointer" onClick={() => setSignature(!signature)}>
+                            Signature Dish
+                          </label>
+                          <p className="text-xs text-muted-foreground mt-0.5">Show in "Signature Dishes" on homepage</p>
+                        </div>
+                        <button
+                        type="button"
+                        onClick={() => setSignature(!signature)}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                            signature ? "bg-gold" : "bg-white/10"
+                        }`}
+                        >
+                        <span
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-primary-foreground shadow ring-0 transition duration-200 ease-in-out ${
+                            signature ? "translate-x-5" : "translate-x-0"
                             }`}
                         />
                         </button>

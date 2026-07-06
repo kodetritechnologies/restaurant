@@ -407,7 +407,7 @@ export default function ReviewsManager() {
                     </button>
                   </div>
                   
-                  <img src={review.imgUrl} alt={review.name} className="w-16 h-16 rounded-full mx-auto border-2 border-gold/40 object-cover mb-3" />
+                  <img src={review.imgUrl || "/assets/no-image-customer.png"} alt={review.name} className="w-16 h-16 rounded-full mx-auto border-2 border-gold/40 object-cover mb-3" onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/assets/no-image-customer.png"; }} />
                   <div className="text-gold text-xs mb-2">{"★".repeat(review.rating)}</div>
                   <blockquote className="text-xs text-foreground/80 italic mb-3 flex-1">
                     "{review.text}"

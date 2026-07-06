@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { User } from "lucide-react";
+import AuthModal from "./AuthModal";
 
 const navLinks = [
   { href: "/#home", label: "Home" },
@@ -16,6 +18,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [progress, setProgress] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => {
@@ -55,6 +58,13 @@ export default function Header() {
             ))}
           </ul>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setAuthModalOpen(true)}
+              title="Customer Login"
+              className="hidden md:flex items-center justify-center h-10 w-10 rounded-full border border-gold/30 bg-background/50 text-gold transition-all hover:bg-gold hover:text-primary-foreground cursor-pointer"
+            >
+              <User className="h-4.5 w-4.5" />
+            </button>
             <a
               href="/#reservation"
               className="hidden rounded-full border border-gold/60 bg-gold/10 px-5 py-2.5 text-sm font-medium text-gold transition-all hover:bg-gold hover:text-primary-foreground md:inline-flex"
@@ -85,6 +95,17 @@ export default function Header() {
                 </li>
               ))}
               <li>
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setAuthModalOpen(true);
+                  }}
+                  className="block w-full text-left rounded-lg px-3 py-2 text-foreground/85 hover:bg-white/5 hover:text-gold"
+                >
+                  Customer Login
+                </button>
+              </li>
+              <li>
                 <a
                   href="/#reservation"
                   onClick={() => setMenuOpen(false)}
@@ -97,6 +118,9 @@ export default function Header() {
           </div>
         )}
       </header>
+
+      {/* Auth Modal */}
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </>
   );
 }

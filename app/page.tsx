@@ -7,7 +7,6 @@ import Hero from "@/components/Hero";
 import Categories from "@/components/Categories";
 import Menu from "@/components/Menu";
 import About from "@/components/About";
-import Features from "@/components/Features";
 import Chefs from "@/components/Chefs";
 import Gallery from "@/components/Gallery";
 import Testimonials from "@/components/Testimonials";
@@ -105,7 +104,6 @@ export default function Page() {
         <Categories />
         <Menu />
         <About />
-        <Features />
         <Chefs chefs={chefs} />
         <Gallery gallery={gallery} />
         <Testimonials reviews={reviews} />

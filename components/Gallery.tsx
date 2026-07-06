@@ -1,24 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+interface GalleryItem {
+  _id: string;
+  url: string;
+  title?: string;
+  category?: string;
+}
 
 interface GalleryProps {
-  gallery?: {
-    _id: string;
-    url: string;
-    title: string;
-    category: string;
-  }[] | null;
+  gallery?: GalleryItem[] | null;
 }
 
 export default function Gallery({ gallery: dbGallery }: GalleryProps) {
   const [lightbox, setLightbox] = useState<string | null>(null);
+  const [items, setItems] = useState<GalleryItem[]>([]);
 
-  const finalGallery = dbGallery && dbGallery.length > 0
-    ? dbGallery.map((item) => item.url)
-    : [];
+  useEffect(() => {
+    // If parent already passed data, use it directly
+    if (dbGallery && dbGallery.length > 0) {
+      setItems(dbGallery);
+      return;
+    }
+    // Otherwise fetch directly from the API
+    fetch("/api/gallery")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.success && Array.isArray(data.items)) {
+          setItems(data.items);
+        }
+      })
+      .catch(() => {});
+  }, [dbGallery]);
 
-  if (finalGallery.length === 0) return null;
+  const gallery = items
+    .map((item) => ({
+      id:    item._id,
+      src:   item.url,
+      title: item.title || "",
+    }))
+    .filter((item) => !!item.src);
+
+  if (gallery.length === 0) return null;
 
   return (
     <>
@@ -30,18 +54,21 @@ export default function Gallery({ gallery: dbGallery }: GalleryProps) {
             <h2 className="mt-4 font-serif text-4xl md:text-5xl">Moments to Savour</h2>
           </div>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            {finalGallery.map((g, i) => (
+            {gallery.map((g, i) => (
               <button
-                key={i}
-                onClick={() => setLightbox(g)}
+                key={g.id}
+                onClick={() => setLightbox(g.src)}
                 className={`group relative overflow-hidden rounded-2xl ${
                   i % 5 === 0 ? "row-span-2 aspect-square md:aspect-auto" : "aspect-square"
                 }`}
               >
                 <img
-                  src={g}
-                  alt={`Gallery ${i + 1}`}
+                  src={g.src}
+                  alt={g.title || `Gallery ${i + 1}`}
                   loading="lazy"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = "/assets/no-image-food.png";
+                  }}
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-background/0 transition-colors group-hover:bg-background/30" />
@@ -84,12 +111,15 @@ export default function Gallery({ gallery: dbGallery }: GalleryProps) {
           <h2 className="mt-4 font-serif text-4xl md:text-5xl">@aurea.dining</h2>
         </div>
         <div className="grid grid-cols-3 gap-2 md:grid-cols-6">
-          {finalGallery.slice(0, 6).map((g, i) => (
-            <a key={i} href="#" className="group relative aspect-square overflow-hidden rounded-xl">
+          {gallery.slice(0, 6).map((g, i) => (
+            <a key={g.id} href="#" className="group relative aspect-square overflow-hidden rounded-xl">
               <img
-                src={g}
-                alt="Instagram"
+                src={g.src}
+                alt={g.title || "Instagram"}
                 loading="lazy"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = "/assets/no-image-food.png";
+                }}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
               <div className="absolute inset-0 grid place-items-center bg-background/0 text-gold opacity-0 transition-all group-hover:bg-background/50 group-hover:opacity-100">
