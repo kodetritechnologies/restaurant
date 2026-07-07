@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Cormorant_Garamond, Great_Vibes } from "next/font/google";
 import { Toaster } from "react-hot-toast";
+import { CustomerProvider } from "@/context/CustomerContext";
 import "./globals.css";
 
 const inter = Inter({
@@ -48,7 +49,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        {children}
+        <CustomerProvider>
+          {children}
+        </CustomerProvider>
         <Toaster position="top-right" />
       </body>
     </html>

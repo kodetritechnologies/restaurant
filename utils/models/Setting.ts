@@ -11,6 +11,11 @@ const SettingSchema = new Schema(
       default: "",
       trim: true,
     },
+    restaurantLogo: {
+      type: String,
+      default: "",
+      trim: true,
+    },
     shopPhone: {
       type: String,
       default: "+33 1 45 67 89 00",

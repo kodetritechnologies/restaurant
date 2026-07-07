@@ -96,7 +96,7 @@ export default function CheckoutPage() {
       setLoading(true);
       try {
         const [prodRes, currRes, settingsRes] = await Promise.all([
-          fetch("/api/products?status=active"),
+          fetch("/api/products"),
           fetch("/api/currency"),
           fetch("/api/settings"),
         ]);
@@ -222,8 +222,42 @@ export default function CheckoutPage() {
 
     setPlacing(true);
     try {
-      // Simulate order placement (replace with real API call)
-      await new Promise((res) => setTimeout(res, 1800));
+      const orderItems = cartItems.map(item => {
+        const details = getItemDetails(item);
+        return {
+          productId: item.productId,
+          variantId: item.variantId || null,
+          quantity: item.quantity,
+          price: details?.price || 0,
+          name: details?.title || "Unknown Item",
+          variantName: details?.variantName || "",
+          image: details?.image || "",
+        };
+      });
+
+      const payload = {
+        cartItems: orderItems,
+        customerDetails: form,
+        deliveryType,
+        paymentMethod,
+        subtotal,
+        deliveryFee,
+        totalAmount: total,
+      };
+
+      const res = await fetch("/api/customer/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!data.success) {
+        toast.error(data.message || "Failed to place order.");
+        setPlacing(false);
+        return;
+      }
+
       // Clear cart
       localStorage.removeItem("cartItems");
       setCartItems([]);

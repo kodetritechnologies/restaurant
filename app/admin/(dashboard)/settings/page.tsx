@@ -8,6 +8,8 @@ import toast from "react-hot-toast";
 export default function SettingsManager() {
   const [bannerText, setBannerText] = useState("");
   const [showBanner, setShowBanner] = useState(false);
+  const [restaurantLogo, setRestaurantLogo] = useState("");
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   
   // Operational details state
   const [shopPhone, setShopPhone] = useState("");
@@ -41,6 +43,7 @@ export default function SettingsManager() {
         const s = data.settings;
         setBannerText(s.bannerText || "");
         setShowBanner(!!s.showBanner);
+        setRestaurantLogo(s.restaurantLogo || "");
         setShopPhone(s.shopPhone || "");
         setWhatsappNumber(s.whatsappNumber || "");
         setShopEmail(s.shopEmail || "");
@@ -137,6 +140,7 @@ export default function SettingsManager() {
         instagramUsername,
         facebookUsername,
         twitterUsername,
+        restaurantLogo,
       });
       if (data && data.success) {
         toast.success("Operational settings saved successfully.");
@@ -145,6 +149,31 @@ export default function SettingsManager() {
       }
     } catch (err: any) {
       toast.error(err.message || "An error occurred.");
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingLogo(true);
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64File = reader.result as string;
+        const res = await postMethod("/api/upload", { file: base64File });
+        if (res && res.success) {
+          setRestaurantLogo(res.url);
+          toast.success("Logo uploaded temporarily. Click Save below to apply.");
+        } else {
+          toast.error(res?.message || "Logo upload failed.");
+        }
+        setUploadingLogo(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (err: any) {
+      toast.error(err.message || "An error occurred during upload.");
+      setUploadingLogo(false);
     }
   };
 
@@ -213,6 +242,42 @@ export default function SettingsManager() {
           <h3 className="font-serif text-lg font-bold text-foreground border-b border-white/5 pb-2.5">
             Operational, Contact & Social Details
           </h3>
+
+          {/* Logo Upload */}
+          <div className="space-y-4 pb-4 border-b border-white/5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-gold/80">Restaurant Logo</h4>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+              {restaurantLogo ? (
+                <div className="relative group">
+                  <img src={restaurantLogo} alt="Restaurant Logo" className="h-20 w-auto rounded object-contain bg-background/50 border border-white/10 p-2" />
+                  <button type="button" onClick={() => setRestaurantLogo("")} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-20 w-32 rounded bg-background/50 border border-dashed border-white/20 text-xs text-muted-foreground">
+                  No Logo
+                </div>
+              )}
+              <div className="space-y-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  id="logo-upload"
+                  className="hidden"
+                  onChange={handleLogoUpload}
+                  disabled={uploadingLogo}
+                />
+                <label
+                  htmlFor="logo-upload"
+                  className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-gold/30 bg-gold/10 px-4 py-2 text-xs font-semibold text-gold transition-colors hover:bg-gold/20"
+                >
+                  {uploadingLogo ? "Uploading..." : "Upload New Logo"}
+                </label>
+                <p className="text-[10px] text-muted-foreground">Recommended: Transparent PNG, max 2MB.</p>
+              </div>
+            </div>
+          </div>
 
           <div className="grid gap-6 md:grid-cols-2">
             {/* Contact Details */}

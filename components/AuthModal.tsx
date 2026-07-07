@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { UtensilsCrossed, Mail, ArrowRight, ShieldCheck, KeyRound, X } from "lucide-react";
 import toast from "react-hot-toast";
 import BasicProvider from "@/utils/BasicProvider";
+import { useCustomer } from "@/context/CustomerContext";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const { postMethod } = BasicProvider();
+  const { refreshCustomer } = useCustomer();
   
   const [step, setStep] = useState<"email" | "otp">("email");
   const [email, setEmail] = useState("");
@@ -84,10 +86,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       }
 
       setIsLoading(false);
-      toast.success("Welcome back!");
+      toast.success(data?.message || "Welcome back!");
+      await refreshCustomer();
       onClose();
-      // Optionally reload the page or update a global user state here
-      window.location.reload(); 
     } catch (err: any) {
       setError("Network or server connection issue. Please try again.");
       setIsLoading(false);

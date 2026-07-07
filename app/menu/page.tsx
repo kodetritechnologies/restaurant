@@ -27,6 +27,7 @@ export default function MenuPage() {
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<any | null>(null);
   const [modalQuantity, setModalQuantity] = useState<number>(1);
+  const [localQuantities, setLocalQuantities] = useState<Record<string, number>>({});
 
   // Cart Drawer State
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -124,8 +125,8 @@ export default function MenuPage() {
       setLoading(true);
       try {
         const url = activeCategory === "all" 
-          ? "/api/products?status=active" 
-          : `/api/products?status=active&category=${activeCategory}`;
+          ? "/api/products" 
+          : `/api/products?category=${activeCategory}`;
         const prodRes = await fetch(url);
         const prodData = await prodRes.json();
         if (prodData?.success) {
@@ -312,32 +313,42 @@ export default function MenuPage() {
                             View Options
                           </button>
                         ) : (
-                          getCartQuantity(product._id) > 0 ? (
-                            <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl p-1.5 h-12">
+                          <div className="flex items-center gap-3 w-full">
+                            <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl p-1.5 h-12 w-28 shrink-0">
                               <button 
-                                onClick={() => updateCartQuantity(product._id, undefined, -1, product.quantity)}
-                                className="w-10 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
+                                onClick={() => setLocalQuantities(prev => ({ ...prev, [product._id]: Math.max(1, (prev[product._id] || 1) - 1) }))}
+                                className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
                               >
                                 <Minus className="w-4 h-4" />
                               </button>
-                              <span className="font-medium text-foreground w-8 text-center">{getCartQuantity(product._id)}</span>
+                              <span className="font-medium text-foreground text-center">
+                                {localQuantities[product._id] || 1}
+                              </span>
                               <button 
-                                onClick={() => updateCartQuantity(product._id, undefined, 1, product.quantity)}
-                                className="w-10 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
+                                onClick={() => {
+                                  const current = localQuantities[product._id] || 1;
+                                  const max = product.quantity !== null ? product.quantity : 99;
+                                  setLocalQuantities(prev => ({ ...prev, [product._id]: Math.min(max, current + 1) }));
+                                }}
+                                className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
                               >
                                 <Plus className="w-4 h-4" />
                               </button>
                             </div>
-                          ) : (
+
                             <button 
-                              onClick={() => updateCartQuantity(product._id, undefined, 1, product.quantity)}
+                              onClick={() => {
+                                const qtyToAdd = localQuantities[product._id] || 1;
+                                updateCartQuantity(product._id, undefined, qtyToAdd, product.quantity);
+                                toast.success(`Added ${qtyToAdd} to cart`);
+                              }}
                               disabled={product.quantity !== null && product.quantity <= 0}
-                              className="w-full h-12 rounded-xl border border-white/10 hover:border-gold hover:bg-gold/5 text-foreground hover:text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="flex-1 h-12 rounded-xl border border-white/10 hover:border-gold hover:bg-gold/5 text-foreground hover:text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               <ShoppingBag className="w-4 h-4" />
                               {product.quantity !== null && product.quantity <= 0 ? "Out of Stock" : "Add to Cart"}
                             </button>
-                          )
+                          </div>
                         )}
                       </div>
                     </div>

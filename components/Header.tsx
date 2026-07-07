@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { User } from "lucide-react";
 import AuthModal from "./AuthModal";
+import { useCustomer } from "@/context/CustomerContext";
 
 const navLinks = [
   { href: "/#home", label: "Home" },
@@ -19,6 +20,9 @@ export default function Header() {
   const [progress, setProgress] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [restaurantLogo, setRestaurantLogo] = useState<string | null>(null);
+  const { isLoggedIn, logout } = useCustomer();
 
   useEffect(() => {
     const onScroll = () => {
@@ -29,6 +33,17 @@ export default function Header() {
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
+    
+    // Fetch settings for dynamic logo
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.success && data.settings?.restaurantLogo) {
+          setRestaurantLogo(data.settings.restaurantLogo);
+        }
+      })
+      .catch((err) => console.error("Error fetching settings for header:", err));
+
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
@@ -46,7 +61,11 @@ export default function Header() {
       >
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 md:px-8">
           <a href="/" className="flex items-center gap-2">
-            <span className="font-serif text-2xl md:text-3xl text-gradient-gold">Auréa</span>
+            {restaurantLogo ? (
+              <img src={restaurantLogo} alt="Restaurant Logo" className="h-16 md:h-20 w-auto object-contain" />
+            ) : (
+              <span className="font-serif text-2xl md:text-3xl text-gradient-gold">Auréa</span>
+            )}
           </a>
           <ul className="hidden items-center gap-8 lg:flex">
             {navLinks.map((l) => (
@@ -58,13 +77,41 @@ export default function Header() {
             ))}
           </ul>
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setAuthModalOpen(true)}
-              title="Customer Login"
-              className="hidden md:flex items-center justify-center h-10 w-10 rounded-full border border-gold/30 bg-background/50 text-gold transition-all hover:bg-gold hover:text-primary-foreground cursor-pointer"
-            >
-              <User className="h-4.5 w-4.5" />
-            </button>
+            {isLoggedIn ? (
+              <div className="relative hidden md:block">
+                <button
+                  onClick={() => setProfileMenuOpen((prev) => !prev)}
+                  className="flex items-center justify-center gap-2 px-4 py-2 rounded-full border border-gold/30 bg-background/50 text-sm font-medium text-gold transition-all hover:bg-gold hover:text-primary-foreground cursor-pointer"
+                >
+                  <User className="h-4 w-4" />
+                  <span>Profile</span>
+                </button>
+                {profileMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 rounded-xl border border-white/10 bg-background/90 p-2 backdrop-blur-md shadow-elegant">
+                    <a
+                      href="/profile"
+                      className="block rounded-lg px-3 py-2 text-sm text-foreground/85 hover:bg-white/5 hover:text-gold transition-colors"
+                    >
+                      Profile
+                    </a>
+                    <button
+                      onClick={() => logout()}
+                      className="block w-full text-left rounded-lg px-3 py-2 text-sm text-foreground/85 hover:bg-white/5 hover:text-gold transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => setAuthModalOpen(true)}
+                className="hidden md:flex items-center justify-center gap-2 px-4 py-2 rounded-full border border-gold/30 bg-background/50 text-sm font-medium text-gold transition-all hover:bg-gold hover:text-primary-foreground cursor-pointer"
+              >
+                <User className="h-4 w-4" />
+                <span>Login</span>
+              </button>
+            )}
             <a
               href="/#reservation"
               className="hidden rounded-full border border-gold/60 bg-gold/10 px-5 py-2.5 text-sm font-medium text-gold transition-all hover:bg-gold hover:text-primary-foreground md:inline-flex"
@@ -94,17 +141,39 @@ export default function Header() {
                   </a>
                 </li>
               ))}
-              <li>
-                <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    setAuthModalOpen(true);
-                  }}
-                  className="block w-full text-left rounded-lg px-3 py-2 text-foreground/85 hover:bg-white/5 hover:text-gold"
-                >
-                  Customer Login
-                </button>
-              </li>
+              {isLoggedIn ? (
+                <>
+                  <li>
+                    <a
+                      href="/profile"
+                      onClick={() => setMenuOpen(false)}
+                      className="block rounded-lg px-3 py-2 text-foreground/85 hover:bg-white/5 hover:text-gold"
+                    >
+                      Profile
+                    </a>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => logout()}
+                      className="block w-full text-left rounded-lg px-3 py-2 text-foreground/85 hover:bg-white/5 hover:text-gold"
+                    >
+                      Logout
+                    </button>
+                  </li>
+                </>
+              ) : (
+                <li>
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setAuthModalOpen(true);
+                    }}
+                    className="block w-full text-left rounded-lg px-3 py-2 text-foreground/85 hover:bg-white/5 hover:text-gold"
+                  >
+                    Customer Login
+                  </button>
+                </li>
+              )}
               <li>
                 <a
                   href="/#reservation"

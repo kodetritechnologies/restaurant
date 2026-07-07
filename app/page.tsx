@@ -43,7 +43,7 @@ export default function Page() {
   const [chefs, setChefs] = useState<any[]>([]);
   const [faqs, setFaqs] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
-
+ 
   useReveal([gallery, chefs, faqs, reviews]);
 
   useEffect(() => {

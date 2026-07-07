@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 150" width="400" height="150">
+  <defs>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Great+Vibes&amp;family=Oswald:wght@700&amp;family=Inter:wght@400;700&amp;display=swap");
+      .yellow { fill: #FFD700; }
+      .white { fill: #FFFFFF; }
+      .new-text { font-family: "Inter", sans-serif; font-size: 14px; font-weight: bold; letter-spacing: 2px; }
+      .udipi { font-family: "Oswald", sans-serif; font-size: 68px; font-weight: 700; letter-spacing: 1px; }
+      .restaurant { font-family: "Great Vibes", cursive; font-size: 52px; }
+      .subtext { font-family: "Inter", sans-serif; font-size: 14px; letter-spacing: 1px; }
+    </style>
+  </defs>
+
+  <!-- NEW (Vertical) -->
+  <g transform="translate(20, 70) rotate(-90)">
+    <text x="0" y="0" class="yellow new-text">NEW</text>
+  </g>
+
+  <!-- U with Fork and Spoon inside -->
+  <!-- Just using text for now, but we can draw a fork and spoon -->
+  <text x="40" y="70" class="yellow udipi">UDIPI</text>
+  
+  <!-- Tiny Fork & Spoon in the U (Approximate) -->
+  <g transform="translate(52, 28) scale(0.6)">
+    <!-- Spoon -->
+    <ellipse cx="10" cy="15" rx="6" ry="10" class="yellow" />
+    <rect x="8" y="22" width="4" height="25" rx="2" class="yellow" />
+    <!-- Fork -->
+    <path d="M 25 5 L 25 18 A 8 8 0 0 0 41 18 L 41 5 L 38 5 L 38 18 A 5 5 0 0 1 28 18 L 28 5 Z" class="yellow" />
+    <rect x="31" y="23" width="4" height="24" rx="2" class="yellow" />
+    <rect x="33" y="5" width="2" height="15" class="yellow" />
+  </g>
+
+  <!-- Restaurant -->
+  <text x="45" y="115" class="white restaurant">Restaurant</text>
+
+  <!-- South Indian & Chinese -->
+  <text x="48" y="140" class="white subtext">South Indian &amp; Chinese</text>
+</svg>

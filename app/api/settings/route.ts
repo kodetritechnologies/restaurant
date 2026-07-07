@@ -12,6 +12,7 @@ export async function GET() {
       settings = await Setting.create({
         showBanner: false,
         bannerText: "",
+        restaurantLogo: "",
         shopPhone: "+33 1 45 67 89 00",
         whatsappNumber: "+33145678900",
         shopEmail: "reserve@aurea.dining",
