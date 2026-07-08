@@ -298,8 +298,8 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
 
   return (
     <div className="space-y-6">
-      <div className="glass p-6 rounded-2xl border border-white/10">
-        <div className="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
+      <div className="glass p-6 rounded-2xl border border-foreground/10">
+        <div className="flex items-center justify-between mb-6 border-b border-foreground/10 pb-4">
           <h2 className="text-xl font-semibold text-foreground">
             {initialData ? "Edit Product" : "Add New Product"}
           </h2>
@@ -313,7 +313,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                 
                 {/* Basic Info */}
                 <div className="space-y-6">
-                    <h3 className="text-lg font-medium text-gold border-b border-white/5 pb-2">Basic Info</h3>
+                    <h3 className="text-lg font-medium text-gold border-b border-foreground/5 pb-2">Basic Info</h3>
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-muted-foreground">Product Name <span className="text-red-500">*</span></label>
                         <input
@@ -323,14 +323,14 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                             setName(e.target.value);
                             if (errors.name) setErrors(prev => ({ ...prev, name: "" }));
                         }}
-                        className={`w-full bg-surface/50 border ${errors.name ? "border-red-500/50" : "border-white/10"} rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors`}
+                        className={`w-full bg-surface/50 border ${errors.name ? "border-red-500/50" : "border-foreground/10"} rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors`}
                         />
                         {errors.name && <p className="text-xs text-red-400 mt-1">{errors.name}</p>}
                     </div>
 
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-muted-foreground">Short Description</label>
-                        <div className="quill-dark bg-surface/50 border border-white/10 rounded-xl overflow-hidden transition-colors focus-within:border-gold">
+                        <div className="quill-dark bg-surface/50 border border-foreground/10 rounded-xl overflow-hidden transition-colors focus-within:border-gold">
                             <ReactQuill 
                                 theme="snow" 
                                 value={shortDescription} 
@@ -342,7 +342,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                     
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-muted-foreground">Full Description</label>
-                        <div className="quill-dark bg-surface/50 border border-white/10 rounded-xl overflow-hidden transition-colors focus-within:border-gold">
+                        <div className="quill-dark bg-surface/50 border border-foreground/10 rounded-xl overflow-hidden transition-colors focus-within:border-gold">
                             <ReactQuill 
                                 theme="snow" 
                                 value={description} 
@@ -358,7 +358,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                             <select
                                 value={productType}
                                 onChange={(e) => setProductType(e.target.value as "simple" | "variable")}
-                                className="w-full bg-surface/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors appearance-none"
+                                className="w-full bg-surface/50 border border-foreground/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors appearance-none"
                             >
                                 <option value="simple" className="bg-surface">Simple Product</option>
                                 <option value="variable" className="bg-surface">Variable Product</option>
@@ -369,7 +369,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                             <select
                                 value={status}
                                 onChange={(e) => setStatus(e.target.value as "active" | "inactive")}
-                                className="w-full bg-surface/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors appearance-none"
+                                className="w-full bg-surface/50 border border-foreground/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors appearance-none"
                             >
                                 <option value="active" className="bg-surface">Active</option>
                                 <option value="inactive" className="bg-surface">Inactive</option>
@@ -378,7 +378,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                     </div>
                     <div className="space-y-3">
                         <label className="text-sm font-medium text-muted-foreground">Categories</label>
-                        <div className="bg-surface/50 border border-white/10 rounded-xl p-4 max-h-48 overflow-y-auto space-y-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/20 transition-all pr-2">
+                        <div className="bg-surface/50 border border-foreground/10 rounded-xl p-4 max-h-48 overflow-y-auto space-y-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-foreground/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-foreground/20 transition-all pr-2">
                             {allCategories.length === 0 ? (
                                 <p className="text-xs text-muted-foreground">No categories available. Please create categories first.</p>
                             ) : (
@@ -397,7 +397,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                                                     }
                                                 }}
                                             />
-                                            <div className="w-5 h-5 rounded border border-white/20 bg-black/20 peer-checked:bg-gold peer-checked:border-gold peer-checked:[&>svg]:opacity-100 transition-colors flex items-center justify-center">
+                                            <div className="w-5 h-5 rounded border border-foreground/20 bg-black/20 peer-checked:bg-gold peer-checked:border-gold peer-checked:[&>svg]:opacity-100 transition-colors flex items-center justify-center">
                                                 <svg className="w-3 h-3 text-primary-foreground opacity-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                 </svg>
@@ -410,7 +410,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                         </div>
                     </div>
                     
-                    <div className="flex items-center justify-between bg-surface/50 border border-white/10 rounded-xl px-4 py-3">
+                    <div className="flex items-center justify-between bg-surface/50 border border-foreground/10 rounded-xl px-4 py-3">
                         <label className="text-sm font-medium text-foreground cursor-pointer" onClick={() => setFeatured(!featured)}>
                         Featured Product
                         </label>
@@ -418,7 +418,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                         type="button"
                         onClick={() => setFeatured(!featured)}
                         className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                            featured ? "bg-gold" : "bg-white/10"
+                            featured ? "bg-gold" : "bg-foreground/10"
                         }`}
                         >
                         <span
@@ -428,7 +428,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                         />
                         </button>
                     </div>
-                    <div className="flex items-center justify-between bg-surface/50 border border-white/10 rounded-xl px-4 py-3">
+                    <div className="flex items-center justify-between bg-surface/50 border border-foreground/10 rounded-xl px-4 py-3">
                         <div>
                           <label className="text-sm font-medium text-foreground cursor-pointer" onClick={() => setSignature(!signature)}>
                             Signature Dish
@@ -439,7 +439,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                         type="button"
                         onClick={() => setSignature(!signature)}
                         className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                            signature ? "bg-gold" : "bg-white/10"
+                            signature ? "bg-gold" : "bg-foreground/10"
                         }`}
                         >
                         <span
@@ -454,7 +454,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                 {/* Pricing & Media */}
                 {productType === "simple" && (
                   <div className="space-y-6">
-                      <h3 className="text-lg font-medium text-gold border-b border-white/5 pb-2">Pricing & Inventory</h3>
+                      <h3 className="text-lg font-medium text-gold border-b border-foreground/5 pb-2">Pricing & Inventory</h3>
                       
                       <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
@@ -468,7 +468,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                                       setRegularPrice(e.target.value ? Number(e.target.value) : "");
                                       if (errors.regularPrice) setErrors(prev => ({ ...prev, regularPrice: "" }));
                                   }}
-                                  className={`w-full bg-surface/50 border ${errors.regularPrice ? "border-red-500/50" : "border-white/10"} rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors`}
+                                  className={`w-full bg-surface/50 border ${errors.regularPrice ? "border-red-500/50" : "border-foreground/10"} rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors`}
                               />
                               {errors.regularPrice && <p className="text-xs text-red-400 mt-1">{errors.regularPrice}</p>}
                           </div>
@@ -483,7 +483,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                                       setSalePrice(e.target.value ? Number(e.target.value) : "");
                                       if (errors.salePrice) setErrors(prev => ({ ...prev, salePrice: "" }));
                                   }}
-                                  className={`w-full bg-surface/50 border ${errors.salePrice ? "border-red-500/50" : "border-white/10"} rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors`}
+                                  className={`w-full bg-surface/50 border ${errors.salePrice ? "border-red-500/50" : "border-foreground/10"} rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors`}
                               />
                               {errors.salePrice && <p className="text-xs text-red-400 mt-1">{errors.salePrice}</p>}
                           </div>
@@ -500,12 +500,12 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                                   if (errors.quantity) setErrors(prev => ({ ...prev, quantity: "" }));
                               }}
                               placeholder="Unlimited"
-                              className={`w-full bg-surface/50 border ${errors.quantity ? "border-red-500/50" : "border-white/10"} rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors`}
+                              className={`w-full bg-surface/50 border ${errors.quantity ? "border-red-500/50" : "border-foreground/10"} rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors`}
                           />
                           {errors.quantity && <p className="text-xs text-red-400 mt-1">{errors.quantity}</p>}
                       </div>
   
-                      <h3 className="text-lg font-medium text-gold border-b border-white/5 pb-2 mt-8">Media</h3>
+                      <h3 className="text-lg font-medium text-gold border-b border-foreground/5 pb-2 mt-8">Media</h3>
                       
                       <div className="space-y-2">
                           <label className="text-sm font-medium text-muted-foreground">Featured Image</label>
@@ -523,7 +523,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                               </div>
                           </div>
                           ) : (
-                          <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed ${errors.featuredImage ? "border-red-500/50" : "border-white/10"} rounded-xl cursor-pointer hover:border-gold/50 hover:bg-white/5 transition-all`}>
+                          <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed ${errors.featuredImage ? "border-red-500/50" : "border-foreground/10"} rounded-xl cursor-pointer hover:border-gold/50 hover:bg-foreground/5 transition-all`}>
                               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                               <UploadCloud className="w-8 h-8 text-muted-foreground mb-2" />
                               <p className="text-xs text-muted-foreground">Click to upload image</p>
@@ -551,7 +551,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                                       </div>
                                   </div>
                               ))}
-                              <label className="flex flex-col items-center justify-center w-full aspect-square border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-gold/50 hover:bg-white/5 transition-all">
+                              <label className="flex flex-col items-center justify-center w-full aspect-square border-2 border-dashed border-foreground/10 rounded-xl cursor-pointer hover:border-gold/50 hover:bg-foreground/5 transition-all">
                                   <div className="flex flex-col items-center justify-center">
                                       <Plus className="w-6 h-6 text-muted-foreground mb-1" />
                                       <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Add Image</span>
@@ -566,26 +566,26 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
 
               {/* Variants Section */}
               {productType === "variable" && (
-                  <div className="space-y-4 pt-4 border-t border-white/10">
+                  <div className="space-y-4 pt-4 border-t border-foreground/10">
                       <div className="flex items-center justify-between">
                           <h3 className="text-lg font-medium text-gold">Product Variants</h3>
                           <button
                             type="button"
                             onClick={addVariant}
-                            className="text-sm bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors"
+                            className="text-sm bg-foreground/5 hover:bg-foreground/10 px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors"
                           >
                               <Plus size={14} /> Add Variant
                           </button>
                       </div>
                       
                       {variants.length === 0 ? (
-                          <div className="text-center py-8 bg-surface/30 rounded-xl border border-dashed border-white/10">
+                          <div className="text-center py-8 bg-surface/30 rounded-xl border border-dashed border-foreground/10">
                               <p className="text-sm text-muted-foreground">No variants added yet. Click "Add Variant" to create one.</p>
                           </div>
                       ) : (
                           <div className="space-y-4">
                               {variants.map((variant, index) => (
-                                  <div key={index} className="bg-surface/50 p-4 rounded-xl border border-white/5 relative group">
+                                  <div key={index} className="bg-surface/50 p-4 rounded-xl border border-foreground/5 relative group">
                                       <button
                                           type="button"
                                           onClick={() => removeVariant(index)}
@@ -603,7 +603,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                                                   onChange={(e) => updateVariant(index, 'variantName', e.target.value)}
                                                   placeholder="e.g. Small / Red"
                                                   required
-                                                  className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold transition-colors"
+                                                  className="w-full bg-black/20 border border-foreground/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold transition-colors"
                                               />
                                           </div>
                                           <div className="space-y-1">
@@ -612,7 +612,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                                                   type="text"
                                                   value={variant.sku}
                                                   onChange={(e) => updateVariant(index, 'sku', e.target.value)}
-                                                  className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold transition-colors"
+                                                  className="w-full bg-black/20 border border-foreground/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold transition-colors"
                                               />
                                           </div>
                                           <div className="space-y-1">
@@ -624,7 +624,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                                                   required
                                                   value={variant.regularPrice}
                                                   onChange={(e) => updateVariant(index, 'regularPrice', Number(e.target.value))}
-                                                  className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold transition-colors"
+                                                  className="w-full bg-black/20 border border-foreground/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold transition-colors"
                                               />
                                           </div>
                                           <div className="space-y-1">
@@ -635,7 +635,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                                                   step="0.01"
                                                   value={variant.salePrice || ""}
                                                   onChange={(e) => updateVariant(index, 'salePrice', e.target.value ? Number(e.target.value) : undefined)}
-                                                  className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold transition-colors"
+                                                  className="w-full bg-black/20 border border-foreground/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold transition-colors"
                                               />
                                           </div>
                                           <div className="space-y-1">
@@ -646,7 +646,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                                                   value={variant.quantity ?? ""}
                                                   onChange={(e) => updateVariant(index, 'quantity', e.target.value === "" ? "" : Number(e.target.value))}
                                                   placeholder="Unlimited"
-                                                  className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold transition-colors"
+                                                  className="w-full bg-black/20 border border-foreground/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold transition-colors"
                                               />
                                           </div>
                                           <div className="space-y-1">
@@ -654,7 +654,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                                               <select
                                                   value={variant.status}
                                                   onChange={(e) => updateVariant(index, 'status', e.target.value)}
-                                                  className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold transition-colors appearance-none"
+                                                  className="w-full bg-black/20 border border-foreground/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold transition-colors appearance-none"
                                               >
                                                   <option value="active" className="bg-surface">Active</option>
                                                   <option value="inactive" className="bg-surface">Inactive</option>
@@ -662,12 +662,12 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                                           </div>
                                       </div>
 
-                                      <div className="mt-4 pt-4 border-t border-white/5">
+                                      <div className="mt-4 pt-4 border-t border-foreground/5">
                                           <div className="space-y-2">
                                               <label className="text-xs font-medium text-muted-foreground">Variant Images</label>
                                               <div className="flex flex-wrap gap-2">
                                                   {(variant.galleryImages || []).map((img, imgIndex) => (
-                                                      <div key={imgIndex} className="relative w-16 h-16 rounded-md overflow-hidden group border border-white/10 shrink-0">
+                                                      <div key={imgIndex} className="relative w-16 h-16 rounded-md overflow-hidden group border border-foreground/10 shrink-0">
                                                           <img src={img} alt={`Gallery ${imgIndex}`} className="w-full h-full object-cover" />
                                                           <button
                                                               type="button"
@@ -678,7 +678,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                                                           </button>
                                                       </div>
                                                   ))}
-                                                  <label className="flex flex-col items-center justify-center w-16 h-16 border-2 border-dashed border-white/10 rounded-md cursor-pointer hover:border-gold/50 hover:bg-white/5 transition-all shrink-0">
+                                                  <label className="flex flex-col items-center justify-center w-16 h-16 border-2 border-dashed border-foreground/10 rounded-md cursor-pointer hover:border-gold/50 hover:bg-foreground/5 transition-all shrink-0">
                                                       <Plus className="w-4 h-4 text-muted-foreground" />
                                                       <input type="file" className="hidden" accept="image/*" multiple onChange={(e) => handleVariantImageChange(index, e)} />
                                                   </label>
@@ -692,11 +692,11 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                   </div>
               )}
 
-              <div className="flex justify-end gap-4 pt-4 border-t border-white/10">
+              <div className="flex justify-end gap-4 pt-4 border-t border-foreground/10">
                 <button
                     type="button"
                     onClick={() => router.push("/admin/products")}
-                    className="px-6 py-3 rounded-xl border border-white/10 text-muted-foreground hover:text-white transition-colors"
+                    className="px-6 py-3 rounded-xl border border-foreground/10 text-muted-foreground hover:text-white transition-colors"
                 >
                     Cancel
                 </button>

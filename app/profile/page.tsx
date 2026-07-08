@@ -7,7 +7,7 @@ import { useCustomer } from "@/context/CustomerContext";
 import toast from "react-hot-toast";
 
 const INPUT_CLASS =
-  "w-full rounded-xl border border-white/10 bg-background/60 px-4 py-3.5 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all focus:border-gold focus:ring-1 focus:ring-gold/30";
+  "w-full rounded-xl border border-foreground/10 bg-background/60 px-4 py-3.5 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all focus:border-gold focus:ring-1 focus:ring-gold/30";
 
 const LABEL_CLASS =
   "block text-[10px] font-semibold uppercase tracking-widest text-gold mb-1.5";
@@ -151,7 +151,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="pt-4 border-t border-white/10 flex justify-end">
+        <div className="pt-4 border-t border-foreground/10 flex justify-end">
           <button
             type="submit"
             disabled={saving}

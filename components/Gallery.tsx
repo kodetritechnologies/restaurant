@@ -47,7 +47,7 @@ export default function Gallery({ gallery: dbGallery }: GalleryProps) {
   return (
     <>
       {/* Moments to Savour Grid */}
-      <section id="gallery" className="bg-surface/50 py-24 md:py-32">
+      <section id="gallery" className="bg-surface/50 py-16 md:py-32">
         <div className="mx-auto max-w-7xl px-5 md:px-8">
           <div className="reveal mb-14 text-center">
             <p className="eyebrow">Gallery</p>
@@ -90,7 +90,7 @@ export default function Gallery({ gallery: dbGallery }: GalleryProps) {
         >
           <button
             aria-label="Close"
-            className="absolute right-6 top-6 grid h-11 w-11 place-items-center rounded-full border border-white/20 text-gold"
+            className="absolute right-6 top-6 grid h-11 w-11 place-items-center rounded-full border border-foreground/20 text-gold"
             onClick={() => setLightbox(null)}
           >
             ✕

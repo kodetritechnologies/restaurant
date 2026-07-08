@@ -239,23 +239,23 @@ export default function SettingsManager() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Dynamic Operational & Social Details Form */}
         <form noValidate onSubmit={handleSaveOperational} className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6 lg:col-span-2">
-          <h3 className="font-serif text-lg font-bold text-foreground border-b border-white/5 pb-2.5">
+          <h3 className="font-serif text-lg font-bold text-foreground border-b border-foreground/5 pb-2.5">
             Operational, Contact & Social Details
           </h3>
 
           {/* Logo Upload */}
-          <div className="space-y-4 pb-4 border-b border-white/5">
+          <div className="space-y-4 pb-4 border-b border-foreground/5">
             <h4 className="text-xs font-bold uppercase tracking-wider text-gold/80">Restaurant Logo</h4>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
               {restaurantLogo ? (
                 <div className="relative group">
-                  <img src={restaurantLogo} alt="Restaurant Logo" className="h-20 w-auto rounded object-contain bg-background/50 border border-white/10 p-2" />
+                  <img src={restaurantLogo} alt="Restaurant Logo" className="h-20 w-auto rounded object-contain bg-background/50 border border-foreground/10 p-2" />
                   <button type="button" onClick={() => setRestaurantLogo("")} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     ✕
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-20 w-32 rounded bg-background/50 border border-dashed border-white/20 text-xs text-muted-foreground">
+                <div className="flex items-center justify-center h-20 w-32 rounded bg-background/50 border border-dashed border-foreground/20 text-xs text-muted-foreground">
                   No Logo
                 </div>
               )}
@@ -301,7 +301,7 @@ export default function SettingsManager() {
                       if (errors.shopPhone) setErrors({ ...errors, shopPhone: "" });
                     }}
                     className={`w-full bg-background/50 border pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none transition-colors ${
-                      errors.shopPhone ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                      errors.shopPhone ? "border-red-500/50 focus:border-red-500" : "border-foreground/10 focus:border-gold"
                     }`}
                   />
                 </div>
@@ -325,7 +325,7 @@ export default function SettingsManager() {
                       if (errors.whatsappNumber) setErrors({ ...errors, whatsappNumber: "" });
                     }}
                     className={`w-full bg-background/50 border pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none transition-colors ${
-                      errors.whatsappNumber ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                      errors.whatsappNumber ? "border-red-500/50 focus:border-red-500" : "border-foreground/10 focus:border-gold"
                     }`}
                   />
                 </div>
@@ -348,7 +348,7 @@ export default function SettingsManager() {
                       if (errors.shopEmail) setErrors({ ...errors, shopEmail: "" });
                     }}
                     className={`w-full bg-background/50 border pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none transition-colors ${
-                      errors.shopEmail ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                      errors.shopEmail ? "border-red-500/50 focus:border-red-500" : "border-foreground/10 focus:border-gold"
                     }`}
                   />
                 </div>
@@ -371,7 +371,7 @@ export default function SettingsManager() {
                       if (errors.shopAddress) setErrors({ ...errors, shopAddress: "" });
                     }}
                     className={`w-full bg-background/50 border pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none transition-colors ${
-                      errors.shopAddress ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                      errors.shopAddress ? "border-red-500/50 focus:border-red-500" : "border-foreground/10 focus:border-gold"
                     }`}
                   />
                 </div>
@@ -391,7 +391,7 @@ export default function SettingsManager() {
                   placeholder="A modern sanctuary of fine dining. Since 2012."
                   rows={2}
                   className={`w-full bg-background/50 border px-4 py-2.5 rounded-xl text-xs text-foreground outline-none transition-colors ${
-                    errors.shopDescription ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                    errors.shopDescription ? "border-red-500/50 focus:border-red-500" : "border-foreground/10 focus:border-gold"
                   }`}
                 />
                 {errors.shopDescription && <span className="text-[10px] text-red-400 mt-1 block">{errors.shopDescription}</span>}
@@ -415,7 +415,7 @@ export default function SettingsManager() {
                     value={shortHours}
                     onChange={(e) => setShortHours(e.target.value)}
                     placeholder="Tue–Sun · 17:00 – 23:30"
-                    className="w-full bg-background/50 border border-white/10 pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
+                    className="w-full bg-background/50 border border-foreground/10 pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
                   />
                 </div>
               </div>
@@ -429,7 +429,7 @@ export default function SettingsManager() {
                   value={openHoursTueFri}
                   onChange={(e) => setOpenHoursTueFri(e.target.value)}
                   placeholder="Tuesday – Friday · 17:00 – 23:00"
-                  className="w-full bg-background/50 border border-white/10 px-3 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
+                  className="w-full bg-background/50 border border-foreground/10 px-3 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
                 />
               </div>
 
@@ -442,7 +442,7 @@ export default function SettingsManager() {
                   value={openHoursSatSun}
                   onChange={(e) => setOpenHoursSatSun(e.target.value)}
                   placeholder="Saturday – Sunday · 12:00 – 23:30"
-                  className="w-full bg-background/50 border border-white/10 px-3 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
+                  className="w-full bg-background/50 border border-foreground/10 px-3 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
                 />
               </div>
 
@@ -455,14 +455,14 @@ export default function SettingsManager() {
                   value={openHoursMon}
                   onChange={(e) => setOpenHoursMon(e.target.value)}
                   placeholder="Monday · Closed"
-                  className="w-full bg-background/50 border border-white/10 px-3 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
+                  className="w-full bg-background/50 border border-foreground/10 px-3 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
                 />
               </div>
             </div>
           </div>
 
           {/* Socials Username/Handles */}
-          <div className="space-y-4 pt-4 border-t border-white/5">
+          <div className="space-y-4 pt-4 border-t border-foreground/5">
             <h4 className="text-xs font-bold uppercase tracking-wider text-gold/80">Social Media Handles</h4>
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
@@ -482,7 +482,7 @@ export default function SettingsManager() {
                     value={instagramUsername}
                     onChange={(e) => setInstagramUsername(e.target.value)}
                     placeholder="aurea.dining"
-                    className="w-full bg-background/50 border border-white/10 pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
+                    className="w-full bg-background/50 border border-foreground/10 pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
                   />
                 </div>
               </div>
@@ -502,7 +502,7 @@ export default function SettingsManager() {
                     value={facebookUsername}
                     onChange={(e) => setFacebookUsername(e.target.value)}
                     placeholder="aurea.dining"
-                    className="w-full bg-background/50 border border-white/10 pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
+                    className="w-full bg-background/50 border border-foreground/10 pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
                   />
                 </div>
               </div>
@@ -522,7 +522,7 @@ export default function SettingsManager() {
                     value={twitterUsername}
                     onChange={(e) => setTwitterUsername(e.target.value)}
                     placeholder="aurea.dining"
-                    className="w-full bg-background/50 border border-white/10 pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
+                    className="w-full bg-background/50 border border-foreground/10 pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
                   />
                 </div>
               </div>
@@ -541,7 +541,7 @@ export default function SettingsManager() {
         <div className="space-y-6 flex flex-col">
           {/* Banner Announcement Config */}
           <form onSubmit={handleSaveBanner} className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6">
-            <h3 className="font-serif text-lg font-bold text-foreground border-b border-white/5 pb-2.5">
+            <h3 className="font-serif text-lg font-bold text-foreground border-b border-foreground/5 pb-2.5">
               Promo Announcement Banner
             </h3>
 
@@ -554,7 +554,7 @@ export default function SettingsManager() {
                   type="button"
                   onClick={() => setShowBanner(!showBanner)}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    showBanner ? "bg-gold" : "bg-white/10"
+                    showBanner ? "bg-gold" : "bg-foreground/10"
                   }`}
                 >
                   <span
@@ -580,7 +580,7 @@ export default function SettingsManager() {
                     onChange={(e) => setBannerText(e.target.value)}
                     placeholder="Complimentary Chef's Special with reservation..."
                     disabled={!showBanner}
-                    className="w-full bg-background/50 border border-white/10 pl-10 pr-4 py-2.5 rounded-2xl text-xs text-foreground outline-none transition-colors focus:border-gold disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-background/50 border border-foreground/10 pl-10 pr-4 py-2.5 rounded-2xl text-xs text-foreground outline-none transition-colors focus:border-gold disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -596,7 +596,7 @@ export default function SettingsManager() {
 
           {/* Change Admin Password */}
           <form onSubmit={handleChangePassword} className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6">
-            <h3 className="font-serif text-lg font-bold text-foreground border-b border-white/5 pb-2.5">
+            <h3 className="font-serif text-lg font-bold text-foreground border-b border-foreground/5 pb-2.5">
               Update Admin Password
             </h3>
 
@@ -615,7 +615,7 @@ export default function SettingsManager() {
                     onChange={(e) => setOldPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="w-full bg-background/50 border border-white/10 pl-10 pr-4 py-2.5 rounded-full text-xs text-foreground outline-none transition-colors focus:border-gold"
+                    className="w-full bg-background/50 border border-foreground/10 pl-10 pr-4 py-2.5 rounded-full text-xs text-foreground outline-none transition-colors focus:border-gold"
                   />
                 </div>
               </div>
@@ -634,7 +634,7 @@ export default function SettingsManager() {
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="w-full bg-background/50 border border-white/10 pl-10 pr-4 py-2.5 rounded-full text-xs text-foreground outline-none transition-colors focus:border-gold"
+                    className="w-full bg-background/50 border border-foreground/10 pl-10 pr-4 py-2.5 rounded-full text-xs text-foreground outline-none transition-colors focus:border-gold"
                   />
                 </div>
               </div>
@@ -653,7 +653,7 @@ export default function SettingsManager() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="w-full bg-background/50 border border-white/10 pl-10 pr-4 py-2.5 rounded-full text-xs text-foreground outline-none transition-colors focus:border-gold"
+                    className="w-full bg-background/50 border border-foreground/10 pl-10 pr-4 py-2.5 rounded-full text-xs text-foreground outline-none transition-colors focus:border-gold"
                   />
                 </div>
               </div>

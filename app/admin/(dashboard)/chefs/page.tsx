@@ -210,7 +210,7 @@ export default function ChefsManager() {
       <div className="flex items-center gap-4">
         <button
           onClick={() => router.push("/admin")}
-          className="p-2 border border-white/10 hover:border-gold/40 text-muted-foreground hover:text-gold rounded-full transition-colors cursor-pointer"
+          className="p-2 border border-foreground/10 hover:border-gold/40 text-muted-foreground hover:text-gold rounded-full transition-colors cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
@@ -227,7 +227,7 @@ export default function ChefsManager() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Upload/Add Form */}
         <form noValidate onSubmit={handleSaveChef} className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6 h-fit">
-          <h3 className="font-serif text-lg font-bold text-foreground border-b border-white/5 pb-2.5">
+          <h3 className="font-serif text-lg font-bold text-foreground border-b border-foreground/5 pb-2.5">
             {editingId ? "Edit Chef Profile" : "Add Chef Profile"}
           </h3>
 
@@ -237,9 +237,9 @@ export default function ChefsManager() {
               <label className="block text-xs font-semibold uppercase tracking-widest text-gold">
                 Profile Photo
               </label>
-              <div className="relative group flex flex-col items-center justify-center border border-dashed border-white/20 rounded-2xl p-4 bg-background/40 hover:border-gold/50 transition-colors">
+              <div className="relative group flex flex-col items-center justify-center border border-dashed border-foreground/20 rounded-2xl p-4 bg-background/40 hover:border-gold/50 transition-colors">
                 {filePreview ? (
-                  <div className="relative w-full aspect-square max-w-[200px] rounded-full overflow-hidden border border-white/10">
+                  <div className="relative w-full aspect-square max-w-[200px] rounded-full overflow-hidden border border-foreground/10">
                     <img src={filePreview} alt="Preview" className="w-full h-full object-cover" />
                     <button
                       type="button"
@@ -280,7 +280,7 @@ export default function ChefsManager() {
                   if (errors.name) setErrors({ ...errors, name: "" });
                 }}
                 className={`w-full bg-background/50 border px-4 py-2.5 rounded-xl text-xs text-foreground outline-none transition-colors ${
-                  errors.name ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                  errors.name ? "border-red-500/50 focus:border-red-500" : "border-foreground/10 focus:border-gold"
                 }`}
               />
               {errors.name && <span className="text-[10px] text-red-400 mt-1 block">{errors.name}</span>}
@@ -300,7 +300,7 @@ export default function ChefsManager() {
                   if (errors.role) setErrors({ ...errors, role: "" });
                 }}
                 className={`w-full bg-background/50 border px-4 py-2.5 rounded-xl text-xs text-foreground outline-none transition-colors ${
-                  errors.role ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                  errors.role ? "border-red-500/50 focus:border-red-500" : "border-foreground/10 focus:border-gold"
                 }`}
               />
               {errors.role && <span className="text-[10px] text-red-400 mt-1 block">{errors.role}</span>}
@@ -316,12 +316,12 @@ export default function ChefsManager() {
                 placeholder="e.g. 15 Years, Michelin Starred"
                 value={experience}
                 onChange={(e) => setExperience(e.target.value)}
-                className="w-full bg-background/50 border border-white/10 px-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold transition-colors"
+                className="w-full bg-background/50 border border-foreground/10 px-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold transition-colors"
               />
             </div>
 
             {/* Social Handles */}
-            <div className="space-y-3 pt-3 border-t border-white/5">
+            <div className="space-y-3 pt-3 border-t border-foreground/5">
               <label className="block text-xs font-bold uppercase tracking-wider text-gold/80">
                 Social Profile Handles
               </label>
@@ -340,7 +340,7 @@ export default function ChefsManager() {
                     placeholder="Instagram handle/URL"
                     value={instagram}
                     onChange={(e) => setInstagram(e.target.value)}
-                    className="w-full bg-background/50 border border-white/10 pl-9 pr-4 py-2 rounded-xl text-xs text-foreground outline-none focus:border-gold"
+                    className="w-full bg-background/50 border border-foreground/10 pl-9 pr-4 py-2 rounded-xl text-xs text-foreground outline-none focus:border-gold"
                   />
                 </div>
               </div>
@@ -357,7 +357,7 @@ export default function ChefsManager() {
                     placeholder="Facebook handle/URL"
                     value={facebook}
                     onChange={(e) => setFacebook(e.target.value)}
-                    className="w-full bg-background/50 border border-white/10 pl-9 pr-4 py-2 rounded-xl text-xs text-foreground outline-none focus:border-gold"
+                    className="w-full bg-background/50 border border-foreground/10 pl-9 pr-4 py-2 rounded-xl text-xs text-foreground outline-none focus:border-gold"
                   />
                 </div>
               </div>
@@ -374,7 +374,7 @@ export default function ChefsManager() {
                     placeholder="Twitter handle/URL"
                     value={twitter}
                     onChange={(e) => setTwitter(e.target.value)}
-                    className="w-full bg-background/50 border border-white/10 pl-9 pr-4 py-2 rounded-xl text-xs text-foreground outline-none focus:border-gold"
+                    className="w-full bg-background/50 border border-foreground/10 pl-9 pr-4 py-2 rounded-xl text-xs text-foreground outline-none focus:border-gold"
                   />
                 </div>
               </div>
@@ -407,7 +407,7 @@ export default function ChefsManager() {
                 type="button"
                 onClick={handleCancelEdit}
                 disabled={uploading}
-                className="rounded-full bg-white/5 border border-white/10 px-6 py-3.5 text-xs font-semibold text-muted-foreground transition-all duration-300 hover:bg-white/10 hover:text-foreground disabled:opacity-75"
+                className="rounded-full bg-foreground/5 border border-foreground/10 px-6 py-3.5 text-xs font-semibold text-muted-foreground transition-all duration-300 hover:bg-foreground/10 hover:text-foreground disabled:opacity-75"
               >
                 Cancel
               </button>
@@ -417,7 +417,7 @@ export default function ChefsManager() {
 
         {/* Chefs Grid */}
         <div className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6 lg:col-span-2">
-          <h3 className="font-serif text-lg font-bold text-foreground border-b border-white/5 pb-2.5">
+          <h3 className="font-serif text-lg font-bold text-foreground border-b border-foreground/5 pb-2.5">
             Active Culinary Team
           </h3>
 
@@ -436,9 +436,9 @@ export default function ChefsManager() {
               {chefs.map((chef) => (
                 <div
                   key={chef._id}
-                  className="flex border border-white/5 bg-background/20 rounded-2xl p-4 gap-4 items-center shadow-elegant hover:border-gold/30 transition-all hover:scale-[1.01]"
+                  className="flex border border-foreground/5 bg-background/20 rounded-2xl p-4 gap-4 items-center shadow-elegant hover:border-gold/30 transition-all hover:scale-[1.01]"
                 >
-                  <div className="h-20 w-20 rounded-full overflow-hidden bg-muted shrink-0 border border-white/10">
+                  <div className="h-20 w-20 rounded-full overflow-hidden bg-muted shrink-0 border border-foreground/10">
                     <img src={chef.image} alt={chef.name} className="h-full w-full object-cover" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -469,14 +469,14 @@ export default function ChefsManager() {
                   <div className="flex flex-col gap-2 shrink-0">
                     <button
                       onClick={() => handleEditChef(chef)}
-                      className="p-2 bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-muted-foreground hover:text-gold rounded-lg transition-colors cursor-pointer"
+                      className="p-2 bg-foreground/5 hover:bg-gold/15 border border-foreground/10 hover:border-gold/30 text-muted-foreground hover:text-gold rounded-lg transition-colors cursor-pointer"
                       title="Edit Chef Profile"
                     >
                       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                     </button>
                     <button
                       onClick={() => handleDeleteChef(chef._id)}
-                      className="p-2 bg-white/5 hover:bg-destructive/15 border border-white/10 hover:border-destructive/30 text-muted-foreground hover:text-destructive-foreground rounded-lg transition-colors cursor-pointer"
+                      className="p-2 bg-foreground/5 hover:bg-destructive/15 border border-foreground/10 hover:border-destructive/30 text-muted-foreground hover:text-destructive-foreground rounded-lg transition-colors cursor-pointer"
                       title="Delete Chef Profile"
                     >
                       <Trash2 className="h-4 w-4" />

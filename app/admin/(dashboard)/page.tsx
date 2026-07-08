@@ -152,7 +152,7 @@ export default function AdminOverview() {
           </div>
 
           {/* SVG Chart */}
-          <div className="h-56 w-full flex items-end justify-between pt-6 border-b border-white/5 px-2">
+          <div className="h-56 w-full flex items-end justify-between pt-6 border-b border-foreground/5 px-2">
             {stats.chartItems.map((item, idx) => (
               <div key={idx} className="flex flex-col items-center gap-2 group w-10 relative">
                 {/* Tooltip */}
@@ -186,7 +186,7 @@ export default function AdminOverview() {
                   <span className="text-foreground">{item.name}</span>
                   <span className="text-gold">{item.count} tables</span>
                 </div>
-                <div className="h-2 w-full bg-white/5 border border-white/10 rounded-full overflow-hidden">
+                <div className="h-2 w-full bg-foreground/5 border border-foreground/10 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${item.percentage}%` }}

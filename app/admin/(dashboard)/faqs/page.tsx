@@ -148,7 +148,7 @@ export default function FaqsManager() {
       <div className="flex items-center gap-4">
         <button
           onClick={() => router.push("/admin")}
-          className="p-2 border border-white/10 hover:border-gold/40 text-muted-foreground hover:text-gold rounded-full transition-colors cursor-pointer"
+          className="p-2 border border-foreground/10 hover:border-gold/40 text-muted-foreground hover:text-gold rounded-full transition-colors cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
@@ -165,7 +165,7 @@ export default function FaqsManager() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Upload/Add Form */}
         <form noValidate onSubmit={handleSaveFaq} className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6 h-fit">
-          <h3 className="font-serif text-lg font-bold text-foreground border-b border-white/5 pb-2.5">
+          <h3 className="font-serif text-lg font-bold text-foreground border-b border-foreground/5 pb-2.5">
             {editingId ? "Edit FAQ" : "Add New FAQ"}
           </h3>
 
@@ -183,7 +183,7 @@ export default function FaqsManager() {
                   if (errors.question) setErrors({ ...errors, question: "" });
                 }}
                 className={`w-full bg-background/50 border px-4 py-2.5 rounded-xl text-xs text-foreground outline-none transition-colors ${
-                  errors.question ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                  errors.question ? "border-red-500/50 focus:border-red-500" : "border-foreground/10 focus:border-gold"
                 }`}
               />
               {errors.question && <span className="text-[10px] text-red-400 mt-1 block">{errors.question}</span>}
@@ -202,7 +202,7 @@ export default function FaqsManager() {
                   if (errors.answer) setErrors({ ...errors, answer: "" });
                 }}
                 className={`w-full bg-background/50 border px-4 py-2.5 rounded-xl text-xs text-foreground outline-none transition-colors ${
-                  errors.answer ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                  errors.answer ? "border-red-500/50 focus:border-red-500" : "border-foreground/10 focus:border-gold"
                 }`}
               />
               {errors.answer && <span className="text-[10px] text-red-400 mt-1 block">{errors.answer}</span>}
@@ -235,7 +235,7 @@ export default function FaqsManager() {
                 type="button"
                 onClick={handleCancelEdit}
                 disabled={saving}
-                className="rounded-full bg-white/5 border border-white/10 px-6 py-3.5 text-xs font-semibold text-muted-foreground transition-all duration-300 hover:bg-white/10 hover:text-foreground disabled:opacity-75"
+                className="rounded-full bg-foreground/5 border border-foreground/10 px-6 py-3.5 text-xs font-semibold text-muted-foreground transition-all duration-300 hover:bg-foreground/10 hover:text-foreground disabled:opacity-75"
               >
                 Cancel
               </button>
@@ -245,7 +245,7 @@ export default function FaqsManager() {
 
         {/* FAQs List */}
         <div className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6 lg:col-span-2">
-          <h3 className="font-serif text-lg font-bold text-foreground border-b border-white/5 pb-2.5">
+          <h3 className="font-serif text-lg font-bold text-foreground border-b border-foreground/5 pb-2.5">
             Active FAQs
           </h3>
 
@@ -264,7 +264,7 @@ export default function FaqsManager() {
               {faqs.map((faq) => (
                 <div
                   key={faq._id}
-                  className="group flex flex-col sm:flex-row sm:items-start justify-between gap-4 p-5 rounded-2xl border border-white/5 bg-background/20 hover:border-gold/30 transition-all shadow-elegant"
+                  className="group flex flex-col sm:flex-row sm:items-start justify-between gap-4 p-5 rounded-2xl border border-foreground/5 bg-background/20 hover:border-gold/30 transition-all shadow-elegant"
                 >
                   <div className="flex-1 space-y-1.5">
                     <h4 className="font-serif text-sm font-bold text-foreground">
@@ -278,14 +278,14 @@ export default function FaqsManager() {
                   <div className="flex gap-2 shrink-0 self-end sm:self-start">
                     <button
                       onClick={() => handleEditFaq(faq)}
-                      className="p-2 bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-muted-foreground hover:text-gold rounded-lg transition-colors cursor-pointer"
+                      className="p-2 bg-foreground/5 hover:bg-gold/15 border border-foreground/10 hover:border-gold/30 text-muted-foreground hover:text-gold rounded-lg transition-colors cursor-pointer"
                       title="Edit FAQ"
                     >
                       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                     </button>
                     <button
                       onClick={() => handleDeleteFaq(faq._id)}
-                      className="p-2 bg-white/5 hover:bg-destructive/15 border border-white/10 hover:border-destructive/30 text-muted-foreground hover:text-destructive-foreground rounded-lg transition-colors cursor-pointer"
+                      className="p-2 bg-foreground/5 hover:bg-destructive/15 border border-foreground/10 hover:border-destructive/30 text-muted-foreground hover:text-destructive-foreground rounded-lg transition-colors cursor-pointer"
                       title="Delete FAQ"
                     >
                       <Trash2 className="h-4 w-4" />

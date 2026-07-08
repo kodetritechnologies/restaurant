@@ -15,7 +15,7 @@ export default function Faq({ faqs: dbFaqs }: FaqProps) {
 
   const displayFaqs = dbFaqs || [];
   return (
-    <section className="bg-surface/50 py-24 md:py-32">
+    <section className="bg-surface/50 py-16 md:py-32">
       <div className="mx-auto max-w-3xl px-5 md:px-8">
         <div className="reveal mb-12 text-center">
           <p className="eyebrow">FAQ</p>
@@ -25,7 +25,7 @@ export default function Faq({ faqs: dbFaqs }: FaqProps) {
           {displayFaqs.map((f, i) => {
             const open = openFaq === i;
             return (
-              <div key={f._id} className="reveal overflow-hidden rounded-2xl border border-white/10 bg-card">
+              <div key={f._id} className="reveal overflow-hidden rounded-2xl border border-foreground/10 bg-card">
                 <button
                   onClick={() => setOpenFaq(open ? null : i)}
                   className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"

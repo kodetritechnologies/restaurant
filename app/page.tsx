@@ -6,9 +6,6 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Categories from "@/components/Categories";
 import Menu from "@/components/Menu";
-import About from "@/components/About";
-import Chefs from "@/components/Chefs";
-import Gallery from "@/components/Gallery";
 import Testimonials from "@/components/Testimonials";
 import Reservation from "@/components/Reservation";
 import Stats from "@/components/Stats";
@@ -39,12 +36,10 @@ function useReveal(deps: any[] = []) {
 export default function Page() {
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<any>(null);
-  const [gallery, setGallery] = useState<any[]>([]);
-  const [chefs, setChefs] = useState<any[]>([]);
   const [faqs, setFaqs] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
  
-  useReveal([gallery, chefs, faqs, reviews]);
+  useReveal([faqs, reviews]);
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 800);
@@ -59,20 +54,6 @@ export default function Page() {
         const settingsData = await settingsRes.json();
         if (settingsData && settingsData.success) {
           setSettings(settingsData.settings);
-        }
-
-        // Fetch gallery items
-        const galleryRes = await fetch("/api/gallery");
-        const galleryData = await galleryRes.json();
-        if (galleryData && galleryData.success) {
-          setGallery(galleryData.items);
-        }
-
-        // Fetch chefs profiles
-        const chefsRes = await fetch("/api/chefs");
-        const chefsData = await chefsRes.json();
-        if (chefsData && chefsData.success) {
-          setChefs(chefsData.chefs);
         }
 
         // Fetch FAQs
@@ -103,9 +84,6 @@ export default function Page() {
         <Hero />
         <Categories />
         <Menu />
-        <About />
-        <Chefs chefs={chefs} />
-        <Gallery gallery={gallery} />
         <Testimonials reviews={reviews} />
         <Reservation />
         <Stats />

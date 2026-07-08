@@ -53,7 +53,7 @@ type DeliveryType = "delivery" | "pickup" | "dinein";
 type PaymentMethod = "cod" | "online";
 
 const INPUT_CLASS =
-  "w-full rounded-xl border border-white/10 bg-background/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all focus:border-gold focus:ring-1 focus:ring-gold/30";
+  "w-full rounded-xl border border-foreground/10 bg-background/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all focus:border-gold focus:ring-1 focus:ring-gold/30";
 
 const LABEL_CLASS =
   "block text-[10px] font-semibold uppercase tracking-widest text-gold mb-1.5";
@@ -304,7 +304,7 @@ export default function CheckoutPage() {
               </button>
               <button
                 onClick={() => router.push("/")}
-                className="px-8 py-3 rounded-full border border-white/10 hover:border-gold/40 text-muted-foreground hover:text-gold font-semibold text-sm transition-colors"
+                className="px-8 py-3 rounded-full border border-foreground/10 hover:border-gold/40 text-muted-foreground hover:text-gold font-semibold text-sm transition-colors"
               >
                 Back to Home
               </button>
@@ -330,7 +330,7 @@ export default function CheckoutPage() {
           >
             <button
               onClick={() => router.push("/menu")}
-              className="p-2.5 rounded-full border border-white/10 hover:border-gold/40 text-muted-foreground hover:text-gold transition-colors"
+              className="p-2.5 rounded-full border border-foreground/10 hover:border-gold/40 text-muted-foreground hover:text-gold transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
@@ -417,7 +417,7 @@ export default function CheckoutPage() {
                           onClick={() => setDeliveryType(type)}
                           className={`flex flex-col items-center gap-2 py-4 px-3 rounded-xl border text-sm font-semibold transition-all ${deliveryType === type
                               ? "border-gold bg-gold/10 text-gold"
-                              : "border-white/10 text-muted-foreground hover:border-white/20 hover:text-foreground"
+                              : "border-foreground/10 text-muted-foreground hover:border-foreground/20 hover:text-foreground"
                             }`}
                         >
                           {icon}
@@ -602,13 +602,13 @@ export default function CheckoutPage() {
                           onClick={() => setPaymentMethod(method)}
                           className={`flex items-center gap-3 py-4 px-5 rounded-xl border text-sm font-semibold transition-all ${paymentMethod === method
                               ? "border-gold bg-gold/10 text-gold"
-                              : "border-white/10 text-muted-foreground hover:border-white/20 hover:text-foreground"
+                              : "border-foreground/10 text-muted-foreground hover:border-foreground/20 hover:text-foreground"
                             }`}
                         >
                           <span
                             className={`h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0 ${paymentMethod === method
                                 ? "border-gold"
-                                : "border-white/30"
+                                : "border-foreground/30"
                               }`}
                           >
                             {paymentMethod === method && (
@@ -622,7 +622,7 @@ export default function CheckoutPage() {
                       ))}
                     </div>
                     {paymentMethod === "online" && (
-                      <p className="text-xs text-muted-foreground bg-white/5 rounded-xl px-4 py-3 border border-white/5">
+                      <p className="text-xs text-muted-foreground bg-foreground/5 rounded-xl px-4 py-3 border border-foreground/5">
                         🔒 You'll be redirected to our secure payment gateway
                         after confirming your order.
                       </p>
@@ -651,9 +651,9 @@ export default function CheckoutPage() {
                         return (
                           <div
                             key={`${item.productId}-${item.variantId || idx}`}
-                            className="flex gap-3 p-3 rounded-xl bg-white/5 border border-white/5 group"
+                            className="flex gap-3 p-3 rounded-xl bg-foreground/5 border border-foreground/5 group"
                           >
-                            <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-black/20 border border-white/5">
+                            <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-black/20 border border-foreground/5">
                               {details.image ? (
                                 <img
                                   src={details.image}
@@ -692,7 +692,7 @@ export default function CheckoutPage() {
                               >
                                 <X className="w-3.5 h-3.5" />
                               </button>
-                              <div className="flex items-center gap-1 bg-black/30 border border-white/10 rounded-lg p-0.5 h-7">
+                              <div className="flex items-center gap-1 bg-black/30 border border-foreground/10 rounded-lg p-0.5 h-7">
                                 <button
                                   type="button"
                                   onClick={() =>
@@ -702,7 +702,7 @@ export default function CheckoutPage() {
                                       -1
                                     )
                                   }
-                                  className="w-6 h-full rounded flex items-center justify-center text-muted-foreground hover:text-white hover:bg-white/10 transition-colors"
+                                  className="w-6 h-full rounded flex items-center justify-center text-muted-foreground hover:text-white hover:bg-foreground/10 transition-colors"
                                 >
                                   <Minus className="w-3 h-3" />
                                 </button>
@@ -718,7 +718,7 @@ export default function CheckoutPage() {
                                       1
                                     )
                                   }
-                                  className="w-6 h-full rounded flex items-center justify-center text-muted-foreground hover:text-white hover:bg-white/10 transition-colors"
+                                  className="w-6 h-full rounded flex items-center justify-center text-muted-foreground hover:text-white hover:bg-foreground/10 transition-colors"
                                 >
                                   <Plus className="w-3 h-3" />
                                 </button>
@@ -730,7 +730,7 @@ export default function CheckoutPage() {
                     </div>
 
                     {/* Divider */}
-                    <div className="border-t border-white/5 pt-4 space-y-2">
+                    <div className="border-t border-foreground/5 pt-4 space-y-2">
                       <div className="flex justify-between text-sm text-muted-foreground">
                         <span>Subtotal</span>
                         <span>
@@ -750,7 +750,7 @@ export default function CheckoutPage() {
                             : "Free"}
                         </span>
                       </div>
-                      <div className="flex justify-between items-center pt-3 border-t border-white/5">
+                      <div className="flex justify-between items-center pt-3 border-t border-foreground/5">
                         <span className="font-bold text-foreground">Total</span>
                         <span className="text-2xl font-bold text-gold">
                           {currencySymbol}
@@ -788,7 +788,7 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={() => router.push("/menu")}
-                    className="w-full py-3 rounded-xl border border-white/10 hover:border-gold/30 text-muted-foreground hover:text-gold text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                    className="w-full py-3 rounded-xl border border-foreground/10 hover:border-gold/30 text-muted-foreground hover:text-gold text-sm font-medium transition-colors flex items-center justify-center gap-2"
                   >
                     <ArrowLeft className="w-4 h-4" />
                     Continue Shopping

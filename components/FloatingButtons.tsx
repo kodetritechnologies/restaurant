@@ -51,7 +51,7 @@ export default function FloatingButtons({ settings }: FloatingButtonsProps) {
         <a
           href={telUrl}
           aria-label="Call"
-          className="grid h-12 w-12 place-items-center rounded-full bg-gold text-primary-foreground shadow-lg transition-transform hover:scale-110"
+          className="grid h-12 w-12 place-items-center rounded-full bg-gold text-black shadow-lg transition-transform hover:scale-110"
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
             <path d="M20 15.5a12.4 12.4 0 0 1-3.9-.6 1 1 0 0 0-1 .3l-2.2 2.2a15 15 0 0 1-6.6-6.6l2.2-2.2a1 1 0 0 0 .3-1A12.4 12.4 0 0 1 8.5 4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 17 17 0 0 0 17 17 1 1 0 0 0 1-1v-3.5a1 1 0 0 0-1-1Z" />
@@ -68,13 +68,13 @@ export default function FloatingButtons({ settings }: FloatingButtonsProps) {
         )}
       </div>
 
-      {/* Sticky reservation on mobile */}
-      <a
-        href="#reservation"
-        className="fixed bottom-6 left-6 z-40 rounded-full bg-gradient-gold px-5 py-3 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-gold)] md:hidden"
+      {/* Sticky Call Waiter on mobile (instead of Reservation) */}
+      <button
+        onClick={() => alert("Waiter has been called to your table!")}
+        className="fixed bottom-6 left-6 z-40 rounded-full bg-gradient-gold px-5 py-3 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-gold)] md:hidden flex items-center gap-2"
       >
-        Reserve
-      </a>
+        <span>🔔</span> Call Waiter
+      </button>
     </>
   );
 }

@@ -118,20 +118,20 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      <div className="glass p-6 rounded-2xl border border-white/10 min-h-[500px]">
+      <div className="glass p-6 rounded-2xl border border-foreground/10 min-h-[500px]">
         <div className="flex flex-col md:flex-row gap-4 mb-6 items-center justify-between">
                 <div className="relative w-full md:w-64">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
                     <input 
                         type="text" 
                         placeholder="Search products..." 
-                        className="w-full pl-9 pr-4 py-2 bg-surface/50 border border-white/10 rounded-xl text-sm focus:outline-none focus:border-gold transition-colors"
+                        className="w-full pl-9 pr-4 py-2 bg-surface/50 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-gold transition-colors"
                     />
                 </div>
                 <div className="flex items-center gap-2 w-full md:w-auto">
                     <div className="relative w-full md:w-32">
                         <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                        <select className="w-full pl-9 pr-4 py-2 bg-surface/50 border border-white/10 rounded-xl text-sm focus:outline-none focus:border-gold transition-colors appearance-none">
+                        <select className="w-full pl-9 pr-4 py-2 bg-surface/50 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-gold transition-colors appearance-none">
                             <option value="">All Types</option>
                             <option value="simple">Simple</option>
                             <option value="variable">Variable</option>
@@ -146,7 +146,7 @@ export default function ProductsPage() {
                 <p>Loading products...</p>
               </div>
             ) : products.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-64 text-muted-foreground border-2 border-dashed border-white/10 rounded-xl">
+              <div className="flex flex-col items-center justify-center h-64 text-muted-foreground border-2 border-dashed border-foreground/10 rounded-xl">
                 <Package className="w-12 h-12 mb-2 opacity-50" />
                 <p>No products found. Create one to get started.</p>
               </div>
@@ -154,7 +154,7 @@ export default function ProductsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-white/10 text-muted-foreground text-sm">
+                    <tr className="border-b border-foreground/10 text-muted-foreground text-sm">
                       <th className="py-3 px-4 font-medium">Product</th>
                       <th className="py-3 px-4 font-medium">Type</th>
                       <th className="py-3 px-4 font-medium">Price</th>
@@ -170,10 +170,10 @@ export default function ProductsPage() {
                         : product.featuredImage;
 
                       return (
-                      <tr key={product._id} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
+                      <tr key={product._id} className="border-b border-foreground/5 hover:bg-foreground/5 transition-colors group">
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/10 flex items-center justify-center bg-white/5">
+                            <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-foreground/10 flex items-center justify-center bg-foreground/5">
                               {displayImage ? (
                                 <img src={displayImage} alt={product.name} className="w-full h-full object-cover" />
                               ) : (

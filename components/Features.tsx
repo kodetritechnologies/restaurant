@@ -36,7 +36,7 @@ export default function Features() {
 
   if (loading) {
     return (
-      <section className="bg-surface/50 py-24 md:py-32 flex justify-center">
+      <section className="bg-surface/50 py-16 md:py-32 flex justify-center">
         <div className="w-8 h-8 border-4 border-gold border-t-transparent rounded-full animate-spin"></div>
       </section>
     );
@@ -45,7 +45,7 @@ export default function Features() {
 
 
   return (
-    <section className="bg-surface/50 py-24 md:py-32">
+    <section className="bg-surface/50 py-16 md:py-32">
       <div className="mx-auto max-w-7xl px-5 md:px-8">
         <div className="reveal mb-14 text-center">
           <p className="eyebrow">Discover Our</p>

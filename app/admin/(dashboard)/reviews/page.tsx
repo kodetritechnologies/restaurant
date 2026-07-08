@@ -217,7 +217,7 @@ export default function ReviewsManager() {
       <div className="flex items-center gap-4">
         <button
           onClick={() => router.push("/admin")}
-          className="p-2 border border-white/10 hover:border-gold/40 text-muted-foreground hover:text-gold rounded-full transition-colors cursor-pointer"
+          className="p-2 border border-foreground/10 hover:border-gold/40 text-muted-foreground hover:text-gold rounded-full transition-colors cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
@@ -234,7 +234,7 @@ export default function ReviewsManager() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Upload/Add Form */}
         <form noValidate onSubmit={handleSaveReview} className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6 h-fit">
-          <h3 className="font-serif text-lg font-bold text-foreground border-b border-white/5 pb-2.5">
+          <h3 className="font-serif text-lg font-bold text-foreground border-b border-foreground/5 pb-2.5">
             {editingId ? "Edit Review" : "Add New Review"}
           </h3>
 
@@ -259,8 +259,8 @@ export default function ReviewsManager() {
               ) : (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className={`w-24 h-24 rounded-full mx-auto border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors bg-background/50 hover:bg-white/5 ${
-                    errors.image ? "border-red-500/50" : "border-white/20 hover:border-gold/50 text-muted-foreground hover:text-gold"
+                  className={`w-24 h-24 rounded-full mx-auto border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors bg-background/50 hover:bg-foreground/5 ${
+                    errors.image ? "border-red-500/50" : "border-foreground/20 hover:border-gold/50 text-muted-foreground hover:text-gold"
                   }`}
                 >
                   <Upload className="h-5 w-5" />
@@ -290,7 +290,7 @@ export default function ReviewsManager() {
                   if (errors.name) setErrors({ ...errors, name: "" });
                 }}
                 className={`w-full bg-background/50 border px-4 py-2.5 rounded-xl text-xs text-foreground outline-none transition-colors ${
-                  errors.name ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                  errors.name ? "border-red-500/50 focus:border-red-500" : "border-foreground/10 focus:border-gold"
                 }`}
               />
               {errors.name && <span className="text-[10px] text-red-400 mt-1 block">{errors.name}</span>}
@@ -303,7 +303,7 @@ export default function ReviewsManager() {
               <select
                 value={rating}
                 onChange={(e) => setRating(e.target.value)}
-                className="w-full bg-background border border-white/10 px-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold cursor-pointer"
+                className="w-full bg-background border border-foreground/10 px-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold cursor-pointer"
               >
                 <option value="5">5 Stars (★★★★★)</option>
                 <option value="4">4 Stars (★★★★☆)</option>
@@ -326,7 +326,7 @@ export default function ReviewsManager() {
                   if (errors.text) setErrors({ ...errors, text: "" });
                 }}
                 className={`w-full bg-background/50 border px-4 py-2.5 rounded-xl text-xs text-foreground outline-none transition-colors ${
-                  errors.text ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                  errors.text ? "border-red-500/50 focus:border-red-500" : "border-foreground/10 focus:border-gold"
                 }`}
               />
               {errors.text && <span className="text-[10px] text-red-400 mt-1 block">{errors.text}</span>}
@@ -359,7 +359,7 @@ export default function ReviewsManager() {
                 type="button"
                 onClick={handleCancelEdit}
                 disabled={saving}
-                className="rounded-full bg-white/5 border border-white/10 px-6 py-3.5 text-xs font-semibold text-muted-foreground transition-all duration-300 hover:bg-white/10 hover:text-foreground disabled:opacity-75"
+                className="rounded-full bg-foreground/5 border border-foreground/10 px-6 py-3.5 text-xs font-semibold text-muted-foreground transition-all duration-300 hover:bg-foreground/10 hover:text-foreground disabled:opacity-75"
               >
                 Cancel
               </button>
@@ -369,7 +369,7 @@ export default function ReviewsManager() {
 
         {/* Reviews List */}
         <div className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6 lg:col-span-2">
-          <h3 className="font-serif text-lg font-bold text-foreground border-b border-white/5 pb-2.5">
+          <h3 className="font-serif text-lg font-bold text-foreground border-b border-foreground/5 pb-2.5">
             Active Reviews
           </h3>
 
@@ -388,19 +388,19 @@ export default function ReviewsManager() {
               {reviews.map((review) => (
                 <div
                   key={review._id}
-                  className="group relative flex flex-col p-5 rounded-2xl border border-white/5 bg-background/20 hover:border-gold/30 transition-all shadow-elegant text-center"
+                  className="group relative flex flex-col p-5 rounded-2xl border border-foreground/5 bg-background/20 hover:border-gold/30 transition-all shadow-elegant text-center"
                 >
                   <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => handleEditReview(review)}
-                      className="p-1.5 bg-white/10 hover:bg-gold/80 hover:text-primary-foreground border border-white/10 text-muted-foreground rounded-lg transition-colors cursor-pointer backdrop-blur-md"
+                      className="p-1.5 bg-foreground/10 hover:bg-gold/80 hover:text-primary-foreground border border-foreground/10 text-muted-foreground rounded-lg transition-colors cursor-pointer backdrop-blur-md"
                       title="Edit Review"
                     >
                       <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                     </button>
                     <button
                       onClick={() => handleDeleteReview(review._id)}
-                      className="p-1.5 bg-white/10 hover:bg-destructive/80 hover:text-white border border-white/10 text-muted-foreground rounded-lg transition-colors cursor-pointer backdrop-blur-md"
+                      className="p-1.5 bg-foreground/10 hover:bg-destructive/80 hover:text-white border border-foreground/10 text-muted-foreground rounded-lg transition-colors cursor-pointer backdrop-blur-md"
                       title="Delete Review"
                     >
                       <Trash2 className="h-3.5 w-3.5" />

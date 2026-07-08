@@ -73,7 +73,7 @@ export default function OrdersPage() {
       case "out_for_delivery": return "bg-purple-500/10 text-purple-400 border-purple-500/20";
       case "delivered": return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
       case "cancelled": return "bg-red-500/10 text-red-400 border-red-500/20";
-      default: return "bg-white/10 text-muted-foreground border-white/20";
+      default: return "bg-foreground/10 text-muted-foreground border-foreground/20";
     }
   };
 
@@ -107,7 +107,7 @@ export default function OrdersPage() {
         </div>
       ) : orders.length === 0 ? (
         <div className="py-20 flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+          <div className="w-16 h-16 rounded-full bg-foreground/5 flex items-center justify-center mb-4">
             <SearchX className="w-8 h-8 text-muted-foreground" />
           </div>
           <h3 className="text-xl font-serif font-medium text-foreground mb-2">No orders found</h3>
@@ -120,10 +120,10 @@ export default function OrdersPage() {
               key={order._id}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="glass rounded-2xl p-6 border border-white/5 hover:border-gold/30 transition-all duration-300"
+              className="glass rounded-2xl p-6 border border-foreground/5 hover:border-gold/30 transition-all duration-300"
             >
               {/* Order Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-white/5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-foreground/5">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="font-semibold text-foreground text-lg">Order #{order._id.slice(-6).toUpperCase()}</h3>
@@ -143,10 +143,10 @@ export default function OrdersPage() {
               </div>
 
               {/* Order Items */}
-              <div className="space-y-4 mb-6 pb-6 border-b border-white/5">
+              <div className="space-y-4 mb-6 pb-6 border-b border-foreground/5">
                 {order.items.map((item, idx) => (
                   <div key={idx} className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-white/5 shrink-0">
+                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-foreground/5 shrink-0">
                       {item.image ? (
                         <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                       ) : (

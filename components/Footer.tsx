@@ -24,7 +24,7 @@ export default function Footer({ settings }: FooterProps) {
   const shopDescription = settings?.shopDescription;
 
   return (
-    <footer className="border-t border-white/5 bg-surface/70">
+    <footer className="border-t border-foreground/5 bg-surface/70">
       <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 md:grid-cols-3 md:px-8">
         <div>
           <img src="/assets/logo.svg" alt="UDIPI Restaurant" className="h-16 w-auto object-contain" />
@@ -53,7 +53,7 @@ export default function Footer({ settings }: FooterProps) {
           </ul>
         </div>
       </div>
-      <div className="border-t border-white/5 py-6 flex flex-col items-center gap-2 text-center text-xs text-foreground/50">
+      <div className="border-t border-foreground/5 py-6 flex flex-col items-center gap-2 text-center text-xs text-foreground/50">
         <p>© {new Date().getFullYear()} UDIPI Restaurant. All rights reserved.</p>
         <p>
           Website designed by{" "}

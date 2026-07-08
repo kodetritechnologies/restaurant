@@ -73,7 +73,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
                     className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-all ${
                       isActive
                         ? "bg-gradient-gold text-primary-foreground shadow-gold"
-                        : "text-muted-foreground hover:bg-white/10 hover:text-foreground"
+                        : "text-muted-foreground hover:bg-foreground/10 hover:text-foreground"
                     }`}
                   >
                     {tab.icon}
@@ -82,7 +82,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
                 );
               })}
               
-              <div className="h-px bg-white/10 my-2 mx-2" />
+              <div className="h-px bg-foreground/10 my-2 mx-2" />
               
               <button
                 onClick={logout}

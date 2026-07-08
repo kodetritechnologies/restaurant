@@ -214,7 +214,7 @@ export default function CategoriesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Form Column */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="glass p-6 rounded-2xl border border-white/10">
+          <div className="glass p-6 rounded-2xl border border-foreground/10">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">
                 {editingId ? "Edit Category" : "Add Category"}
@@ -230,7 +230,7 @@ export default function CategoriesPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium text-muted-foreground flex items-center justify-between">
                   <span>Category Name(s)</span>
-                  {!editingId && <span className="text-[10px] text-muted-foreground bg-white/5 px-2 py-0.5 rounded-full">Comma separated</span>}
+                  {!editingId && <span className="text-[10px] text-muted-foreground bg-foreground/5 px-2 py-0.5 rounded-full">Comma separated</span>}
                 </label>
                 <textarea
                   rows={3}
@@ -240,7 +240,7 @@ export default function CategoriesPage() {
                     if (errors.name) setErrors(prev => ({ ...prev, name: undefined }));
                   }}
                   placeholder={editingId ? "e.g. Apple" : "e.g. Apple, Banana, Orange"}
-                  className={`w-full bg-surface/50 border ${errors.name ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"} rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-1 ${errors.name ? "focus:ring-red-500" : "focus:ring-gold"} transition-colors resize-none`}
+                  className={`w-full bg-surface/50 border ${errors.name ? "border-red-500/50 focus:border-red-500" : "border-foreground/10 focus:border-gold"} rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-1 ${errors.name ? "focus:ring-red-500" : "focus:ring-gold"} transition-colors resize-none`}
                 />
                 {errors.name && <p className="text-xs text-red-400 mt-1">{errors.name}</p>}
               </div>
@@ -252,7 +252,7 @@ export default function CategoriesPage() {
                 <select
                   value={parentId}
                   onChange={(e) => setParentId(e.target.value)}
-                  className="w-full bg-surface/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold transition-colors appearance-none"
+                  className="w-full bg-surface/50 border border-foreground/10 rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold transition-colors appearance-none"
                 >
                   <option value="" className="bg-surface text-muted-foreground">
                     None (Top Level)
@@ -280,7 +280,7 @@ export default function CategoriesPage() {
                         setCategoryType(e.target.value);
                       }
                     }}
-                    className="w-full bg-surface/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold transition-colors appearance-none"
+                    className="w-full bg-surface/50 border border-foreground/10 rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold transition-colors appearance-none"
                   >
                     {Array.from(new Set(["General", ...categories.map(c => c.type).filter(Boolean)])).map(type => (
                       <option key={type} value={type} className="bg-surface">
@@ -299,7 +299,7 @@ export default function CategoriesPage() {
                       onChange={(e) => setCategoryType(e.target.value)}
                       placeholder="Enter custom type..."
                       autoFocus
-                      className="w-full bg-surface/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold transition-colors"
+                      className="w-full bg-surface/50 border border-foreground/10 rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold transition-colors"
                     />
                     <button
                       type="button"
@@ -307,7 +307,7 @@ export default function CategoriesPage() {
                         setIsCustomType(false);
                         setCategoryType("General");
                       }}
-                      className="px-4 bg-white/5 border border-white/10 rounded-xl text-muted-foreground hover:text-white transition-colors flex items-center justify-center"
+                      className="px-4 bg-foreground/5 border border-foreground/10 rounded-xl text-muted-foreground hover:text-white transition-colors flex items-center justify-center"
                       title="Cancel custom type"
                     >
                       <X size={16} />
@@ -316,7 +316,7 @@ export default function CategoriesPage() {
                 )}
               </div>
 
-              <div className="flex items-center justify-between bg-surface/50 border border-white/10 rounded-xl px-4 py-3">
+              <div className="flex items-center justify-between bg-surface/50 border border-foreground/10 rounded-xl px-4 py-3">
                 <label className="text-sm font-medium text-foreground cursor-pointer" onClick={() => setFeatured(!featured)}>
                   Featured Category
                 </label>
@@ -324,7 +324,7 @@ export default function CategoriesPage() {
                   type="button"
                   onClick={() => setFeatured(!featured)}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    featured ? "bg-gold" : "bg-white/10"
+                    featured ? "bg-gold" : "bg-foreground/10"
                   }`}
                 >
                   <span
@@ -344,7 +344,7 @@ export default function CategoriesPage() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="A brief summary of this category..."
-                  className="w-full bg-surface/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold transition-colors resize-none"
+                  className="w-full bg-surface/50 border border-foreground/10 rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold transition-colors resize-none"
                 />
               </div>
 
@@ -371,7 +371,7 @@ export default function CategoriesPage() {
                     </div>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-gold/50 hover:bg-white/5 transition-all">
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-foreground/10 rounded-xl cursor-pointer hover:border-gold/50 hover:bg-foreground/5 transition-all">
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       <UploadCloud className="w-8 h-8 text-muted-foreground mb-2" />
                       <p className="text-xs text-muted-foreground">Click to upload image</p>
@@ -402,7 +402,7 @@ export default function CategoriesPage() {
 
         {/* JS Tree Column */}
         <div className="lg:col-span-2">
-          <div className="glass p-6 rounded-2xl border border-white/10 min-h-[500px]">
+          <div className="glass p-6 rounded-2xl border border-foreground/10 min-h-[500px]">
             <h2 className="text-lg font-semibold text-foreground mb-6">Category Tree</h2>
             
             {loading ? (
@@ -411,12 +411,12 @@ export default function CategoriesPage() {
                 <p>Loading categories...</p>
               </div>
             ) : categories.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-64 text-muted-foreground border-2 border-dashed border-white/10 rounded-xl">
+              <div className="flex flex-col items-center justify-center h-64 text-muted-foreground border-2 border-dashed border-foreground/10 rounded-xl">
                 <ListTree className="w-12 h-12 mb-2 opacity-50" />
                 <p>No categories found. Create one to get started.</p>
               </div>
             ) : (
-              <div className="bg-surface/30 p-4 rounded-xl border border-white/5">
+              <div className="bg-surface/30 p-4 rounded-xl border border-foreground/5">
                 <CategoryTree categories={categories} onEdit={handleEdit} onDelete={handleDelete} />
               </div>
             )}
@@ -455,7 +455,7 @@ const CategoryTree = ({
     return (
       <div className="space-y-4">
         {Object.entries(grouped).map(([type, typeCategories]) => (
-          <div key={type} className="bg-surface/50 p-3 rounded-xl border border-white/5">
+          <div key={type} className="bg-surface/50 p-3 rounded-xl border border-foreground/5">
             <h3 className="text-xs font-semibold text-gold mb-2 uppercase tracking-wider pl-2">{type} Categories</h3>
             <ul className="space-y-1">
               {typeCategories.map(category => (
@@ -475,7 +475,7 @@ const CategoryTree = ({
   }
 
   return (
-    <ul className={`space-y-1 pl-6 mt-1 border-l border-white/10`}>
+    <ul className={`space-y-1 pl-6 mt-1 border-l border-foreground/10`}>
       {children.map(category => (
         <CategoryNode 
           key={category._id} 
@@ -506,7 +506,7 @@ const CategoryNode = ({
   return (
     <li className="select-none">
       <div 
-        className="group flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors"
+        className="group flex items-center justify-between p-2 rounded-lg hover:bg-foreground/5 transition-colors"
       >
         <div className="flex items-center gap-2 flex-1 cursor-pointer" onClick={() => setExpanded(!expanded)}>
           {hasChildren ? (
@@ -524,7 +524,7 @@ const CategoryNode = ({
           )}
           
           {category.image ? (
-            <div className="w-6 h-6 rounded-md overflow-hidden shrink-0 border border-white/10">
+            <div className="w-6 h-6 rounded-md overflow-hidden shrink-0 border border-foreground/10">
               <img src={category.image} alt={category.name} className="w-full h-full object-cover" />
             </div>
           ) : expanded && hasChildren ? (
@@ -537,7 +537,7 @@ const CategoryNode = ({
             {category.name}
             {category.featured && <Star size={12} className="text-gold fill-gold" />}
           </span>
-          <span className="text-xs text-muted-foreground bg-white/5 px-2 py-0.5 rounded-full ml-2 font-mono">
+          <span className="text-xs text-muted-foreground bg-foreground/5 px-2 py-0.5 rounded-full ml-2 font-mono">
             {category.slug}
           </span>
           <span className="text-[10px] text-gold/80 bg-gold/10 border border-gold/20 px-2 py-0.5 rounded-full ml-2 uppercase tracking-wider">

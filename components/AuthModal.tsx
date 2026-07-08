@@ -124,7 +124,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 {/* Close Button */}
                 <button
                   onClick={onClose}
-                  className="absolute right-4 top-4 p-2 rounded-full hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors z-10"
+                  className="absolute right-4 top-4 p-2 rounded-full hover:bg-foreground/10 text-muted-foreground hover:text-foreground transition-colors z-10"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -177,7 +177,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="you@example.com"
                             required
-                            className="w-full rounded-full border border-white/10 bg-background/60 pl-11 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all focus:border-gold focus:ring-1 focus:ring-gold/30"
+                            className="w-full rounded-full border border-foreground/10 bg-background/60 pl-11 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all focus:border-gold focus:ring-1 focus:ring-gold/30"
                           />
                         </div>
                       </motion.div>
@@ -203,7 +203,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                             onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
                             placeholder="••••••"
                             required
-                            className="w-full rounded-full border border-white/10 bg-background/60 pl-11 pr-4 py-3 text-sm tracking-[0.5em] text-center text-foreground placeholder:text-muted-foreground/50 outline-none transition-all focus:border-gold focus:ring-1 focus:ring-gold/30 font-mono"
+                            className="w-full rounded-full border border-foreground/10 bg-background/60 pl-11 pr-4 py-3 text-sm tracking-[0.5em] text-center text-foreground placeholder:text-muted-foreground/50 outline-none transition-all focus:border-gold focus:ring-1 focus:ring-gold/30 font-mono"
                           />
                         </div>
                         <div className="flex justify-between items-center px-1 pt-2">
@@ -266,7 +266,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 </form>
 
                 {/* Credential Note at the bottom */}
-                <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground/60">
+                <div className="mt-4 pt-4 border-t border-foreground/5 flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground/60">
                   <ShieldCheck className="h-3 w-3 text-gold/60" />
                   <span>Secure Passwordless Login</span>
                 </div>

@@ -134,7 +134,7 @@ export default function AdminDashboardLayout({
   return (
     <div className="min-h-screen lg:h-screen lg:overflow-hidden bg-background text-foreground flex flex-col lg:flex-row relative">
       {/* Sidebar for Desktop */}
-      <aside className="hidden lg:flex w-72 shrink-0 flex-col border-r border-white/5 bg-surface/50 backdrop-blur-md p-6 justify-between z-30">
+      <aside className="hidden lg:flex w-72 shrink-0 flex-col border-r border-foreground/5 bg-surface/50 backdrop-blur-md p-6 justify-between z-30">
         <div className="flex flex-col gap-8 flex-1 overflow-hidden">
           <div className="flex items-center gap-3">
             <span className="grid h-10 w-10 place-items-center rounded-full bg-gradient-gold shadow-gold">
@@ -246,7 +246,7 @@ export default function AdminDashboardLayout({
       </aside>
 
       {/* Header for Mobile */}
-      <header className="lg:hidden flex items-center justify-between border-b border-white/5 bg-surface/50 backdrop-blur-md px-6 py-4 z-40">
+      <header className="lg:hidden flex items-center justify-between border-b border-foreground/5 bg-surface/50 backdrop-blur-md px-6 py-4 z-40">
         <div className="flex items-center gap-3">
           <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-gold shadow-gold">
             <UtensilsCrossed className="h-4 w-4 text-primary-foreground" strokeWidth={2.5} />
@@ -281,7 +281,7 @@ export default function AdminDashboardLayout({
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed right-0 top-0 bottom-0 w-80 bg-surface border-l border-white/5 p-6 flex flex-col justify-between z-50 lg:hidden"
+              className="fixed right-0 top-0 bottom-0 w-80 bg-surface border-l border-foreground/5 p-6 flex flex-col justify-between z-50 lg:hidden"
             >
               <div className="flex flex-col gap-8 flex-1 overflow-hidden">
                 <div className="flex justify-between items-center">
@@ -399,7 +399,7 @@ export default function AdminDashboardLayout({
       </AnimatePresence>
 
       {/* Main content body */}
-      <main className="flex-1 p-6 lg:p-10 overflow-y-auto max-w-7xl mx-auto w-full flex flex-col gap-8">
+      <main className="flex-1 p-4 sm:p-6 lg:p-10 overflow-y-auto max-w-7xl mx-auto w-full flex flex-col gap-8">
         {showBanner && bannerText && (
           <div className="relative overflow-hidden rounded-2xl bg-gradient-gold p-4 text-primary-foreground font-semibold flex items-center justify-between shadow-gold shrink-0">
             <div className="flex items-center gap-2 pr-8">

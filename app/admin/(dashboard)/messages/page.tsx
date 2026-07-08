@@ -108,7 +108,7 @@ export default function MessagesManager() {
       <div className="flex items-center gap-4">
         <button
           onClick={() => router.push("/admin")}
-          className="p-2 border border-white/10 hover:border-gold/40 text-muted-foreground hover:text-gold rounded-full transition-colors cursor-pointer"
+          className="p-2 border border-foreground/10 hover:border-gold/40 text-muted-foreground hover:text-gold rounded-full transition-colors cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
@@ -134,7 +134,7 @@ export default function MessagesManager() {
             placeholder="Search by name, email, subject, or message..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-full border border-white/10 bg-surface/50 pl-10 pr-4 py-2.5 text-xs text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-gold transition-all"
+            className="w-full rounded-full border border-foreground/10 bg-surface/50 pl-10 pr-4 py-2.5 text-xs text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-gold transition-all"
           />
         </div>
 
@@ -147,7 +147,7 @@ export default function MessagesManager() {
               className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
                 statusFilter === status
                   ? "bg-gold border-gold text-primary-foreground shadow-gold"
-                  : "bg-surface/50 border-white/10 text-muted-foreground hover:text-gold hover:border-gold/40"
+                  : "bg-surface/50 border-foreground/10 text-muted-foreground hover:text-gold hover:border-gold/40"
               }`}
             >
               {status}
@@ -155,7 +155,7 @@ export default function MessagesManager() {
           ))}
           <button
             onClick={() => fetchMessages()}
-            className="p-2 bg-surface/50 border border-white/10 hover:border-gold/45 text-muted-foreground hover:text-gold rounded-full transition-all cursor-pointer"
+            className="p-2 bg-surface/50 border border-foreground/10 hover:border-gold/45 text-muted-foreground hover:text-gold rounded-full transition-all cursor-pointer"
             title="Refresh database"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
@@ -172,7 +172,7 @@ export default function MessagesManager() {
             </p>
           </div>
         ) : messages.length === 0 ? (
-          <div className="glass p-12 text-center text-muted-foreground rounded-2xl border border-white/5">
+          <div className="glass p-12 text-center text-muted-foreground rounded-2xl border border-foreground/5">
             No inquiries in inbox matching criteria.
           </div>
         ) : (
@@ -183,7 +183,7 @@ export default function MessagesManager() {
                 statusBadge = "bg-blue-500/10 border-blue-500/20 text-blue-400";
                 break;
               case "Read":
-                statusBadge = "bg-white/5 border-white/10 text-foreground/80";
+                statusBadge = "bg-foreground/5 border-foreground/10 text-foreground/80";
                 break;
               case "Replied":
                 statusBadge = "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
@@ -193,7 +193,7 @@ export default function MessagesManager() {
             return (
               <div
                 key={m._id}
-                className={`glass p-6 rounded-2xl border border-white/5 flex flex-col gap-4 transition-all hover:border-white/10 ${
+                className={`glass p-6 rounded-2xl border border-foreground/5 flex flex-col gap-4 transition-all hover:border-foreground/10 ${
                   m.status === "Unread" ? "border-l-4 border-l-gold" : ""
                 }`}
               >
@@ -218,7 +218,7 @@ export default function MessagesManager() {
                       {m.status === "Unread" && (
                         <button
                           onClick={() => handleUpdateStatus(m._id, "Read")}
-                          className="p-1.5 bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-muted-foreground hover:text-gold rounded-lg transition-colors cursor-pointer"
+                          className="p-1.5 bg-foreground/5 hover:bg-gold/15 border border-foreground/10 hover:border-gold/30 text-muted-foreground hover:text-gold rounded-lg transition-colors cursor-pointer"
                           title="Mark as Read"
                         >
                           <MailOpen className="h-4 w-4" />
@@ -227,7 +227,7 @@ export default function MessagesManager() {
                       {m.status !== "Replied" && (
                         <button
                           onClick={() => handleUpdateStatus(m._id, "Replied")}
-                          className="p-1.5 bg-white/5 hover:bg-emerald-500/15 border border-white/10 hover:border-emerald-500/30 text-muted-foreground hover:text-emerald-400 rounded-lg transition-colors cursor-pointer"
+                          className="p-1.5 bg-foreground/5 hover:bg-emerald-500/15 border border-foreground/10 hover:border-emerald-500/30 text-muted-foreground hover:text-emerald-400 rounded-lg transition-colors cursor-pointer"
                           title="Mark as Replied"
                         >
                           <Check className="h-4 w-4" />
@@ -235,7 +235,7 @@ export default function MessagesManager() {
                       )}
                       <button
                         onClick={() => handleDelete(m._id)}
-                        className="p-1.5 bg-white/5 hover:bg-destructive/15 border border-white/10 hover:border-destructive/30 text-muted-foreground hover:text-destructive-foreground rounded-lg transition-colors cursor-pointer"
+                        className="p-1.5 bg-foreground/5 hover:bg-destructive/15 border border-foreground/10 hover:border-destructive/30 text-muted-foreground hover:text-destructive-foreground rounded-lg transition-colors cursor-pointer"
                         title="Delete Message"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -245,7 +245,7 @@ export default function MessagesManager() {
                 </div>
 
                 {/* Body Message */}
-                <div className="bg-surface/50 border border-white/5 p-4 rounded-xl">
+                <div className="bg-surface/50 border border-foreground/5 p-4 rounded-xl">
                   <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
                     {m.message}
                   </p>

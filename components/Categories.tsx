@@ -19,7 +19,7 @@ export default function Categories() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch("/api/categories?type=product");
+        const res = await fetch("/api/categories?type=product&featured=true");
         const data = await res.json();
         if (data && data.success) {
           setCategories(data.categories);
@@ -36,7 +36,7 @@ export default function Categories() {
 
   if (loading) {
     return (
-      <section id="categories" className="mx-auto max-w-7xl px-5 py-24 md:px-8 md:py-32 flex justify-center">
+      <section id="categories" className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-32 flex justify-center">
         <div className="w-8 h-8 border-4 border-gold border-t-transparent rounded-full animate-spin"></div>
       </section>
     );
@@ -45,14 +45,14 @@ export default function Categories() {
 
 
   return (
-    <section id="categories" className="mx-auto max-w-7xl px-5 py-24 md:px-8 md:py-32">
+    <section id="categories" className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-32">
       <div className="reveal mb-14 text-center">
         <p className="eyebrow">Discover</p>
         <h2 className="mt-4 font-serif text-4xl md:text-5xl">Featured Categories</h2>
       </div>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {categories.map((c) => (
-          <article key={c._id} className="reveal group relative overflow-hidden rounded-2xl border border-white/5 bg-surface">
+          <article key={c._id} className="reveal group relative overflow-hidden rounded-2xl border border-foreground/5 bg-surface">
             <div className="aspect-[4/3] overflow-hidden relative">
               {c.image ? (
                 <Image

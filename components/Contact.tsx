@@ -115,7 +115,7 @@ export default function Contact({ settings }: ContactProps) {
   ];
 
   return (
-    <section id="contact" className="mx-auto max-w-7xl px-5 py-24 md:px-8 md:py-32">
+    <section id="contact" className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-32">
       <div className="reveal mb-14 text-center">
         <p className="eyebrow">Visit Us</p>
         <h2 className="mt-4 font-serif text-4xl md:text-5xl">Get in Touch</h2>
@@ -136,14 +136,14 @@ export default function Contact({ settings }: ContactProps) {
               ["Email", emailProp],
               ["Hours", hours],
             ].map(([k, v]) => (
-              <div key={k} className="flex items-start justify-between gap-4 border-b border-white/5 pb-3 last:border-0">
+              <div key={k} className="flex items-start justify-between gap-4 border-b border-foreground/5 pb-3 last:border-0">
                 <span className="text-xs uppercase tracking-widest text-foreground/60">{k}</span>
                 <span className="text-right text-foreground/90">{v}</span>
               </div>
             ))}
             <div className="mt-2 flex gap-3">
               {socialLinks.map((s) => (
-                <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="rounded-full border border-white/10 px-4 py-2 text-xs uppercase tracking-widest text-foreground/70 hover:border-gold hover:text-gold transition-colors">
+                <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="rounded-full border border-foreground/10 px-4 py-2 text-xs uppercase tracking-widest text-foreground/70 hover:border-gold hover:text-gold transition-colors">
                   {s.label}
                 </a>
               ))}
@@ -164,13 +164,13 @@ export default function Contact({ settings }: ContactProps) {
           ).map((f) => (
             <label key={f.l} className="grid gap-2">
               <span className="text-xs uppercase tracking-widest text-foreground/60">{f.l}</span>
-              <input type={f.t} name={f.n} className={`rounded-xl border ${errors[f.n] ? 'border-red-500/70' : 'border-white/10'} bg-background/60 px-4 py-3 outline-none focus:border-gold transition-colors`} />
+              <input type={f.t} name={f.n} className={`rounded-xl border ${errors[f.n] ? 'border-red-500/70' : 'border-foreground/10'} bg-background/60 px-4 py-3 outline-none focus:border-gold transition-colors`} />
               {errors[f.n] && <span className="text-xs text-red-400">{errors[f.n]}</span>}
             </label>
           ))}
           <label className="grid gap-2">
             <span className="text-xs uppercase tracking-widest text-foreground/60">Message</span>
-            <textarea name="message" rows={5} className={`rounded-xl border ${errors.message ? 'border-red-500/70' : 'border-white/10'} bg-background/60 px-4 py-3 outline-none focus:border-gold transition-colors`} />
+            <textarea name="message" rows={5} className={`rounded-xl border ${errors.message ? 'border-red-500/70' : 'border-foreground/10'} bg-background/60 px-4 py-3 outline-none focus:border-gold transition-colors`} />
             {errors.message && <span className="text-xs text-red-400">{errors.message}</span>}
           </label>
           <button type="submit" disabled={loading} className="mt-2 rounded-full bg-gradient-gold px-6 py-3.5 font-semibold text-primary-foreground shadow-[var(--shadow-gold)] disabled:opacity-75">

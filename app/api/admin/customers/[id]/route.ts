@@ -6,7 +6,7 @@ import { verifyAdmin } from "@/utils/lib/auth";
 // DELETE /api/admin/customers/[id] — soft-delete (move to trash)
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const admin = await verifyAdmin(req);
@@ -19,8 +19,9 @@ export async function DELETE(
 
     await dbConnect();
 
+    const { id } = await params;
     const customer = await Customer.findByIdAndUpdate(
-      params.id,
+      id,
       { deleted_at: new Date() },
       { new: true }
     );

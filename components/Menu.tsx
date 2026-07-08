@@ -49,7 +49,7 @@ export default function Menu() {
 
   if (loading) {
     return (
-      <section className="bg-surface/50 py-24 md:py-32 flex justify-center">
+      <section className="bg-surface/50 py-16 md:py-32 flex justify-center">
         <div className="w-8 h-8 border-4 border-gold border-t-transparent rounded-full animate-spin"></div>
       </section>
     );
@@ -58,7 +58,7 @@ export default function Menu() {
   if (dishes.length === 0) return null;
 
   return (
-    <section id="menu" className="bg-surface/50 py-24 md:py-32">
+    <section id="menu" className="bg-surface/50 py-16 md:py-32">
       <div className="mx-auto max-w-7xl px-5 md:px-8">
         <div className="reveal mb-14 text-center">
           <p className="eyebrow">Chef's Selection</p>
@@ -71,7 +71,7 @@ export default function Menu() {
           {dishes.map((d) => (
             <article
               key={d._id}
-              className="reveal group overflow-hidden rounded-2xl border border-white/5 bg-card hover-lift"
+              className="reveal group overflow-hidden rounded-2xl border border-foreground/5 bg-card hover-lift"
             >
               <div className="aspect-square overflow-hidden">
                 <img

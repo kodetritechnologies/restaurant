@@ -91,7 +91,7 @@ export default function CustomersManager() {
         <div className="flex items-center gap-4">
           <button
             onClick={() => router.push("/admin")}
-            className="p-2 border border-white/10 hover:border-gold/40 text-muted-foreground hover:text-gold rounded-full transition-colors cursor-pointer"
+            className="p-2 border border-foreground/10 hover:border-gold/40 text-muted-foreground hover:text-gold rounded-full transition-colors cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
@@ -116,7 +116,7 @@ export default function CustomersManager() {
 
       <div className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6">
         {/* Search Bar */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center border-b border-white/5 pb-6">
+        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center border-b border-foreground/5 pb-6">
           <h3 className="font-serif text-lg font-bold text-foreground w-full sm:w-auto">
             Customers List
           </h3>
@@ -126,7 +126,7 @@ export default function CustomersManager() {
               placeholder="Search by email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-background/50 border border-white/10 px-4 py-2 pl-10 rounded-full text-xs text-foreground outline-none focus:border-gold transition-colors"
+              className="w-full bg-background/50 border border-foreground/10 px-4 py-2 pl-10 rounded-full text-xs text-foreground outline-none focus:border-gold transition-colors"
             />
             <button
               type="submit"
@@ -164,7 +164,7 @@ export default function CustomersManager() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-white/5 text-[10px] uppercase tracking-widest text-muted-foreground">
+                <tr className="border-b border-foreground/5 text-[10px] uppercase tracking-widest text-muted-foreground">
                   <th className="py-3 px-4 font-semibold">Email</th>
                   <th className="py-3 px-4 font-semibold">Name</th>
                   <th className="py-3 px-4 font-semibold">Phone</th>
@@ -176,7 +176,7 @@ export default function CustomersManager() {
                 {customers.map((customer) => (
                   <tr
                     key={customer._id}
-                    className="border-b border-white/5 hover:bg-white/5 transition-colors group"
+                    className="border-b border-foreground/5 hover:bg-foreground/5 transition-colors group"
                   >
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-3">

@@ -56,18 +56,18 @@ export default function Header() {
       {/* Nav */}
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-          scrolled ? "glass border-b border-white/5 py-3" : "bg-transparent py-5"
+          scrolled ? "glass border-b border-foreground/5 py-3" : "bg-transparent py-5"
         }`}
       >
-        <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 md:px-8">
+        <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 md:px-8">
           <a href="/" className="flex items-center gap-2">
             {restaurantLogo ? (
-              <img src={restaurantLogo} alt="Restaurant Logo" className="h-16 md:h-20 w-auto object-contain" />
+              <img src={restaurantLogo} alt="Restaurant Logo" className="h-10 sm:h-12 md:h-16 lg:h-20 w-auto object-contain" />
             ) : (
-              <img src="/assets/logo.svg" alt="UDIPI Restaurant" className="h-16 md:h-20 w-auto object-contain" />
+              <img src="/assets/logo.svg" alt="UDIPI Restaurant" className="h-10 sm:h-12 md:h-16 lg:h-20 w-auto object-contain" />
             )}
           </a>
-          <ul className="hidden items-center gap-8 lg:flex">
+          <ul className="hidden items-center gap-6 lg:flex">
             {navLinks.map((l) => (
               <li key={l.href}>
                 <a href={l.href} className="text-sm text-foreground/80 transition-colors hover:text-gold">
@@ -87,16 +87,16 @@ export default function Header() {
                   <span>Profile</span>
                 </button>
                 {profileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-xl border border-white/10 bg-background/90 p-2 backdrop-blur-md shadow-elegant">
+                  <div className="absolute right-0 mt-2 w-48 rounded-xl border border-foreground/10 bg-background/90 p-2 backdrop-blur-md shadow-elegant">
                     <a
                       href="/profile"
-                      className="block rounded-lg px-3 py-2 text-sm text-foreground/85 hover:bg-white/5 hover:text-gold transition-colors"
+                      className="block rounded-lg px-3 py-2 text-sm text-foreground/85 hover:bg-foreground/5 hover:text-gold transition-colors"
                     >
                       Profile
                     </a>
                     <button
                       onClick={() => logout()}
-                      className="block w-full text-left rounded-lg px-3 py-2 text-sm text-foreground/85 hover:bg-white/5 hover:text-gold transition-colors"
+                      className="block w-full text-left rounded-lg px-3 py-2 text-sm text-foreground/85 hover:bg-foreground/5 hover:text-gold transition-colors"
                     >
                       Logout
                     </button>
@@ -121,21 +121,21 @@ export default function Header() {
             <button
               aria-label="Toggle menu"
               onClick={() => setMenuOpen((v) => !v)}
-              className="grid h-10 w-10 place-items-center rounded-md border border-white/10 lg:hidden"
+              className="grid h-10 w-10 place-items-center rounded-md border border-foreground/10 lg:hidden"
             >
               <span className="text-gold text-xl">{menuOpen ? "✕" : "☰"}</span>
             </button>
           </div>
         </nav>
         {menuOpen && (
-          <div className="glass mx-5 mt-3 rounded-2xl p-5 lg:hidden">
+          <div className="mx-4 sm:mx-6 mt-3 rounded-2xl bg-background/95 p-5 shadow-2xl backdrop-blur-2xl border border-foreground/10 lg:hidden max-h-[75vh] overflow-y-auto">
             <ul className="grid gap-3">
               {navLinks.map((l) => (
                 <li key={l.href}>
                   <a
                     href={l.href}
                     onClick={() => setMenuOpen(false)}
-                    className="block rounded-lg px-3 py-2 text-foreground/85 hover:bg-white/5 hover:text-gold"
+                    className="block rounded-lg px-3 py-2 text-foreground/85 hover:bg-foreground/5 hover:text-gold"
                   >
                     {l.label}
                   </a>
@@ -147,7 +147,7 @@ export default function Header() {
                     <a
                       href="/profile"
                       onClick={() => setMenuOpen(false)}
-                      className="block rounded-lg px-3 py-2 text-foreground/85 hover:bg-white/5 hover:text-gold"
+                      className="block rounded-lg px-3 py-2 text-foreground/85 hover:bg-foreground/5 hover:text-gold"
                     >
                       Profile
                     </a>
@@ -155,7 +155,7 @@ export default function Header() {
                   <li>
                     <button
                       onClick={() => logout()}
-                      className="block w-full text-left rounded-lg px-3 py-2 text-foreground/85 hover:bg-white/5 hover:text-gold"
+                      className="block w-full text-left rounded-lg px-3 py-2 text-foreground/85 hover:bg-foreground/5 hover:text-gold"
                     >
                       Logout
                     </button>
@@ -168,7 +168,7 @@ export default function Header() {
                       setMenuOpen(false);
                       setAuthModalOpen(true);
                     }}
-                    className="block w-full text-left rounded-lg px-3 py-2 text-foreground/85 hover:bg-white/5 hover:text-gold"
+                    className="block w-full text-left rounded-lg px-3 py-2 text-foreground/85 hover:bg-foreground/5 hover:text-gold"
                   >
                     Customer Login
                   </button>

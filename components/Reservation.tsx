@@ -107,7 +107,7 @@ export default function Reservation() {
   ];
 
   return (
-    <section id="reservation" className="relative overflow-hidden py-24 md:py-32">
+    <section id="reservation" className="relative overflow-hidden py-16 md:py-32">
       <div className="absolute inset-0 opacity-20">
         <img src={hero} alt="" className="h-full w-full object-cover" />
       </div>
@@ -136,7 +136,7 @@ export default function Reservation() {
                 className={`rounded-xl border bg-background/60 px-4 py-3 text-foreground outline-none transition-colors ${
                   f.type === 'date' || f.type === 'time' ? '[color-scheme:dark]' : ''
                 } ${
-                  errors[f.name] ? "border-red-500/50 focus:border-red-500" : "border-white/10 focus:border-gold"
+                  errors[f.name] ? "border-red-500/50 focus:border-red-500" : "border-foreground/10 focus:border-gold"
                 }`}
               />
               {errors[f.name] && (
@@ -151,7 +151,7 @@ export default function Reservation() {
               value={formData.request}
               onChange={handleChange}
               rows={4}
-              className="rounded-xl border border-white/10 bg-background/60 px-4 py-3 text-foreground outline-none transition-colors focus:border-gold"
+              className="rounded-xl border border-foreground/10 bg-background/60 px-4 py-3 text-foreground outline-none transition-colors focus:border-gold"
             />
           </div>
           <button

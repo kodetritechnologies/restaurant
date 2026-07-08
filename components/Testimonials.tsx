@@ -25,7 +25,7 @@ export default function Testimonials({ reviews: dbReviews }: TestimonialProps) {
 
   if (displayReviews.length === 0) {
     return (
-      <section id="testimonials" className="mx-auto max-w-5xl px-5 py-24 md:px-8 md:py-32">
+      <section id="testimonials" className="mx-auto max-w-5xl px-5 py-16 md:px-8 md:py-32">
         <div className="reveal mb-14 text-center">
           <p className="eyebrow">Guests Say</p>
           <h2 className="mt-4 font-serif text-4xl md:text-5xl">Cherished Reviews</h2>
@@ -35,7 +35,7 @@ export default function Testimonials({ reviews: dbReviews }: TestimonialProps) {
   }
 
   return (
-    <section id="testimonials" className="mx-auto max-w-5xl px-5 py-24 md:px-8 md:py-32">
+    <section id="testimonials" className="mx-auto max-w-5xl px-5 py-16 md:px-8 md:py-32">
       <div className="reveal mb-14 text-center">
         <p className="eyebrow">Guests Say</p>
         <h2 className="mt-4 font-serif text-4xl md:text-5xl">Cherished Reviews</h2>
@@ -66,7 +66,7 @@ export default function Testimonials({ reviews: dbReviews }: TestimonialProps) {
               key={i}
               aria-label={`Go to slide ${i + 1}`}
               onClick={() => setReviewIdx(i)}
-              className={`h-1.5 rounded-full transition-all cursor-pointer ${i === reviewIdx ? "w-8 bg-gold" : "w-4 bg-white/20"}`}
+              className={`h-1.5 rounded-full transition-all cursor-pointer ${i === reviewIdx ? "w-8 bg-gold" : "w-4 bg-foreground/20"}`}
             />
           ))}
         </div>

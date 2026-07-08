@@ -190,11 +190,11 @@ export default function CurrencyPage() {
           <Loader2 className="w-8 h-8 animate-spin text-gold" />
         </div>
       ) : (
-        <div className="bg-surface/50 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-md">
+        <div className="bg-surface/50 border border-foreground/10 rounded-2xl overflow-hidden backdrop-blur-md">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-white/10 text-muted-foreground text-sm bg-black/20">
+                <tr className="border-b border-foreground/10 text-muted-foreground text-sm bg-black/20">
                   <th className="py-4 px-6 font-medium">Currency Name</th>
                   <th className="py-4 px-6 font-medium">Code</th>
                   <th className="py-4 px-6 font-medium">Symbol</th>
@@ -211,7 +211,7 @@ export default function CurrencyPage() {
                   </tr>
                 ) : (
                   currencies.map((currency) => (
-                    <tr key={currency._id} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
+                    <tr key={currency._id} className="border-b border-foreground/5 hover:bg-foreground/5 transition-colors group">
                       <td className="py-4 px-6 font-medium">{currency.name}</td>
                       <td className="py-4 px-6">{currency.code}</td>
                       <td className="py-4 px-6 font-serif font-bold text-gold text-lg">{currency.symbol}</td>
@@ -224,7 +224,7 @@ export default function CurrencyPage() {
                         ) : (
                           <button
                             onClick={() => handleSetDefault(currency._id)}
-                            className="text-xs font-medium text-muted-foreground hover:text-white bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-full transition-colors w-max"
+                            className="text-xs font-medium text-muted-foreground hover:text-white bg-foreground/5 hover:bg-foreground/10 px-2.5 py-1 rounded-full transition-colors w-max"
                           >
                             Set as Default
                           </button>
@@ -265,14 +265,14 @@ export default function CurrencyPage() {
       {/* Add/Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
-            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+          <div className="bg-[#111] border border-foreground/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div className="p-6 border-b border-foreground/10 flex justify-between items-center bg-foreground/5">
               <h2 className="text-xl font-bold text-white">
                 {editingId ? "Edit Currency" : "Add New Currency"}
               </h2>
               <button 
                 onClick={closeModal}
-                className="p-2 text-muted-foreground hover:text-white hover:bg-white/10 rounded-full transition-colors"
+                className="p-2 text-muted-foreground hover:text-white hover:bg-foreground/10 rounded-full transition-colors"
               >
                 <X size={20} />
               </button>
@@ -289,7 +289,7 @@ export default function CurrencyPage() {
                     if (errors.name) setErrors(prev => ({ ...prev, name: undefined }));
                   }}
                   placeholder="e.g. US Dollar"
-                  className={`w-full bg-black/40 border ${errors.name ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors text-white placeholder:text-muted-foreground/50`}
+                  className={`w-full bg-black/40 border ${errors.name ? 'border-red-500' : 'border-foreground/10'} rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors text-white placeholder:text-muted-foreground/50`}
                 />
                 {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
               </div>
@@ -305,7 +305,7 @@ export default function CurrencyPage() {
                       if (errors.code) setErrors(prev => ({ ...prev, code: undefined }));
                     }}
                     placeholder="e.g. USD"
-                    className={`w-full bg-black/40 border ${errors.code ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors text-white placeholder:text-muted-foreground/50 uppercase`}
+                    className={`w-full bg-black/40 border ${errors.code ? 'border-red-500' : 'border-foreground/10'} rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors text-white placeholder:text-muted-foreground/50 uppercase`}
                   />
                   {errors.code && <p className="text-xs text-red-500">{errors.code}</p>}
                 </div>
@@ -320,7 +320,7 @@ export default function CurrencyPage() {
                       if (errors.symbol) setErrors(prev => ({ ...prev, symbol: undefined }));
                     }}
                     placeholder="e.g. $"
-                    className={`w-full bg-black/40 border ${errors.symbol ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors text-white placeholder:text-muted-foreground/50`}
+                    className={`w-full bg-black/40 border ${errors.symbol ? 'border-red-500' : 'border-foreground/10'} rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors text-white placeholder:text-muted-foreground/50`}
                   />
                   {errors.symbol && <p className="text-xs text-red-500">{errors.symbol}</p>}
                 </div>
@@ -345,11 +345,11 @@ export default function CurrencyPage() {
                 </label>
               </div>
 
-              <div className="flex justify-end gap-3 pt-6 border-t border-white/10 mt-6">
+              <div className="flex justify-end gap-3 pt-6 border-t border-foreground/10 mt-6">
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="px-5 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-muted-foreground hover:text-white transition-colors text-sm font-medium"
+                  className="px-5 py-2.5 rounded-xl border border-foreground/10 hover:bg-foreground/5 text-muted-foreground hover:text-white transition-colors text-sm font-medium"
                 >
                   Cancel
                 </button>

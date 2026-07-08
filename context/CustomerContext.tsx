@@ -11,6 +11,7 @@ interface Customer {
   email: string;
   phone?: string;
   address?: string;
+  city?: string;
 }
 
 interface CustomerContextType {

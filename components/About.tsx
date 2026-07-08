@@ -4,10 +4,10 @@ const about = "/assets/about.jpg";
 
 export default function About() {
   return (
-    <section id="about" className="mx-auto max-w-7xl px-5 py-24 md:px-8 md:py-32">
+    <section id="about" className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-32">
       <div className="grid items-center gap-12 lg:grid-cols-2">
         <div className="reveal relative">
-          <div className="overflow-hidden rounded-3xl border border-white/10">
+          <div className="overflow-hidden rounded-3xl border border-foreground/10">
             <img src={about} alt="Restaurant interior" loading="lazy" className="h-full w-full object-cover" />
           </div>
           <div className="absolute -bottom-6 -right-6 hidden rounded-2xl border border-gold/40 bg-background/90 px-8 py-6 shadow-[var(--shadow-gold)] backdrop-blur md:block">

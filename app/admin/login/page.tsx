@@ -137,7 +137,7 @@ export default function AdminLogin() {
                       onChange={(e) => setName(e.target.value)}
                       placeholder="e.g. Master Chef"
                       required={!isLogin}
-                      className="w-full rounded-full border border-white/10 bg-background/60 pl-11 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all focus:border-gold focus:ring-1 focus:ring-gold/30"
+                      className="w-full rounded-full border border-foreground/10 bg-background/60 pl-11 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all focus:border-gold focus:ring-1 focus:ring-gold/30"
                     />
                   </div>
                 </motion.div>
@@ -159,7 +159,7 @@ export default function AdminLogin() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@aurea.dining"
                   required
-                  className="w-full rounded-full border border-white/10 bg-background/60 pl-11 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all focus:border-gold focus:ring-1 focus:ring-gold/30"
+                  className="w-full rounded-full border border-foreground/10 bg-background/60 pl-11 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all focus:border-gold focus:ring-1 focus:ring-gold/30"
                 />
               </div>
             </div>
@@ -186,7 +186,7 @@ export default function AdminLogin() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full rounded-full border border-white/10 bg-background/60 pl-11 pr-12 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all focus:border-gold focus:ring-1 focus:ring-gold/30"
+                  className="w-full rounded-full border border-foreground/10 bg-background/60 pl-11 pr-12 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all focus:border-gold focus:ring-1 focus:ring-gold/30"
                 />
                 <button
                   type="button"
@@ -206,7 +206,7 @@ export default function AdminLogin() {
                     type="checkbox"
                     checked={agreeTerms}
                     onChange={(e) => setAgreeTerms(e.target.checked)}
-                    className="accent-gold h-4 w-4 rounded border-white/20 bg-background text-primary-foreground focus:ring-gold"
+                    className="accent-gold h-4 w-4 rounded border-foreground/20 bg-background text-primary-foreground focus:ring-gold"
                   />
                   <span className="text-xs text-muted-foreground">
                     I agree to the <a href="#" className="text-gold hover:underline">Terms of Service</a>
@@ -217,7 +217,7 @@ export default function AdminLogin() {
                   <input
                     type="checkbox"
                     defaultChecked
-                    className="accent-gold h-4 w-4 rounded border-white/20 bg-background text-primary-foreground focus:ring-gold"
+                    className="accent-gold h-4 w-4 rounded border-foreground/20 bg-background text-primary-foreground focus:ring-gold"
                   />
                   <span className="text-xs text-muted-foreground">Remember this session</span>
                 </label>
@@ -263,7 +263,7 @@ export default function AdminLogin() {
           </form>
 
           {/* Tab Switcher */}
-          <div className="mt-8 pt-6 border-t border-white/10 text-center">
+          <div className="mt-8 pt-6 border-t border-foreground/10 text-center">
             <p className="text-xs text-muted-foreground">
               {isLogin ? "Not registered as admin yet?" : "Already have an admin account?"}
               <button
