@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Loader from "@/components/Loader";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingButtons from "@/components/FloatingButtons";
-import { ShoppingBag, Star, Plus, Minus, X, Package, ShoppingCart } from "lucide-react";
+import { ShoppingBag, Star, Plus, Minus, X, Package, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -32,6 +32,14 @@ function MenuContent() {
     if (initSearch) setSearchQuery(initSearch);
     else setSearchQuery("");
   }, [initCategory, initSearch]);
+
+  const scrollContainerRef = useRef<HTMLElement>(null);
+  const scroll = (direction: "left" | "right") => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = direction === "left" ? -200 : 200;
+      scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
 
   // Cart State
   const [cartItems, setCartItems] = useState<{ productId: string, variantId?: string, quantity: number }[]>([]);
@@ -186,32 +194,66 @@ function MenuContent() {
         </section>
 
 
-        {/* Categories Filter */}
+        {/* Categories Filter Slider */}
         {categories.length > 0 && (
           <div className="sticky top-[72px] md:top-[76px] z-40 bg-background/95 backdrop-blur-xl border-b border-foreground/5 py-4 mb-12 -mt-4 transition-all shadow-sm">
-            <section className="px-5 md:px-8 max-w-7xl mx-auto flex flex-wrap justify-center gap-3">
-              <button
-                onClick={() => { setActiveCategory("all"); setSearchQuery(""); router.replace('/menu'); }}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === "all" && !searchQuery
-                    ? "bg-gold text-primary-foreground shadow-gold"
-                    : "bg-surface/50 text-muted-foreground border border-foreground/10 hover:border-gold hover:text-gold"
-                  }`}
+            <div className="relative max-w-7xl mx-auto px-5 md:px-8 group">
+              
+              {/* Left Scroll Button */}
+              <div className="absolute left-0 top-0 bottom-0 w-16 md:w-20 bg-gradient-to-r from-background via-background/90 to-transparent z-10 flex items-center justify-start px-2 pointer-events-none">
+                <button 
+                  onClick={() => scroll("left")}
+                  className="pointer-events-auto w-8 h-8 rounded-full bg-surface border border-foreground/10 hover:border-gold hover:text-gold flex items-center justify-center shadow-md transition-colors text-foreground"
+                  aria-label="Scroll left"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Right Scroll Button */}
+              <div className="absolute right-0 top-0 bottom-0 w-16 md:w-20 bg-gradient-to-l from-background via-background/90 to-transparent z-10 flex items-center justify-end px-2 pointer-events-none">
+                <button 
+                  onClick={() => scroll("right")}
+                  className="pointer-events-auto w-8 h-8 rounded-full bg-surface border border-foreground/10 hover:border-gold hover:text-gold flex items-center justify-center shadow-md transition-colors text-foreground"
+                  aria-label="Scroll right"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Scrollable Container */}
+              <section 
+                ref={scrollContainerRef}
+                className="flex overflow-x-auto gap-3 pb-2 -mb-2 snap-x hide-scrollbar px-6 md:px-8"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
-                All
-              </button>
-              {categories.map((cat) => (
+                <style dangerouslySetInnerHTML={{__html: `
+                  section.hide-scrollbar::-webkit-scrollbar { display: none; }
+                `}} />
+                
                 <button
-                  key={cat._id}
-                  onClick={() => { setActiveCategory(cat._id); setSearchQuery(""); router.replace(`/menu?category=${cat._id}`); }}
-                  className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === cat._id && !searchQuery
+                  onClick={() => { setActiveCategory("all"); setSearchQuery(""); router.replace('/menu'); }}
+                  className={`shrink-0 snap-start px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === "all" && !searchQuery
                       ? "bg-gold text-primary-foreground shadow-gold"
                       : "bg-surface/50 text-muted-foreground border border-foreground/10 hover:border-gold hover:text-gold"
                     }`}
                 >
-                  {cat.name}
+                  All
                 </button>
-              ))}
-            </section>
+                {categories.map((cat) => (
+                  <button
+                    key={cat._id}
+                    onClick={() => { setActiveCategory(cat._id); setSearchQuery(""); router.replace(`/menu?category=${cat._id}`); }}
+                    className={`shrink-0 snap-start px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === cat._id && !searchQuery
+                        ? "bg-gold text-primary-foreground shadow-gold"
+                        : "bg-surface/50 text-muted-foreground border border-foreground/10 hover:border-gold hover:text-gold"
+                      }`}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </section>
+            </div>
           </div>
         )}
 
