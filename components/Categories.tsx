@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface Category {
   _id: string;
@@ -15,6 +16,7 @@ interface Category {
 export default function Categories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -52,7 +54,11 @@ export default function Categories() {
       </div>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {categories.map((c) => (
-          <article key={c._id} className="reveal group relative overflow-hidden rounded-2xl border border-foreground/5 bg-surface">
+          <article 
+            key={c._id} 
+            onClick={() => router.push(`/menu?category=${c._id}`)}
+            className="reveal group relative overflow-hidden rounded-2xl border border-foreground/5 bg-surface cursor-pointer"
+          >
             <div className="aspect-[4/3] overflow-hidden relative">
               {c.image ? (
                 <Image

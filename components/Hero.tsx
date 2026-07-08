@@ -30,7 +30,7 @@ export default function Hero() {
           
           <div className="reveal mt-10 flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
             <a
-              href="#categories"
+              href="/menu"
               className="w-full sm:w-auto rounded-full bg-gradient-gold px-10 py-4 text-base font-bold text-primary-foreground shadow-[var(--shadow-gold)] transition-transform hover:-translate-y-1 text-center"
             >
               Browse Menu
