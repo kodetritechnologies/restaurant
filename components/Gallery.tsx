@@ -31,13 +31,13 @@ export default function Gallery({ gallery: dbGallery }: GalleryProps) {
           setItems(data.items);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [dbGallery]);
 
   const gallery = items
     .map((item) => ({
-      id:    item._id,
-      src:   item.url,
+      id: item._id,
+      src: item.url,
       title: item.title || "",
     }))
     .filter((item) => !!item.src);
@@ -58,16 +58,15 @@ export default function Gallery({ gallery: dbGallery }: GalleryProps) {
               <button
                 key={g.id}
                 onClick={() => setLightbox(g.src)}
-                className={`group relative overflow-hidden rounded-2xl ${
-                  i % 5 === 0 ? "row-span-2 aspect-square md:aspect-auto" : "aspect-square"
-                }`}
+                className={`group relative overflow-hidden rounded-2xl ${i % 5 === 0 ? "row-span-2 aspect-square md:aspect-auto" : "aspect-square"
+                  }`}
               >
                 <img
                   src={g.src}
                   alt={g.title || `Gallery ${i + 1}`}
                   loading="lazy"
                   onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = "/assets/no-image-food.png";
+                    (e.currentTarget as HTMLImageElement).src = "/assets/no-image-food.jpg";
                   }}
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
@@ -118,7 +117,7 @@ export default function Gallery({ gallery: dbGallery }: GalleryProps) {
                 alt={g.title || "Instagram"}
                 loading="lazy"
                 onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = "/assets/no-image-food.png";
+                  (e.currentTarget as HTMLImageElement).src = "/assets/no-image-food.jpg";
                 }}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
               />

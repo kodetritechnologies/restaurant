@@ -24,16 +24,16 @@ export default function Menu() {
           fetch("/api/products?signature=true"),
           fetch("/api/currency")
         ]);
-        
+
         const [prodData, currData] = await Promise.all([
           prodRes.json(),
           currRes.json()
         ]);
-        
+
         if (prodData && prodData.success) {
           setDishes(prodData.products.slice(0, 8));
         }
-        
+
         if (currData?.success && currData.currencies) {
           const defaultCurr = currData.currencies.find((c: any) => c.isDefault);
           if (defaultCurr) setCurrencySymbol(defaultCurr.symbol);
@@ -75,11 +75,11 @@ export default function Menu() {
             >
               <div className="aspect-square overflow-hidden">
                 <img
-                  src={d.featuredImage || "/assets/no-image-food.png"}
+                  src={d.featuredImage || "/assets/no-image-food.jpg"}
                   alt={d.name}
                   loading="lazy"
                   onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = "/assets/no-image-food.png";
+                    (e.currentTarget as HTMLImageElement).src = "/assets/no-image-food.jpg";
                   }}
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />

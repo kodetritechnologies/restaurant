@@ -87,7 +87,7 @@ export default function CheckoutPage() {
     try {
       const stored = localStorage.getItem("cartItems");
       if (stored) setCartItems(JSON.parse(stored));
-    } catch {}
+    } catch { }
   }, []);
 
   // Fetch products for all items in cart
@@ -112,7 +112,7 @@ export default function CheckoutPage() {
           if (def) setCurrencySymbol(def.symbol);
         }
         if (settingsData?.success) setSettings(settingsData.settings);
-      } catch {}
+      } catch { }
       setLoading(false);
     };
     fetchData();
@@ -136,9 +136,9 @@ export default function CheckoutPage() {
               }));
             }
           })
-          .catch(() => {});
+          .catch(() => { });
       }
-    } catch {}
+    } catch { }
   }, []);
 
   const getItemDetails = useCallback(
@@ -201,8 +201,8 @@ export default function CheckoutPage() {
     deliveryType === "delivery"
       ? "Delivery Fee"
       : deliveryType === "pickup"
-      ? "Pick Up"
-      : "Dine In";
+        ? "Pick Up"
+        : "Dine In";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -415,11 +415,10 @@ export default function CheckoutPage() {
                           key={type}
                           type="button"
                           onClick={() => setDeliveryType(type)}
-                          className={`flex flex-col items-center gap-2 py-4 px-3 rounded-xl border text-sm font-semibold transition-all ${
-                            deliveryType === type
+                          className={`flex flex-col items-center gap-2 py-4 px-3 rounded-xl border text-sm font-semibold transition-all ${deliveryType === type
                               ? "border-gold bg-gold/10 text-gold"
                               : "border-white/10 text-muted-foreground hover:border-white/20 hover:text-foreground"
-                          }`}
+                            }`}
                         >
                           {icon}
                           <span className="text-center leading-tight">{label}</span>
@@ -601,18 +600,16 @@ export default function CheckoutPage() {
                           key={method}
                           type="button"
                           onClick={() => setPaymentMethod(method)}
-                          className={`flex items-center gap-3 py-4 px-5 rounded-xl border text-sm font-semibold transition-all ${
-                            paymentMethod === method
+                          className={`flex items-center gap-3 py-4 px-5 rounded-xl border text-sm font-semibold transition-all ${paymentMethod === method
                               ? "border-gold bg-gold/10 text-gold"
                               : "border-white/10 text-muted-foreground hover:border-white/20 hover:text-foreground"
-                          }`}
+                            }`}
                         >
                           <span
-                            className={`h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                              paymentMethod === method
+                            className={`h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0 ${paymentMethod === method
                                 ? "border-gold"
                                 : "border-white/30"
-                            }`}
+                              }`}
                           >
                             {paymentMethod === method && (
                               <span className="w-2 h-2 rounded-full bg-gold" />
@@ -665,7 +662,7 @@ export default function CheckoutPage() {
                                 />
                               ) : (
                                 <img
-                                  src="/assets/no-image-food.png"
+                                  src="/assets/no-image-food.jpg"
                                   alt="No image"
                                   className="w-full h-full object-cover"
                                 />

@@ -64,7 +64,7 @@ export default function Header() {
             {restaurantLogo ? (
               <img src={restaurantLogo} alt="Restaurant Logo" className="h-16 md:h-20 w-auto object-contain" />
             ) : (
-              <span className="font-serif text-2xl md:text-3xl text-gradient-gold">Auréa</span>
+              <img src="/assets/logo.svg" alt="UDIPI Restaurant" className="h-16 md:h-20 w-auto object-contain" />
             )}
           </a>
           <ul className="hidden items-center gap-8 lg:flex">

@@ -273,7 +273,7 @@ export default function ChefsManager() {
               </label>
               <input
                 type="text"
-                placeholder="e.g. Jean-Luc Auréa"
+                placeholder="e.g. Sanjeev Kapoor"
                 value={name}
                 onChange={(e) => {
                   setName(e.target.value);

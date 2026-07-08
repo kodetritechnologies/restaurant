@@ -19,7 +19,7 @@ export default function About() {
           <p className="eyebrow">Our Story</p>
           <h2 className="mt-4 font-serif text-4xl md:text-5xl">A Legacy of Refined Taste</h2>
           <p className="mt-6 text-foreground/70">
-            Since 2012, Auréa has been a sanctuary for those who believe that a meal is more than nourishment —
+            Since 2012, NEW UDIPI has been a sanctuary for those who believe that a meal is more than nourishment —
             it's a ritual. From the marble bar to the candlelit tables, every detail has been considered.
           </p>
           <ul className="mt-8 grid gap-4 sm:grid-cols-2">

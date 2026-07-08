@@ -22,7 +22,7 @@ export default function MenuPage() {
   // Cart State
   const [cartItems, setCartItems] = useState<{ productId: string, variantId?: string, quantity: number }[]>([]);
   const [cartLoaded, setCartLoaded] = useState(false);
-  
+
   // Variant Modal State
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<any | null>(null);
@@ -41,7 +41,7 @@ export default function MenuPage() {
     setCartItems(prev => {
       const existingItem = prev.find(i => i.productId === productId && i.variantId === variantId);
       let newQuantity = existingItem ? existingItem.quantity + delta : delta;
-      
+
       if (newQuantity < 0) newQuantity = 0;
       if (maxStock !== null && maxStock !== undefined && newQuantity > maxStock) newQuantity = maxStock;
 
@@ -50,7 +50,7 @@ export default function MenuPage() {
       }
 
       if (existingItem) {
-        return prev.map(i => 
+        return prev.map(i =>
           (i.productId === productId && i.variantId === variantId) ? { ...i, quantity: newQuantity } : i
         );
       }
@@ -70,7 +70,7 @@ export default function MenuPage() {
     try {
       const stored = localStorage.getItem("cartItems");
       if (stored) setCartItems(JSON.parse(stored));
-    } catch {}
+    } catch { }
     setCartLoaded(true);
   }, []);
 
@@ -104,7 +104,7 @@ export default function MenuPage() {
         const catRes = await fetch("/api/categories");
         const catData = await catRes.json();
         if (catData?.success) {
-           setCategories(catData.categories.filter((c: any) => c.type?.toLowerCase() === "product" || !c.type || c.type === "General"));
+          setCategories(catData.categories.filter((c: any) => c.type?.toLowerCase() === "product" || !c.type || c.type === "General"));
         }
 
         const currRes = await fetch("/api/currency");
@@ -124,8 +124,8 @@ export default function MenuPage() {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const url = activeCategory === "all" 
-          ? "/api/products" 
+        const url = activeCategory === "all"
+          ? "/api/products"
           : `/api/products?category=${activeCategory}`;
         const prodRes = await fetch(url);
         const prodData = await prodRes.json();
@@ -147,7 +147,7 @@ export default function MenuPage() {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Loader loading={loading} />
       <Header />
-      
+
       <main className="flex-1 pt-32 pb-24">
         {/* Hero Section */}
         <section className="relative px-5 md:px-8 max-w-7xl mx-auto mb-16 text-center">
@@ -173,29 +173,27 @@ export default function MenuPage() {
         {categories.length > 0 && (
           <div className="sticky top-[72px] md:top-[76px] z-40 bg-background/95 backdrop-blur-xl border-b border-white/5 py-4 mb-12 -mt-4 transition-all shadow-sm">
             <section className="px-5 md:px-8 max-w-7xl mx-auto flex flex-wrap justify-center gap-3">
-            <button
-              onClick={() => setActiveCategory("all")}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                activeCategory === "all"
-                  ? "bg-gold text-primary-foreground shadow-gold"
-                  : "bg-surface/50 text-muted-foreground border border-white/10 hover:border-gold hover:text-gold"
-              }`}
-            >
-              All
-            </button>
-            {categories.map((cat) => (
               <button
-                key={cat._id}
-                onClick={() => setActiveCategory(cat._id)}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                  activeCategory === cat._id
+                onClick={() => setActiveCategory("all")}
+                className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === "all"
                     ? "bg-gold text-primary-foreground shadow-gold"
                     : "bg-surface/50 text-muted-foreground border border-white/10 hover:border-gold hover:text-gold"
-                }`}
+                  }`}
               >
-                {cat.name}
+                All
               </button>
-            ))}
+              {categories.map((cat) => (
+                <button
+                  key={cat._id}
+                  onClick={() => setActiveCategory(cat._id)}
+                  className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === cat._id
+                      ? "bg-gold text-primary-foreground shadow-gold"
+                      : "bg-surface/50 text-muted-foreground border border-white/10 hover:border-gold hover:text-gold"
+                    }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
             </section>
           </div>
         )}
@@ -209,153 +207,171 @@ export default function MenuPage() {
               <p className="text-muted-foreground">We are currently updating our menu. Please check back later.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <AnimatePresence>
-                {products.map((product, index) => {
-                  const displayImage = product.productType === "variable" && product.variants?.[0]?.galleryImages?.[0] 
-                    ? product.variants[0].galleryImages[0] 
-                    : product.featuredImage;
+            <div className="space-y-16">
+              {(activeCategory === "all" ? [...categories, { _id: "uncategorized", name: "Others" }] : categories.filter((cat) => cat._id === activeCategory))
+                .map((cat) => {
+                  const catProducts = cat._id === "uncategorized"
+                    ? products.filter((p) => !p.categories || p.categories.length === 0)
+                    : products.filter((p) => p.categories?.includes(cat._id));
 
-                  const displayRegularPrice = product.productType === "variable" && product.variants?.[0]
-                    ? product.variants[0].regularPrice
-                    : product.regularPrice;
-
-                  const displaySalePrice = product.productType === "variable" && product.variants?.[0]
-                    ? product.variants[0].salePrice
-                    : product.salePrice;
+                  if (catProducts.length === 0) return null;
 
                   return (
-                  <motion.div
-                    key={product._id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    className="glass rounded-3xl overflow-hidden group hover:border-gold/30 transition-all duration-500"
-                  >
-                    {/* Image */}
-                    <div className="relative aspect-[4/3] overflow-hidden bg-black/10 flex items-center justify-center">
-                      {displayImage ? (
-                        <img 
-                          src={displayImage} 
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                        />
-                      ) : (
-                        <img
-                          src="/assets/no-image-food.png"
-                          alt="No image"
-                          className="w-full h-full object-cover"
-                        />
-                      )}
-                      {product.featured && (
-                        <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-white/10">
-                          <Star className="w-3.5 h-3.5 text-gold fill-gold" />
-                          <span className="text-xs font-medium text-white uppercase tracking-wider">Featured</span>
-                        </div>
-                      )}
-                      {displaySalePrice && (
-                        <div className="absolute top-4 left-4 bg-red-500/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-red-500/50">
-                          <span className="text-xs font-bold text-white uppercase tracking-wider">Sale</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Content */}
-                    <div className="p-6">
-                      <div className="flex justify-between items-start gap-4 mb-2">
-                        <h3 className="text-xl font-serif font-bold text-foreground group-hover:text-gold transition-colors">
-                          {product.name}
-                        </h3>
-                        <div className="text-right shrink-0">
-                          {product.productType === "variable" ? (
-                            <span className="text-gold font-medium flex flex-col">
-                              <span className="text-xs text-muted-foreground uppercase tracking-wider mb-0.5">Starting at</span>
-                              {currencySymbol}{displaySalePrice ? displaySalePrice.toFixed(2) : displayRegularPrice?.toFixed(2) || "0.00"}
-                            </span>
-                          ) : (
-                            <span className="text-gold font-medium flex items-center gap-2 text-lg">
-                              {displaySalePrice ? (
-                                <>
-                                  <span>{currencySymbol}{displaySalePrice.toFixed(2)}</span>
-                                  <span className="text-sm text-muted-foreground line-through">{currencySymbol}{displayRegularPrice?.toFixed(2) || "0.00"}</span>
-                                </>
-                              ) : (
-                                <span>{currencySymbol}{displayRegularPrice?.toFixed(2) || "0.00"}</span>
-                              )}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {product.shortDescription || product.description ? (
-                        <div 
-                          className="text-muted-foreground text-sm line-clamp-2 mt-2 leading-relaxed prose prose-invert prose-p:m-0 prose-p:inline prose-sm"
-                          dangerouslySetInnerHTML={{ __html: product.shortDescription || product.description }}
-                        />
-                      ) : (
-                        <p className="text-muted-foreground text-sm line-clamp-2 mt-2 leading-relaxed">
-                          A delicious culinary experience crafted with passion.
-                        </p>
-                      )}
-                      
-                      {/* Actions */}
-                      <div className="mt-6">
-                        {product.productType === "variable" ? (
-                          <button 
-                            onClick={() => {
-                              setSelectedProduct(product);
-                              setSelectedVariant(product.variants?.[0] || null);
-                              setModalQuantity(1);
-                            }}
-                            className="w-full py-3 rounded-xl border border-white/10 hover:border-gold hover:bg-gold/5 text-foreground hover:text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2"
-                          >
-                            <Package className="w-4 h-4" />
-                            View Options
-                          </button>
-                        ) : (
-                          <div className="flex items-center gap-3 w-full">
-                            <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl p-1.5 h-12 w-28 shrink-0">
-                              <button 
-                                onClick={() => setLocalQuantities(prev => ({ ...prev, [product._id]: Math.max(1, (prev[product._id] || 1) - 1) }))}
-                                className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
-                              >
-                                <Minus className="w-4 h-4" />
-                              </button>
-                              <span className="font-medium text-foreground text-center">
-                                {localQuantities[product._id] || 1}
-                              </span>
-                              <button 
-                                onClick={() => {
-                                  const current = localQuantities[product._id] || 1;
-                                  const max = product.quantity !== null ? product.quantity : 99;
-                                  setLocalQuantities(prev => ({ ...prev, [product._id]: Math.min(max, current + 1) }));
-                                }}
-                                className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
-                              >
-                                <Plus className="w-4 h-4" />
-                              </button>
-                            </div>
+                    <div key={cat._id} className="scroll-mt-32">
+                      <h2 className="text-3xl font-serif font-bold text-foreground mb-8 flex items-center gap-4 before:h-px before:flex-1 before:bg-white/10 after:h-px after:flex-1 after:bg-white/10">
+                        <span className="text-gold">{cat.name}</span>
+                      </h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <AnimatePresence>
+                          {catProducts.map((product, index) => {
+                            const displayImage = product.productType === "variable" && product.variants?.[0]?.galleryImages?.[0]
+                              ? product.variants[0].galleryImages[0]
+                              : product.featuredImage;
 
-                            <button 
-                              onClick={() => {
-                                const qtyToAdd = localQuantities[product._id] || 1;
-                                updateCartQuantity(product._id, undefined, qtyToAdd, product.quantity);
-                                toast.success(`Added ${qtyToAdd} to cart`);
-                              }}
-                              disabled={product.quantity !== null && product.quantity <= 0}
-                              className="flex-1 h-12 rounded-xl border border-white/10 hover:border-gold hover:bg-gold/5 text-foreground hover:text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ShoppingBag className="w-4 h-4" />
-                              {product.quantity !== null && product.quantity <= 0 ? "Out of Stock" : "Add to Cart"}
-                            </button>
-                          </div>
-                        )}
+                            const displayRegularPrice = product.productType === "variable" && product.variants?.[0]
+                              ? product.variants[0].regularPrice
+                              : product.regularPrice;
+
+                            const displaySalePrice = product.productType === "variable" && product.variants?.[0]
+                              ? product.variants[0].salePrice
+                              : product.salePrice;
+
+                            return (
+                              <motion.div
+                                key={product._id}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.5, delay: index * 0.1 }}
+                                className="glass rounded-3xl overflow-hidden group hover:border-gold/30 transition-all duration-500"
+                              >
+                                {/* Image */}
+                                <div className="relative aspect-[4/3] overflow-hidden bg-black/10 flex items-center justify-center">
+                                  {displayImage ? (
+                                    <img
+                                      src={displayImage}
+                                      alt={product.name}
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                    />
+                                  ) : (
+                                    <img
+                                      src="/assets/no-image-food.jpg"
+                                      alt="No image"
+                                      className="w-full h-full object-cover"
+                                    />
+                                  )}
+                                  {product.featured && (
+                                    <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-white/10">
+                                      <Star className="w-3.5 h-3.5 text-gold fill-gold" />
+                                      <span className="text-xs font-medium text-white uppercase tracking-wider">Featured</span>
+                                    </div>
+                                  )}
+                                  {displaySalePrice && (
+                                    <div className="absolute top-4 left-4 bg-red-500/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-red-500/50">
+                                      <span className="text-xs font-bold text-white uppercase tracking-wider">Sale</span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Content */}
+                                <div className="p-6">
+                                  <div className="flex justify-between items-start gap-4 mb-2">
+                                    <h3 className="text-xl font-serif font-bold text-foreground group-hover:text-gold transition-colors">
+                                      {product.name}
+                                    </h3>
+                                    <div className="text-right shrink-0">
+                                      {product.productType === "variable" ? (
+                                        <span className="text-gold font-medium flex flex-col">
+                                          <span className="text-xs text-muted-foreground uppercase tracking-wider mb-0.5">Starting at</span>
+                                          {currencySymbol}{displaySalePrice ? displaySalePrice.toFixed(2) : displayRegularPrice?.toFixed(2) || "0.00"}
+                                        </span>
+                                      ) : (
+                                        <span className="text-gold font-medium flex items-center gap-2 text-lg">
+                                          {displaySalePrice ? (
+                                            <>
+                                              <span>{currencySymbol}{displaySalePrice.toFixed(2)}</span>
+                                              <span className="text-sm text-muted-foreground line-through">{currencySymbol}{displayRegularPrice?.toFixed(2) || "0.00"}</span>
+                                            </>
+                                          ) : (
+                                            <span>{currencySymbol}{displayRegularPrice?.toFixed(2) || "0.00"}</span>
+                                          )}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {product.shortDescription || product.description ? (
+                                    <div
+                                      className="text-muted-foreground text-sm line-clamp-2 mt-2 leading-relaxed prose prose-invert prose-p:m-0 prose-p:inline prose-sm"
+                                      dangerouslySetInnerHTML={{ __html: product.shortDescription || product.description }}
+                                    />
+                                  ) : (
+                                    <p className="text-muted-foreground text-sm line-clamp-2 mt-2 leading-relaxed">
+                                      A delicious culinary experience crafted with passion.
+                                    </p>
+                                  )}
+
+                                  {/* Actions */}
+                                  <div className="mt-6">
+                                    {product.productType === "variable" ? (
+                                      <button
+                                        onClick={() => {
+                                          setSelectedProduct(product);
+                                          setSelectedVariant(product.variants?.[0] || null);
+                                          setModalQuantity(1);
+                                        }}
+                                        className="w-full py-3 rounded-xl border border-white/10 hover:border-gold hover:bg-gold/5 text-foreground hover:text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2"
+                                      >
+                                        <Package className="w-4 h-4" />
+                                        View Options
+                                      </button>
+                                    ) : (
+                                      <div className="flex items-center gap-3 w-full">
+                                        <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl p-1.5 h-12 w-28 shrink-0">
+                                          <button
+                                            onClick={() => setLocalQuantities(prev => ({ ...prev, [product._id]: Math.max(1, (prev[product._id] || 1) - 1) }))}
+                                            className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
+                                          >
+                                            <Minus className="w-4 h-4" />
+                                          </button>
+                                          <span className="font-medium text-foreground text-center">
+                                            {localQuantities[product._id] || 1}
+                                          </span>
+                                          <button
+                                            onClick={() => {
+                                              const current = localQuantities[product._id] || 1;
+                                              const max = product.quantity !== null ? product.quantity : 99;
+                                              setLocalQuantities(prev => ({ ...prev, [product._id]: Math.min(max, current + 1) }));
+                                            }}
+                                            className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
+                                          >
+                                            <Plus className="w-4 h-4" />
+                                          </button>
+                                        </div>
+
+                                        <button
+                                          onClick={() => {
+                                            const qtyToAdd = localQuantities[product._id] || 1;
+                                            updateCartQuantity(product._id, undefined, qtyToAdd, product.quantity);
+                                            toast.success(`Added ${qtyToAdd} to cart`);
+                                          }}
+                                          disabled={product.quantity !== null && product.quantity <= 0}
+                                          className="flex-1 h-12 rounded-xl border border-white/10 hover:border-gold hover:bg-gold/5 text-foreground hover:text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                          <ShoppingBag className="w-4 h-4" />
+                                          {product.quantity !== null && product.quantity <= 0 ? "Out of Stock" : "Add to Cart"}
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </motion.div>
+                            );
+                          })}
+                        </AnimatePresence>
                       </div>
                     </div>
-                  </motion.div>
                   );
                 })}
-              </AnimatePresence>
             </div>
           )}
         </section>
@@ -364,19 +380,19 @@ export default function MenuPage() {
       {/* Variant Selection Modal */}
       <AnimatePresence>
         {selectedProduct && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl relative"
             >
-              <button 
+              <button
                 onClick={() => setSelectedProduct(null)}
                 className="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-black text-white rounded-full transition-colors backdrop-blur-md border border-white/10"
               >
@@ -384,8 +400,8 @@ export default function MenuPage() {
               </button>
 
               <div className="relative h-48 sm:h-64 overflow-hidden bg-black/10">
-                <img 
-                  src={selectedVariant?.galleryImages?.[0] || selectedProduct.featuredImage} 
+                <img
+                  src={selectedVariant?.galleryImages?.[0] || selectedProduct.featuredImage}
                   alt={selectedProduct.name}
                   className="w-full h-full object-cover"
                 />
@@ -396,9 +412,9 @@ export default function MenuPage() {
                 <h3 className="text-2xl font-serif font-bold text-foreground mb-1">
                   {selectedProduct.name}
                 </h3>
-                
+
                 {selectedProduct.shortDescription || selectedProduct.description ? (
-                  <div 
+                  <div
                     className="text-muted-foreground text-sm line-clamp-2 mb-6 prose prose-invert prose-p:m-0 prose-p:inline prose-sm"
                     dangerouslySetInnerHTML={{ __html: selectedProduct.shortDescription || selectedProduct.description }}
                   />
@@ -413,11 +429,10 @@ export default function MenuPage() {
                       <button
                         key={variant._id}
                         onClick={() => setSelectedVariant(variant)}
-                        className={`px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
-                          selectedVariant?._id === variant._id 
-                          ? 'border-gold bg-gold/10 text-gold' 
-                          : 'border-white/10 hover:border-white/30 text-muted-foreground hover:text-white'
-                        }`}
+                        className={`px-4 py-2 rounded-xl border text-sm font-medium transition-all ${selectedVariant?._id === variant._id
+                            ? 'border-gold bg-gold/10 text-gold'
+                            : 'border-white/10 hover:border-white/30 text-muted-foreground hover:text-white'
+                          }`}
                       >
                         {variant.variantName}
                       </button>
@@ -439,22 +454,22 @@ export default function MenuPage() {
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {selectedVariant.quantity !== null && selectedVariant.quantity <= 5 && selectedVariant.quantity > 0 
-                          ? `Only ${selectedVariant.quantity} left!` 
+                        {selectedVariant.quantity !== null && selectedVariant.quantity <= 5 && selectedVariant.quantity > 0
+                          ? `Only ${selectedVariant.quantity} left!`
                           : selectedVariant.quantity === 0 ? 'Out of stock' : 'In stock'}
                       </p>
                     </div>
 
                     <div className="flex items-center gap-3">
                       <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl p-1.5 h-12 w-28">
-                        <button 
+                        <button
                           onClick={() => setModalQuantity(Math.max(1, modalQuantity - 1))}
                           className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
                         >
                           <Minus className="w-4 h-4" />
                         </button>
                         <span className="font-medium text-foreground">{modalQuantity}</span>
-                        <button 
+                        <button
                           onClick={() => setModalQuantity(selectedVariant.quantity !== null ? Math.min(selectedVariant.quantity, modalQuantity + 1) : modalQuantity + 1)}
                           className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
                         >
@@ -462,7 +477,7 @@ export default function MenuPage() {
                         </button>
                       </div>
 
-                      <button 
+                      <button
                         onClick={() => {
                           updateCartQuantity(selectedProduct._id, selectedVariant._id, modalQuantity, selectedVariant.quantity);
                           setSelectedProduct(null); // Close modal after adding
@@ -541,7 +556,7 @@ export default function MenuPage() {
                   cartItems.map((item, idx) => {
                     const product = products.find(p => p._id === item.productId);
                     if (!product) return null;
-                    
+
                     let title = product.name;
                     let price = product.salePrice || product.regularPrice;
                     let image = product.featuredImage;
@@ -561,7 +576,7 @@ export default function MenuPage() {
                     return (
                       <div key={`${item.productId}-${item.variantId || idx}`} className="flex gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 relative group">
                         <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-black/20">
-                          <img src={image || "/assets/no-image-food.png"} alt={title} className="w-full h-full object-cover" />
+                          <img src={image || "/assets/no-image-food.jpg"} alt={title} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 flex flex-col justify-center">
                           <h4 className="font-bold text-white text-sm line-clamp-1">{title}</h4>
@@ -571,16 +586,16 @@ export default function MenuPage() {
                           <div className="text-gold font-bold text-sm mt-1">
                             {currencySymbol}{(price * item.quantity).toFixed(2)}
                           </div>
-                          
+
                           <div className="flex items-center justify-between bg-black/40 border border-white/10 rounded-lg p-1 h-8 w-24 mt-3">
-                            <button 
+                            <button
                               onClick={() => updateCartQuantity(item.productId, item.variantId, -1, maxStock)}
                               className="w-6 h-full rounded hover:bg-white/10 flex items-center justify-center text-muted-foreground hover:text-white transition-colors"
                             >
                               <Minus className="w-3 h-3" />
                             </button>
                             <span className="text-xs font-medium text-white">{item.quantity}</span>
-                            <button 
+                            <button
                               onClick={() => updateCartQuantity(item.productId, item.variantId, 1, maxStock)}
                               className="w-6 h-full rounded hover:bg-white/10 flex items-center justify-center text-muted-foreground hover:text-white transition-colors"
                             >
@@ -588,8 +603,8 @@ export default function MenuPage() {
                             </button>
                           </div>
                         </div>
-                        
-                        <button 
+
+                        <button
                           onClick={() => updateCartQuantity(item.productId, item.variantId, -item.quantity, maxStock)}
                           className="absolute top-2 right-2 p-1.5 text-muted-foreground opacity-0 md:group-hover:opacity-100 transition-opacity hover:text-red-400 hover:bg-red-400/10 rounded-md"
                           title="Remove item"
@@ -609,7 +624,7 @@ export default function MenuPage() {
                     <span className="text-muted-foreground">Subtotal</span>
                     <span className="text-2xl font-bold text-gold">{currencySymbol}{getCartSubtotal().toFixed(2)}</span>
                   </div>
-                  <button 
+                  <button
                     onClick={() => {
                       setIsCartOpen(false);
                       router.push("/checkout");

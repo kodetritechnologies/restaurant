@@ -96,7 +96,7 @@ export default function AdminLogin() {
               <UtensilsCrossed className="h-6 w-6 text-primary-foreground" strokeWidth={2.5} />
             </motion.div>
             <h1 className="font-serif text-3xl font-extrabold text-gradient-gold leading-none tracking-tight">
-              Auréa
+              NEW UDIPI Restaurant
             </h1>
             <p className="text-[10px] uppercase tracking-[0.4em] text-muted-foreground mt-1 mb-3">
               Fine Dining Workspace

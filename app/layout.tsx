@@ -23,17 +23,17 @@ const greatVibes = Great_Vibes({
 });
 
 export const metadata: Metadata = {
-  title: "Auréa — Fine Dining Restaurant & Cafe",
-  description: "Auréa is a luxury fine dining restaurant offering world-class cuisine, award-winning chefs and an unforgettable ambiance. Reserve your table today.",
+  title: "NEW UDIPI Restaurant",
+  description: "NEW UDIPI Restaurant offers authentic South Indian & Chinese cuisine. Reserve your table today.",
   openGraph: {
-    title: "Auréa — Fine Dining Restaurant & Cafe",
-    description: "Auréa is a luxury fine dining restaurant offering world-class cuisine, award-winning chefs and an unforgettable ambiance. Reserve your table today.",
+    title: "NEW UDIPI Restaurant",
+    description: "NEW UDIPI Restaurant offers authentic South Indian & Chinese cuisine. Reserve your table today.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Auréa — Fine Dining Restaurant & Cafe",
-    description: "Auréa is a luxury fine dining restaurant offering world-class cuisine, award-winning chefs and an unforgettable ambiance. Reserve your table today.",
+    title: "NEW UDIPI Restaurant",
+    description: "NEW UDIPI Restaurant offers authentic South Indian & Chinese cuisine. Reserve your table today.",
   },
 };
 

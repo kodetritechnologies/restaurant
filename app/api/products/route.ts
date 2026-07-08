@@ -77,9 +77,9 @@ export async function POST(req: Request) {
     }
 
     if (productType === "simple") {
-      if (regularPrice === undefined || !featuredImage) {
+      if (regularPrice === undefined) {
         return NextResponse.json(
-          { success: false, message: "Regular price and featured image are required for simple products." },
+          { success: false, message: "Regular price is required for simple products." },
           { status: 400 }
         );
       }

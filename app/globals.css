@@ -38,37 +38,38 @@
 
 :root {
   --radius: 0.75rem;
-  --background: oklch(0.14 0.01 60);
-  --foreground: oklch(0.96 0.01 80);
-  --surface: oklch(0.18 0.012 60);
-  --surface-2: oklch(0.22 0.014 60);
-  --card: oklch(0.18 0.012 60);
-  --card-foreground: oklch(0.96 0.01 80);
-  --popover: oklch(0.18 0.012 60);
-  --popover-foreground: oklch(0.96 0.01 80);
-  --primary: oklch(0.78 0.13 85);
-  --primary-foreground: oklch(0.14 0.01 60);
-  --secondary: oklch(0.24 0.014 60);
-  --secondary-foreground: oklch(0.96 0.01 80);
-  --muted: oklch(0.22 0.012 60);
-  --muted-foreground: oklch(0.72 0.02 80);
-  --accent: oklch(0.78 0.13 85);
-  --accent-foreground: oklch(0.14 0.01 60);
-  --destructive: oklch(0.6 0.22 27);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.78 0.13 85);
-  --gold: oklch(0.78 0.13 85);
-  --gold-soft: oklch(0.86 0.09 88);
+  --background: #140b0d;
+  --foreground: #fcf8f2;
+  --surface: #1e1114;
+  --surface-2: #2a181c;
+  --card: #1e1114;
+  --card-foreground: #fcf8f2;
+  --popover: #1e1114;
+  --popover-foreground: #fcf8f2;
+  --primary: #FFD700;
+  --primary-foreground: #140b0d;
+  --secondary: #2a181c;
+  --secondary-foreground: #FFD700;
+  --muted: #2a181c;
+  --muted-foreground: #b3a4a6;
+  --accent: #FFD700;
+  --accent-foreground: #140b0d;
+  --destructive: #d93838;
+  --destructive-foreground: #ffffff;
+  --border: color-mix(in srgb, #FFD700 10%, transparent);
+  --input: color-mix(in srgb, #FFD700 15%, transparent);
+  --ring: #FFD700;
+  
+  --gold: #FFD700;
+  --gold-soft: #ffe373;
 
-  --gradient-gold: linear-gradient(135deg, oklch(0.86 0.09 88), oklch(0.72 0.14 82));
-  --gradient-dark: linear-gradient(180deg, oklch(0.1 0.01 60 / 0), oklch(0.08 0.01 60 / 0.9));
-  --gradient-hero: linear-gradient(180deg, oklch(0.1 0.01 60 / 0.6) 0%, oklch(0.08 0.01 60 / 0.4) 40%, oklch(0.08 0.01 60 / 0.95) 100%);
-  --shadow-elegant: 0 30px 60px -20px oklch(0 0 0 / 0.6);
-  --shadow-gold: 0 20px 50px -15px oklch(0.78 0.13 85 / 0.35);
-  --glass-bg: color-mix(in oklab, oklch(0.14 0.01 60) 60%, transparent);
-  --glass-border: oklch(1 0 0 / 0.08);
+  --gradient-gold: linear-gradient(135deg, #FFD700, #E65C00);
+  --gradient-dark: linear-gradient(180deg, transparent, #140b0d);
+  --gradient-hero: linear-gradient(180deg, color-mix(in srgb, #140b0d 60%, transparent) 0%, color-mix(in srgb, #140b0d 40%, transparent) 40%, #140b0d 100%);
+  --shadow-elegant: 0 30px 60px -20px rgba(0, 0, 0, 0.8);
+  --shadow-gold: 0 20px 50px -15px rgba(255, 215, 0, 0.25);
+  --glass-bg: color-mix(in srgb, #1e1114 75%, transparent);
+  --glass-border: color-mix(in srgb, #FFD700 12%, transparent);
 }
 
 @layer base {

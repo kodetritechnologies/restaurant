@@ -45,7 +45,7 @@ export default function OrdersPage() {
           if (def) setCurrency(def.symbol);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
 
     // Fetch orders
     fetch("/api/customer/orders")
@@ -135,7 +135,7 @@ export default function OrdersPage() {
                     <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {new Date(order.createdAt).toLocaleDateString()} at {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
                 </div>
-                
+
                 <div className="text-left sm:text-right">
                   <div className="text-sm text-muted-foreground mb-1">Total Amount</div>
                   <div className="text-2xl font-bold text-gold">{currency}{order.totalAmount.toFixed(2)}</div>
@@ -150,7 +150,7 @@ export default function OrdersPage() {
                       {item.image ? (
                         <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                       ) : (
-                        <img src="/assets/no-image-food.png" alt="No image" className="w-full h-full object-cover" />
+                        <img src="/assets/no-image-food.jpg" alt="No image" className="w-full h-full object-cover" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">

@@ -13,7 +13,7 @@ export default function Loader({ loading }: LoaderProps) {
       }`}
     >
       <div className="flex flex-col items-center gap-4">
-        <div className="font-serif text-4xl text-gradient-gold">Auréa</div>
+        <img src="/assets/logo.svg" alt="UDIPI Restaurant" className="h-16 w-auto object-contain" />
         <div className="h-px w-24 overflow-hidden bg-border">
           <div className="h-full w-1/2 animate-[shimmer_1.2s_linear_infinite] bg-[linear-gradient(90deg,transparent,var(--gold),transparent)] bg-[length:200%_100%]" />
         </div>

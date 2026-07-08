@@ -55,7 +55,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>(initialData?.galleryImages || []);
   const [regularPrice, setRegularPrice] = useState<number | "">(initialData?.regularPrice ?? "");
   const [salePrice, setSalePrice] = useState<number | "">(initialData?.salePrice ?? "");
-  const [quantity, setQuantity] = useState<number | "">(initialData?.quantity === null ? "" : (initialData?.quantity ?? 0));
+  const [quantity, setQuantity] = useState<number | "">(initialData?.quantity ?? "");
   const [featured, setFeatured] = useState(initialData?.featured || false);
   const [signature, setSignature] = useState((initialData as any)?.signature || false);
   const [productType, setProductType] = useState<"simple" | "variable">(initialData?.productType || "simple");
@@ -192,7 +192,6 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
         if (Number(regularPrice) < 0) newErrors.regularPrice = "Price cannot be negative";
         if (salePrice !== "" && Number(salePrice) > Number(regularPrice)) newErrors.salePrice = "Sale price cannot be greater than regular price";
         if (quantity !== "" && Number(quantity) < 0) newErrors.quantity = "Quantity cannot be negative";
-        if (!featuredImagePreview) newErrors.featuredImage = "Featured image is required";
     }
     
     if (productType === "variable" && variants.length === 0) {
@@ -509,7 +508,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                       <h3 className="text-lg font-medium text-gold border-b border-white/5 pb-2 mt-8">Media</h3>
                       
                       <div className="space-y-2">
-                          <label className="text-sm font-medium text-muted-foreground">Featured Image <span className="text-red-500">*</span></label>
+                          <label className="text-sm font-medium text-muted-foreground">Featured Image</label>
                           {featuredImagePreview ? (
                           <div className="relative aspect-video rounded-xl overflow-hidden group">
                               <img src={featuredImagePreview} alt="Preview" className="w-full h-full object-cover" />

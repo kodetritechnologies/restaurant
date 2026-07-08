@@ -142,7 +142,7 @@ export default function AdminDashboardLayout({
             </span>
             <div className="leading-tight">
               <span className="block font-serif text-lg font-bold tracking-wide text-gradient-gold">
-                Auréa
+                NEW UDIPI Restaurant
               </span>
               <span className="block text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
                 Restaurant Admin
@@ -253,7 +253,7 @@ export default function AdminDashboardLayout({
           </span>
           <div>
             <span className="block font-serif text-sm font-bold tracking-wide text-gradient-gold">
-              Auréa
+              NEW UDIPI Restaurant
             </span>
           </div>
         </div>
