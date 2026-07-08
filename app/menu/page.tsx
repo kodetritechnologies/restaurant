@@ -8,16 +8,30 @@ import Footer from "@/components/Footer";
 import FloatingButtons from "@/components/FloatingButtons";
 import { ShoppingBag, Star, Plus, Minus, X, Package, ShoppingCart } from "lucide-react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function MenuPage() {
+function MenuContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
+  const initCategory = searchParams.get("category");
+  const initSearch = searchParams.get("search");
+
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [activeCategory, setActiveCategory] = useState<string>(initCategory || "all");
+  const [searchQuery, setSearchQuery] = useState<string>(initSearch || "");
   const [settings, setSettings] = useState<any>(null);
   const [currencySymbol, setCurrencySymbol] = useState<string>("$");
+
+  useEffect(() => {
+    if (initCategory) setActiveCategory(initCategory);
+    else setActiveCategory("all");
+    
+    if (initSearch) setSearchQuery(initSearch);
+    else setSearchQuery("");
+  }, [initCategory, initSearch]);
 
   // Cart State
   const [cartItems, setCartItems] = useState<{ productId: string, variantId?: string, quantity: number }[]>([]);
@@ -124,9 +138,9 @@ export default function MenuPage() {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const url = activeCategory === "all"
-          ? "/api/products"
-          : `/api/products?category=${activeCategory}`;
+        let url = "/api/products?";
+        if (activeCategory !== "all") url += `category=${activeCategory}&`;
+        if (searchQuery) url += `search=${encodeURIComponent(searchQuery)}&`;
         const prodRes = await fetch(url);
         const prodData = await prodRes.json();
         if (prodData?.success) {
@@ -139,7 +153,7 @@ export default function MenuPage() {
       }
     };
     fetchProducts();
-  }, [activeCategory]);
+  }, [activeCategory, searchQuery]);
 
 
 
@@ -162,6 +176,9 @@ export default function MenuPage() {
             <h1 className="text-4xl md:text-6xl font-serif font-bold text-foreground mb-6">
               Our <span className="text-gradient-gold">Menu</span>
             </h1>
+            {searchQuery && (
+              <p className="text-gold font-medium mb-4">Showing search results for: "{searchQuery}"</p>
+            )}
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
               Explore our carefully curated selection of dishes, prepared with the finest ingredients and culinary expertise.
             </p>
@@ -174,8 +191,8 @@ export default function MenuPage() {
           <div className="sticky top-[72px] md:top-[76px] z-40 bg-background/95 backdrop-blur-xl border-b border-foreground/5 py-4 mb-12 -mt-4 transition-all shadow-sm">
             <section className="px-5 md:px-8 max-w-7xl mx-auto flex flex-wrap justify-center gap-3">
               <button
-                onClick={() => setActiveCategory("all")}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === "all"
+                onClick={() => { setActiveCategory("all"); setSearchQuery(""); router.replace('/menu'); }}
+                className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === "all" && !searchQuery
                     ? "bg-gold text-primary-foreground shadow-gold"
                     : "bg-surface/50 text-muted-foreground border border-foreground/10 hover:border-gold hover:text-gold"
                   }`}
@@ -185,8 +202,8 @@ export default function MenuPage() {
               {categories.map((cat) => (
                 <button
                   key={cat._id}
-                  onClick={() => setActiveCategory(cat._id)}
-                  className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === cat._id
+                  onClick={() => { setActiveCategory(cat._id); setSearchQuery(""); router.replace(`/menu?category=${cat._id}`); }}
+                  className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === cat._id && !searchQuery
                       ? "bg-gold text-primary-foreground shadow-gold"
                       : "bg-surface/50 text-muted-foreground border border-foreground/10 hover:border-gold hover:text-gold"
                     }`}
@@ -208,170 +225,326 @@ export default function MenuPage() {
             </div>
           ) : (
             <div className="space-y-16">
-              {(activeCategory === "all" ? [...categories, { _id: "uncategorized", name: "Others" }] : categories.filter((cat) => cat._id === activeCategory))
-                .map((cat) => {
-                  const catProducts = cat._id === "uncategorized"
-                    ? products.filter((p) => !p.categories || p.categories.length === 0)
-                    : products.filter((p) => p.categories?.includes(cat._id));
+              {searchQuery ? (
+                <div className="scroll-mt-32">
+                  <h2 className="text-3xl font-serif font-bold text-foreground mb-8 flex items-center gap-4 before:h-px before:flex-1 before:bg-foreground/10 after:h-px after:flex-1 after:bg-foreground/10">
+                    <span className="text-gold">Search Results</span>
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <AnimatePresence>
+                      {products.map((product, index) => {
+                        const displayImage = product.productType === "variable" && product.variants?.[0]?.galleryImages?.[0]
+                          ? product.variants[0].galleryImages[0]
+                          : product.featuredImage;
 
-                  if (catProducts.length === 0) return null;
+                        const displayRegularPrice = product.productType === "variable" && product.variants?.[0]
+                          ? product.variants[0].regularPrice
+                          : product.regularPrice;
 
-                  return (
-                    <div key={cat._id} className="scroll-mt-32">
-                      <h2 className="text-3xl font-serif font-bold text-foreground mb-8 flex items-center gap-4 before:h-px before:flex-1 before:bg-foreground/10 after:h-px after:flex-1 after:bg-foreground/10">
-                        <span className="text-gold">{cat.name}</span>
-                      </h2>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <AnimatePresence>
-                          {catProducts.map((product, index) => {
-                            const displayImage = product.productType === "variable" && product.variants?.[0]?.galleryImages?.[0]
-                              ? product.variants[0].galleryImages[0]
-                              : product.featuredImage;
+                        const displaySalePrice = product.productType === "variable" && product.variants?.[0]
+                          ? product.variants[0].salePrice
+                          : product.salePrice;
 
-                            const displayRegularPrice = product.productType === "variable" && product.variants?.[0]
-                              ? product.variants[0].regularPrice
-                              : product.regularPrice;
+                        return (
+                          <motion.div
+                            key={product._id}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.5, delay: index * 0.1 }}
+                            className="glass rounded-3xl overflow-hidden group hover:border-gold/30 transition-all duration-500"
+                          >
+                            {/* Image */}
+                            <div className="relative aspect-[4/3] overflow-hidden bg-black/10 flex items-center justify-center">
+                              {displayImage ? (
+                                <img
+                                  src={displayImage}
+                                  alt={product.name}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                />
+                              ) : (
+                                <img
+                                  src="/assets/no-image-food.jpg"
+                                  alt="No image"
+                                  className="w-full h-full object-cover"
+                                />
+                              )}
+                              {product.featured && (
+                                <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-foreground/10">
+                                  <Star className="w-3.5 h-3.5 text-gold fill-gold" />
+                                  <span className="text-xs font-medium text-white uppercase tracking-wider">Featured</span>
+                                </div>
+                              )}
+                              {displaySalePrice && (
+                                <div className="absolute top-4 left-4 bg-red-500/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-red-500/50">
+                                  <span className="text-xs font-bold text-white uppercase tracking-wider">Sale</span>
+                                </div>
+                              )}
+                            </div>
 
-                            const displaySalePrice = product.productType === "variable" && product.variants?.[0]
-                              ? product.variants[0].salePrice
-                              : product.salePrice;
-
-                            return (
-                              <motion.div
-                                key={product._id}
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.5, delay: index * 0.1 }}
-                                className="glass rounded-3xl overflow-hidden group hover:border-gold/30 transition-all duration-500"
-                              >
-                                {/* Image */}
-                                <div className="relative aspect-[4/3] overflow-hidden bg-black/10 flex items-center justify-center">
-                                  {displayImage ? (
-                                    <img
-                                      src={displayImage}
-                                      alt={product.name}
-                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                                    />
+                            {/* Content */}
+                            <div className="p-6">
+                              <div className="flex justify-between items-start gap-4 mb-2">
+                                <h3 className="text-xl font-serif font-bold text-foreground group-hover:text-gold transition-colors">
+                                  {product.name}
+                                </h3>
+                                <div className="text-right shrink-0">
+                                  {product.productType === "variable" ? (
+                                    <span className="text-gold font-medium flex flex-col">
+                                      <span className="text-xs text-muted-foreground uppercase tracking-wider mb-0.5">Starting at</span>
+                                      {currencySymbol}{displaySalePrice ? displaySalePrice.toFixed(2) : displayRegularPrice?.toFixed(2) || "0.00"}
+                                    </span>
                                   ) : (
-                                    <img
-                                      src="/assets/no-image-food.jpg"
-                                      alt="No image"
-                                      className="w-full h-full object-cover"
-                                    />
-                                  )}
-                                  {product.featured && (
-                                    <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-foreground/10">
-                                      <Star className="w-3.5 h-3.5 text-gold fill-gold" />
-                                      <span className="text-xs font-medium text-white uppercase tracking-wider">Featured</span>
-                                    </div>
-                                  )}
-                                  {displaySalePrice && (
-                                    <div className="absolute top-4 left-4 bg-red-500/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-red-500/50">
-                                      <span className="text-xs font-bold text-white uppercase tracking-wider">Sale</span>
-                                    </div>
+                                    <span className="text-gold font-medium flex items-center gap-2 text-lg">
+                                      {displaySalePrice ? (
+                                        <>
+                                          <span>{currencySymbol}{displaySalePrice.toFixed(2)}</span>
+                                          <span className="text-sm text-muted-foreground line-through">{currencySymbol}{displayRegularPrice?.toFixed(2) || "0.00"}</span>
+                                        </>
+                                      ) : (
+                                        <span>{currencySymbol}{displayRegularPrice?.toFixed(2) || "0.00"}</span>
+                                      )}
+                                    </span>
                                   )}
                                 </div>
+                              </div>
 
-                                {/* Content */}
-                                <div className="p-6">
-                                  <div className="flex justify-between items-start gap-4 mb-2">
-                                    <h3 className="text-xl font-serif font-bold text-foreground group-hover:text-gold transition-colors">
-                                      {product.name}
-                                    </h3>
-                                    <div className="text-right shrink-0">
-                                      {product.productType === "variable" ? (
-                                        <span className="text-gold font-medium flex flex-col">
-                                          <span className="text-xs text-muted-foreground uppercase tracking-wider mb-0.5">Starting at</span>
-                                          {currencySymbol}{displaySalePrice ? displaySalePrice.toFixed(2) : displayRegularPrice?.toFixed(2) || "0.00"}
-                                        </span>
-                                      ) : (
-                                        <span className="text-gold font-medium flex items-center gap-2 text-lg">
-                                          {displaySalePrice ? (
-                                            <>
-                                              <span>{currencySymbol}{displaySalePrice.toFixed(2)}</span>
-                                              <span className="text-sm text-muted-foreground line-through">{currencySymbol}{displayRegularPrice?.toFixed(2) || "0.00"}</span>
-                                            </>
-                                          ) : (
-                                            <span>{currencySymbol}{displayRegularPrice?.toFixed(2) || "0.00"}</span>
-                                          )}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
+                              {product.shortDescription || product.description ? (
+                                <div
+                                  className="text-muted-foreground text-sm line-clamp-2 mt-2 leading-relaxed prose prose-invert prose-p:m-0 prose-p:inline prose-sm"
+                                  dangerouslySetInnerHTML={{ __html: product.shortDescription || product.description }}
+                                />
+                              ) : (
+                                <p className="text-muted-foreground text-sm line-clamp-2 mt-2 leading-relaxed">
+                                  A delicious culinary experience crafted with passion.
+                                </p>
+                              )}
 
-                                  {product.shortDescription || product.description ? (
-                                    <div
-                                      className="text-muted-foreground text-sm line-clamp-2 mt-2 leading-relaxed prose prose-invert prose-p:m-0 prose-p:inline prose-sm"
-                                      dangerouslySetInnerHTML={{ __html: product.shortDescription || product.description }}
-                                    />
-                                  ) : (
-                                    <p className="text-muted-foreground text-sm line-clamp-2 mt-2 leading-relaxed">
-                                      A delicious culinary experience crafted with passion.
-                                    </p>
-                                  )}
-
-                                  {/* Actions */}
-                                  <div className="mt-6">
-                                    {product.productType === "variable" ? (
+                              {/* Actions */}
+                              <div className="mt-6">
+                                {product.productType === "variable" ? (
+                                  <button
+                                    onClick={() => {
+                                      setSelectedProduct(product);
+                                      setSelectedVariant(product.variants?.[0] || null);
+                                      setModalQuantity(1);
+                                    }}
+                                    className="w-full py-3 rounded-xl border border-foreground/10 hover:border-gold hover:bg-gold/5 text-foreground hover:text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2"
+                                  >
+                                    <Package className="w-4 h-4" />
+                                    View Options
+                                  </button>
+                                ) : (
+                                  <div className="flex items-center gap-3 w-full">
+                                    <div className="flex items-center justify-between bg-foreground/5 border border-foreground/10 rounded-xl p-1.5 h-12 w-28 shrink-0">
+                                      <button
+                                        onClick={() => setLocalQuantities(prev => ({ ...prev, [product._id]: Math.max(1, (prev[product._id] || 1) - 1) }))}
+                                        className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
+                                      >
+                                        <Minus className="w-4 h-4" />
+                                      </button>
+                                      <span className="font-medium text-foreground text-center">
+                                        {localQuantities[product._id] || 1}
+                                      </span>
                                       <button
                                         onClick={() => {
-                                          setSelectedProduct(product);
-                                          setSelectedVariant(product.variants?.[0] || null);
-                                          setModalQuantity(1);
+                                          const current = localQuantities[product._id] || 1;
+                                          const max = product.quantity !== null ? product.quantity : 99;
+                                          setLocalQuantities(prev => ({ ...prev, [product._id]: Math.min(max, current + 1) }));
                                         }}
-                                        className="w-full py-3 rounded-xl border border-foreground/10 hover:border-gold hover:bg-gold/5 text-foreground hover:text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2"
+                                        className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
                                       >
-                                        <Package className="w-4 h-4" />
-                                        View Options
+                                        <Plus className="w-4 h-4" />
                                       </button>
-                                    ) : (
-                                      <div className="flex items-center gap-3 w-full">
-                                        <div className="flex items-center justify-between bg-foreground/5 border border-foreground/10 rounded-xl p-1.5 h-12 w-28 shrink-0">
-                                          <button
-                                            onClick={() => setLocalQuantities(prev => ({ ...prev, [product._id]: Math.max(1, (prev[product._id] || 1) - 1) }))}
-                                            className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
-                                          >
-                                            <Minus className="w-4 h-4" />
-                                          </button>
-                                          <span className="font-medium text-foreground text-center">
-                                            {localQuantities[product._id] || 1}
-                                          </span>
-                                          <button
-                                            onClick={() => {
-                                              const current = localQuantities[product._id] || 1;
-                                              const max = product.quantity !== null ? product.quantity : 99;
-                                              setLocalQuantities(prev => ({ ...prev, [product._id]: Math.min(max, current + 1) }));
-                                            }}
-                                            className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
-                                          >
-                                            <Plus className="w-4 h-4" />
-                                          </button>
-                                        </div>
+                                    </div>
 
-                                        <button
-                                          onClick={() => {
-                                            const qtyToAdd = localQuantities[product._id] || 1;
-                                            updateCartQuantity(product._id, undefined, qtyToAdd, product.quantity);
-                                            toast.success(`Added ${qtyToAdd} to cart`);
-                                          }}
-                                          disabled={product.quantity !== null && product.quantity <= 0}
-                                          className="flex-1 h-12 rounded-xl border border-foreground/10 hover:border-gold hover:bg-gold/5 text-foreground hover:text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                          <ShoppingBag className="w-4 h-4" />
-                                          {product.quantity !== null && product.quantity <= 0 ? "Out of Stock" : "Add to Cart"}
-                                        </button>
+                                    <button
+                                      onClick={() => {
+                                        const qtyToAdd = localQuantities[product._id] || 1;
+                                        updateCartQuantity(product._id, undefined, qtyToAdd, product.quantity);
+                                        toast.success(`Added ${qtyToAdd} to cart`);
+                                      }}
+                                      disabled={product.quantity !== null && product.quantity <= 0}
+                                      className="flex-1 h-12 rounded-xl border border-foreground/10 hover:border-gold hover:bg-gold/5 text-foreground hover:text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                      <ShoppingBag className="w-4 h-4" />
+                                      {product.quantity !== null && product.quantity <= 0 ? "Out of Stock" : "Add to Cart"}
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              ) : (
+                (activeCategory === "all" ? [...categories, { _id: "uncategorized", name: "Others" }] : categories.filter((cat) => cat._id === activeCategory))
+                  .map((cat) => {
+                    const catProducts = cat._id === "uncategorized"
+                      ? products.filter((p) => !p.categories || p.categories.length === 0)
+                      : products.filter((p) => p.categories?.includes(cat._id));
+
+                    if (catProducts.length === 0) return null;
+
+                    return (
+                      <div key={cat._id} className="scroll-mt-32">
+                        <h2 className="text-3xl font-serif font-bold text-foreground mb-8 flex items-center gap-4 before:h-px before:flex-1 before:bg-foreground/10 after:h-px after:flex-1 after:bg-foreground/10">
+                          <span className="text-gold">{cat.name}</span>
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                          <AnimatePresence>
+                            {catProducts.map((product, index) => {
+                              const displayImage = product.productType === "variable" && product.variants?.[0]?.galleryImages?.[0]
+                                ? product.variants[0].galleryImages[0]
+                                : product.featuredImage;
+
+                              const displayRegularPrice = product.productType === "variable" && product.variants?.[0]
+                                ? product.variants[0].regularPrice
+                                : product.regularPrice;
+
+                              const displaySalePrice = product.productType === "variable" && product.variants?.[0]
+                                ? product.variants[0].salePrice
+                                : product.salePrice;
+
+                              return (
+                                <motion.div
+                                  key={product._id}
+                                  initial={{ opacity: 0, scale: 0.95 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                                  className="glass rounded-3xl overflow-hidden group hover:border-gold/30 transition-all duration-500"
+                                >
+                                  {/* Image */}
+                                  <div className="relative aspect-[4/3] overflow-hidden bg-black/10 flex items-center justify-center">
+                                    {displayImage ? (
+                                      <img
+                                        src={displayImage}
+                                        alt={product.name}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                      />
+                                    ) : (
+                                      <img
+                                        src="/assets/no-image-food.jpg"
+                                        alt="No image"
+                                        className="w-full h-full object-cover"
+                                      />
+                                    )}
+                                    {product.featured && (
+                                      <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-foreground/10">
+                                        <Star className="w-3.5 h-3.5 text-gold fill-gold" />
+                                        <span className="text-xs font-medium text-white uppercase tracking-wider">Featured</span>
+                                      </div>
+                                    )}
+                                    {displaySalePrice && (
+                                      <div className="absolute top-4 left-4 bg-red-500/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-red-500/50">
+                                        <span className="text-xs font-bold text-white uppercase tracking-wider">Sale</span>
                                       </div>
                                     )}
                                   </div>
-                                </div>
-                              </motion.div>
-                            );
-                          })}
-                        </AnimatePresence>
+
+                                  {/* Content */}
+                                  <div className="p-6">
+                                    <div className="flex justify-between items-start gap-4 mb-2">
+                                      <h3 className="text-xl font-serif font-bold text-foreground group-hover:text-gold transition-colors">
+                                        {product.name}
+                                      </h3>
+                                      <div className="text-right shrink-0">
+                                        {product.productType === "variable" ? (
+                                          <span className="text-gold font-medium flex flex-col">
+                                            <span className="text-xs text-muted-foreground uppercase tracking-wider mb-0.5">Starting at</span>
+                                            {currencySymbol}{displaySalePrice ? displaySalePrice.toFixed(2) : displayRegularPrice?.toFixed(2) || "0.00"}
+                                          </span>
+                                        ) : (
+                                          <span className="text-gold font-medium flex items-center gap-2 text-lg">
+                                            {displaySalePrice ? (
+                                              <>
+                                                <span>{currencySymbol}{displaySalePrice.toFixed(2)}</span>
+                                                <span className="text-sm text-muted-foreground line-through">{currencySymbol}{displayRegularPrice?.toFixed(2) || "0.00"}</span>
+                                              </>
+                                            ) : (
+                                              <span>{currencySymbol}{displayRegularPrice?.toFixed(2) || "0.00"}</span>
+                                            )}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    {product.shortDescription || product.description ? (
+                                      <div
+                                        className="text-muted-foreground text-sm line-clamp-2 mt-2 leading-relaxed prose prose-invert prose-p:m-0 prose-p:inline prose-sm"
+                                        dangerouslySetInnerHTML={{ __html: product.shortDescription || product.description }}
+                                      />
+                                    ) : (
+                                      <p className="text-muted-foreground text-sm line-clamp-2 mt-2 leading-relaxed">
+                                        A delicious culinary experience crafted with passion.
+                                      </p>
+                                    )}
+
+                                    {/* Actions */}
+                                    <div className="mt-6">
+                                      {product.productType === "variable" ? (
+                                        <button
+                                          onClick={() => {
+                                            setSelectedProduct(product);
+                                            setSelectedVariant(product.variants?.[0] || null);
+                                            setModalQuantity(1);
+                                          }}
+                                          className="w-full py-3 rounded-xl border border-foreground/10 hover:border-gold hover:bg-gold/5 text-foreground hover:text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2"
+                                        >
+                                          <Package className="w-4 h-4" />
+                                          View Options
+                                        </button>
+                                      ) : (
+                                        <div className="flex items-center gap-3 w-full">
+                                          <div className="flex items-center justify-between bg-foreground/5 border border-foreground/10 rounded-xl p-1.5 h-12 w-28 shrink-0">
+                                            <button
+                                              onClick={() => setLocalQuantities(prev => ({ ...prev, [product._id]: Math.max(1, (prev[product._id] || 1) - 1) }))}
+                                              className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
+                                            >
+                                              <Minus className="w-4 h-4" />
+                                            </button>
+                                            <span className="font-medium text-foreground text-center">
+                                              {localQuantities[product._id] || 1}
+                                            </span>
+                                            <button
+                                              onClick={() => {
+                                                const current = localQuantities[product._id] || 1;
+                                                const max = product.quantity !== null ? product.quantity : 99;
+                                                setLocalQuantities(prev => ({ ...prev, [product._id]: Math.min(max, current + 1) }));
+                                              }}
+                                              className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
+                                            >
+                                              <Plus className="w-4 h-4" />
+                                            </button>
+                                          </div>
+
+                                          <button
+                                            onClick={() => {
+                                              const qtyToAdd = localQuantities[product._id] || 1;
+                                              updateCartQuantity(product._id, undefined, qtyToAdd, product.quantity);
+                                              toast.success(`Added ${qtyToAdd} to cart`);
+                                            }}
+                                            disabled={product.quantity !== null && product.quantity <= 0}
+                                            className="flex-1 h-12 rounded-xl border border-foreground/10 hover:border-gold hover:bg-gold/5 text-foreground hover:text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                          >
+                                            <ShoppingBag className="w-4 h-4" />
+                                            {product.quantity !== null && product.quantity <= 0 ? "Out of Stock" : "Add to Cart"}
+                                          </button>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              );
+                            })}
+                          </AnimatePresence>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+              )}
             </div>
           )}
         </section>
@@ -643,5 +816,13 @@ export default function MenuPage() {
       <Footer settings={settings} />
       <FloatingButtons settings={settings} />
     </div>
+  );
+}
+
+export default function MenuPage() {
+  return (
+    <Suspense fallback={<Loader loading={true} />}>
+      <MenuContent />
+    </Suspense>
   );
 }

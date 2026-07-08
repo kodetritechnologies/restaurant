@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { User } from "lucide-react";
+import { User, Search } from "lucide-react";
 import AuthModal from "./AuthModal";
+import GlobalSearch from "./GlobalSearch";
 import { useCustomer } from "@/context/CustomerContext";
 
 const navLinks = [
@@ -21,6 +22,7 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [restaurantLogo, setRestaurantLogo] = useState<string | null>(null);
   const { isLoggedIn, logout } = useCustomer();
 
@@ -77,6 +79,14 @@ export default function Header() {
             ))}
           </ul>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="flex items-center justify-center gap-2 px-3 py-2 sm:px-4 rounded-full border border-gold/30 bg-background/50 text-sm font-medium text-gold transition-all hover:bg-gold hover:text-primary-foreground cursor-pointer"
+              title="Search menu and categories"
+            >
+              <Search className="h-4 w-4" />
+              <span className="hidden md:block">Search</span>
+            </button>
             {isLoggedIn ? (
               <div className="relative hidden md:block">
                 <button
@@ -188,7 +198,8 @@ export default function Header() {
         )}
       </header>
 
-      {/* Auth Modal */}
+      {/* Modals */}
+      <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </>
   );
