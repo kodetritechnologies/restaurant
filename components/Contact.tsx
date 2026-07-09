@@ -3,6 +3,26 @@
 import { FormEvent, useState } from "react";
 import toast from "react-hot-toast";
 
+const InstagramIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+  </svg>
+);
+
+const FacebookIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
+);
+
+const XIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
+  </svg>
+);
+
 interface ContactProps {
   settings?: {
     shopPhone?: string;
@@ -109,9 +129,9 @@ export default function Contact({ settings }: ContactProps) {
     : "https://twitter.com";
 
   const socialLinks = [
-    { label: "Instagram", href: instagram },
-    { label: "Facebook", href: facebook },
-    { label: "Twitter", href: twitter },
+    { label: "Instagram", href: instagram, icon: <InstagramIcon className="w-5 h-5" /> },
+    { label: "Facebook", href: facebook, icon: <FacebookIcon className="w-5 h-5" /> },
+    { label: "X", href: twitter, icon: <XIcon className="w-5 h-5" /> },
   ];
 
   return (
@@ -128,7 +148,7 @@ export default function Contact({ settings }: ContactProps) {
             className="h-72 w-full border-0 grayscale"
             loading="lazy"
           />
-          <div className="grid gap-4 p-8">
+          <div className="grid gap-4 p-5 sm:p-8">
             {[
               ["Address", address],
               ["Phone", phone],
@@ -136,15 +156,15 @@ export default function Contact({ settings }: ContactProps) {
               ["Email", emailProp],
               ["Hours", hours],
             ].map(([k, v]) => (
-              <div key={k} className="flex items-start justify-between gap-4 border-b border-foreground/5 pb-3 last:border-0">
-                <span className="text-xs uppercase tracking-widest text-foreground/60">{k}</span>
-                <span className="text-right text-foreground/90">{v}</span>
+              <div key={k} className="flex flex-col sm:flex-row sm:items-start justify-between gap-1 sm:gap-4 border-b border-foreground/5 pb-3 last:border-0">
+                <span className="text-xs uppercase tracking-widest text-foreground/60 shrink-0">{k}</span>
+                <span className="text-left sm:text-right text-foreground/90 break-words">{v}</span>
               </div>
             ))}
-            <div className="mt-2 flex gap-3">
+            <div className="mt-2 flex flex-wrap gap-3">
               {socialLinks.map((s) => (
-                <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="rounded-full border border-foreground/10 px-4 py-2 text-xs uppercase tracking-widest text-foreground/70 hover:border-gold hover:text-gold transition-colors">
-                  {s.label}
+                <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} className="rounded-full border border-foreground/10 p-3 text-foreground/70 hover:border-gold hover:text-gold hover:bg-gold/10 transition-colors">
+                  {s.icon}
                 </a>
               ))}
             </div>
@@ -152,7 +172,7 @@ export default function Contact({ settings }: ContactProps) {
         </div>
         <form
           onSubmit={handleSubmit}
-          className="reveal glass grid gap-4 rounded-3xl p-8"
+          className="reveal glass grid gap-4 rounded-3xl p-5 sm:p-8"
           noValidate
         >
           {(
