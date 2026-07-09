@@ -387,7 +387,7 @@ export default function CheckoutPage() {
                       <Truck className="w-5 h-5 text-gold" />
                       Delivery Method
                     </h2>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       {([
                         {
                           type: "delivery" as DeliveryType,
