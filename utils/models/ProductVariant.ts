@@ -35,17 +35,8 @@ const ProductVariantSchema = new Schema(
       default: null,
       min: [0, "Quantity cannot be negative"],
     },
-    status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "active",
-    },
   },
   { timestamps: true }
 );
-
-if (process.env.NODE_ENV !== "production") {
-  delete models.ProductVariant;
-}
 
 export default models.ProductVariant || model("ProductVariant", ProductVariantSchema);

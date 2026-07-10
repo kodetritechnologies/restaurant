@@ -55,10 +55,6 @@ const ProductSchema = new Schema(
       enum: ["simple", "variable"],
       default: "simple",
     },
-    status: {
-      type: String,
-      default: "active",
-    },
     deletedAt: {
       type: Date,
       default: null,
@@ -70,9 +66,5 @@ const ProductSchema = new Schema(
   },
   { timestamps: true }
 );
-
-if (process.env.NODE_ENV !== "production") {
-  delete models.Product;
-}
 
 export default models.Product || model("Product", ProductSchema);

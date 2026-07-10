@@ -10,7 +10,6 @@ const navLinks = [
   { href: "/#home", label: "Home" },
   { href: "/menu", label: "Menu" },
   { href: "/#about", label: "About" },
-  { href: "/#gallery", label: "Gallery" },
   { href: "/#reservation", label: "Reservation" },
   { href: "/#testimonials", label: "Testimonials" },
   { href: "/#contact", label: "Contact" },
@@ -35,7 +34,7 @@ export default function Header() {
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    
+
     // Fetch settings for dynamic logo
     fetch("/api/settings")
       .then((res) => res.json())
@@ -57,9 +56,8 @@ export default function Header() {
 
       {/* Nav */}
       <header
-        className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-          scrolled ? "glass border-b border-foreground/5 py-3" : "bg-transparent py-5"
-        }`}
+        className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${scrolled ? "glass border-b border-foreground/5 py-3" : "bg-transparent py-5"
+          }`}
       >
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 md:px-8">
           <a href="/" className="flex items-center gap-2">

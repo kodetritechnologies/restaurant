@@ -1,15 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-export interface ICurrency extends Document {
-  name: string;
-  code: string;
-  symbol: string;
-  isDefault: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const currencySchema = new Schema<ICurrency>(
+const currencySchema = new Schema(
   {
     name: {
       type: String,
@@ -36,7 +27,6 @@ const currencySchema = new Schema<ICurrency>(
   { timestamps: true }
 );
 
-// If this currency is set as default, unset others before saving
 currencySchema.pre("save", async function () {
   if (this.isDefault) {
     const CurrencyModel = this.constructor as mongoose.Model<any>;
@@ -50,4 +40,5 @@ currencySchema.pre("save", async function () {
 if (mongoose.models.Currency) {
   delete mongoose.models.Currency;
 }
-export default mongoose.model<ICurrency>("Currency", currencySchema);
+
+export default mongoose.model("Currency", currencySchema);

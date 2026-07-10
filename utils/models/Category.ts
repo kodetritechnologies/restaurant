@@ -48,9 +48,4 @@ const CategorySchema = new Schema(
   { timestamps: true }
 );
 
-// Delete cached model in development to ensure schema changes take effect
-if (process.env.NODE_ENV !== "production") {
-  delete models.Category;
-}
-
 export default models.Category || model("Category", CategorySchema);

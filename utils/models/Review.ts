@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, models } from "mongoose";
+import { Schema, model, models } from "mongoose";
 
 const ReviewSchema = new Schema(
   {
@@ -20,11 +20,9 @@ const ReviewSchema = new Schema(
     },
     imgUrl: {
       type: String,
-      required: [true, "Image URL is required"],
     },
     publicId: {
       type: String,
-      required: [true, "Cloudinary public ID is required"],
     },
   },
   { timestamps: true }

@@ -8,13 +8,10 @@ export async function verifyAdmin(req: Request) {
     
     let token = "";
     
-    // 1. Try to read from Authorization header
     const authHeader = req.headers.get("Authorization");
-    if (authHeader && authHeader.startsWith("Bearer ")) {
+    if (authHeader && authHeader.startsWith("Bearer")) {
       token = authHeader.split(" ")[1];
     }
-    
-    // 2. Try to read from Cookie header if not found in Authorization header
     if (!token) {
       const cookieHeader = req.headers.get("cookie");
       if (cookieHeader) {

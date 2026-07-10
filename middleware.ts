@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const JWT_SECRET = process.env.JWT_SECRET || "kodetrisecrect";
+const JWT_SECRET = process.env.JWT_SECRET as string;
 
 function base64UrlDecode(str: string): Uint8Array {
   let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
@@ -37,15 +37,12 @@ async function verifyJwt(token: string, secret: string): Promise<boolean> {
 
     const [headerB64, payloadB64, signatureB64] = parts;
 
-    // Decode and parse payload
     const payload = decodeJwtPayload(payloadB64);
 
-    // Check expiration
     if (payload.exp && Date.now() >= payload.exp * 1000) {
       return false;
     }
 
-    // Verify HMAC SHA-256 signature
     const encoder = new TextEncoder();
     const keyData = encoder.encode(secret);
     const key = await crypto.subtle.importKey(
@@ -69,33 +66,60 @@ async function verifyJwt(token: string, secret: string): Promise<boolean> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Retrieve adminToken cookie
-  const adminTokenCookie = request.cookies.get('adminToken');
-  const token = adminTokenCookie?.value;
+  // ==========================================
+  // 1. ADMIN ROUTE PROTECTION
+  // ==========================================
+  const isAdminRoute = pathname.startsWith('/admin');
+  
+  if (isAdminRoute) {
+    const adminToken = request.cookies.get('adminToken')?.value;
+    const isAdminValid = adminToken ? await verifyJwt(adminToken, JWT_SECRET) : false;
+    const isAdminLoginRoute = pathname === '/admin/login';
 
-  const isLoginRoute = pathname === '/admin/login';
-
-  // Check if token is valid
-  const isValid = token ? await verifyJwt(token, JWT_SECRET) : false;
-
-  if (isLoginRoute) {
-    // If user is already logged in, redirect them to dashboard
-    if (isValid) {
-      return NextResponse.redirect(new URL('/admin', request.url));
+    if (isAdminLoginRoute) {
+      // If admin is already logged in, redirect them to dashboard
+      if (isAdminValid) {
+        return NextResponse.redirect(new URL('/admin', request.url));
+      }
+      return NextResponse.next();
     }
+
+    // For all other /admin routes, block unauthenticated access
+    if (!isAdminValid) {
+      return NextResponse.redirect(new URL('/admin/login', request.url));
+    }
+    
     return NextResponse.next();
   }
 
-  // For all other /admin routes, verify authentication
-  if (!isValid) {
-    // Redirect to login page
-    const loginUrl = new URL('/admin/login', request.url);
-    return NextResponse.redirect(loginUrl);
+  // ==========================================
+  // 2. CUSTOMER ROUTE PROTECTION
+  // ==========================================
+  // Define which paths require a customer to be logged in
+  const isCustomerProtectedRoute = pathname.startsWith('/profile') || pathname.startsWith('/checkout');
+  
+  if (isCustomerProtectedRoute) {
+    const customerToken = request.cookies.get('customerToken')?.value;
+    const isCustomerValid = customerToken ? await verifyJwt(customerToken, JWT_SECRET) : false;
+
+    if (!isCustomerValid) {
+      // Redirect unauthenticated customers to the home page
+      const homeUrl = new URL('/', request.url);
+      return NextResponse.redirect(homeUrl);
+    }
+    
+    return NextResponse.next();
   }
 
+  // Allow all other public routes
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  // Add your protected customer routes to the matcher
+  matcher: [
+    '/admin/:path*', 
+    '/profile/:path*', 
+    '/checkout/:path*'
+  ],
 };
