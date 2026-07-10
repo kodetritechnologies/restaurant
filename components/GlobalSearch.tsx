@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Search, X, Loader2, Package, LayoutGrid } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import BasicProvider from "@/utils/BasicProvider";
 
 interface SearchResult {
   products: any[];
@@ -11,6 +12,7 @@ interface SearchResult {
 }
 
 export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const { getMethod } = BasicProvider();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult>({ products: [], categories: [] });
   const [loading, setLoading] = useState(false);
@@ -23,16 +25,18 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
       setTimeout(() => inputRef.current?.focus(), 100);
       document.body.style.overflow = "hidden";
       
-      // Fetch dynamic currency symbol
-      fetch("/api/currency")
-        .then((res) => res.json())
-        .then((data) => {
-          if (data?.success && data.currencies) {
-            const defaultCurr = data.currencies.find((c: any) => c.isDefault) || data.currencies[0];
-            if (defaultCurr) setCurrencySymbol(defaultCurr.symbol);
+      const fetchCurrency = async () => {
+        try {
+          const data = await getMethod("/api/currency?default=true");
+          if (data?.success && data.currencies && data.currencies.length > 0) {
+            setCurrencySymbol(data.currencies[0].symbol);
           }
-        })
-        .catch(console.error);
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      
+      fetchCurrency();
     } else {
       setQuery("");
       setResults({ products: [], categories: [] });
@@ -60,9 +64,8 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
 
       setLoading(true);
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-        const data = await res.json();
-        if (data.success) {
+        const data = await getMethod(`/api/search?q=${encodeURIComponent(query)}`);
+        if (data && data.success) {
           setResults({ products: data.products || [], categories: data.categories || [] });
         }
       } catch (err) {
@@ -94,7 +97,6 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             className="relative w-full max-w-2xl bg-surface border border-foreground/10 shadow-2xl rounded-2xl overflow-hidden flex flex-col max-h-[80vh]"
           >
-            {/* Search Input */}
             <div className="relative flex items-center p-4 border-b border-foreground/10">
               <Search className="w-5 h-5 text-muted-foreground ml-2 shrink-0" />
               <input
@@ -110,8 +112,6 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
                 <X className="w-5 h-5 text-muted-foreground" />
               </button>
             </div>
-
-            {/* Results Area */}
             <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
               {query.trim().length > 0 && query.trim().length < 2 && (
                 <p className="text-center text-muted-foreground py-8 text-sm">Please type at least 2 characters...</p>
@@ -125,8 +125,6 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
 
               {(results.categories.length > 0 || results.products.length > 0) && (
                 <div className="space-y-6">
-                  
-                  {/* Categories Section */}
                   {results.categories.length > 0 && (
                     <div className="space-y-3">
                       <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gold pb-2 border-b border-foreground/5">
@@ -155,8 +153,6 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
                       </div>
                     </div>
                   )}
-
-                  {/* Products Section */}
                   {results.products.length > 0 && (
                     <div className="space-y-3">
                       <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gold pb-2 border-b border-foreground/5">
@@ -194,13 +190,8 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
                       </div>
                     </div>
                   )}
-
                 </div>
               )}
-            </div>
-            
-            <div className="p-3 border-t border-foreground/5 bg-foreground/5 text-center">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Press ESC to close</p>
             </div>
           </motion.div>
         </div>

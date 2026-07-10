@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { User, Search } from "lucide-react";
+import BasicProvider from "@/utils/BasicProvider";
 import AuthModal from "./AuthModal";
 import GlobalSearch from "./GlobalSearch";
 import { useCustomer } from "@/context/CustomerContext";
@@ -16,6 +17,7 @@ const navLinks = [
 ];
 
 export default function Header() {
+  const { getMethod } = BasicProvider();
   const [scrolled, setScrolled] = useState(false);
   const [progress, setProgress] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -35,9 +37,7 @@ export default function Header() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
 
-    // Fetch settings for dynamic logo
-    fetch("/api/settings")
-      .then((res) => res.json())
+    getMethod("/api/settings")
       .then((data) => {
         if (data && data.success && data.settings?.restaurantLogo) {
           setRestaurantLogo(data.settings.restaurantLogo);
@@ -53,8 +53,6 @@ export default function Header() {
       <div className="fixed left-0 top-0 z-[90] h-[2px] w-full bg-transparent">
         <div className="h-full bg-gradient-gold transition-[width] duration-150" style={{ width: `${progress}%` }} />
       </div>
-
-      {/* Nav */}
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${scrolled ? "glass border-b border-foreground/5 py-3" : "bg-transparent py-5"
           }`}
@@ -195,8 +193,6 @@ export default function Header() {
           </div>
         )}
       </header>
-
-      {/* Modals */}
       <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </>

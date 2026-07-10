@@ -16,7 +16,7 @@ interface CustomerItem {
 }
 
 export default function CustomersTrashPage() {
-  const { getMethod, deleteMethod } = BasicProvider();
+  const { getMethod, deleteMethod, patchMethod } = BasicProvider();
 
   const [customers, setCustomers] = useState<CustomerItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,12 +45,7 @@ export default function CustomersTrashPage() {
 
   const handleRestore = async (id: string) => {
     try {
-      const response = await fetch("/api/admin/customers/trash", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
-      const data = await response.json();
+      const data = await patchMethod("/api/admin/customers/trash", { id });
       if (data && data.success) {
         toast.success(data.message);
         fetchCustomers();

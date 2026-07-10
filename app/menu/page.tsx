@@ -10,8 +10,10 @@ import { ShoppingBag, Star, Plus, Minus, X, Package, ShoppingCart, ChevronLeft, 
 import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import BasicProvider from "@/utils/BasicProvider";
 
 function MenuContent() {
+  const { getMethod } = BasicProvider();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
@@ -119,18 +121,15 @@ function MenuContent() {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const settingsRes = await fetch("/api/settings");
-        const settingsData = await settingsRes.json();
+        const settingsData = await getMethod("/api/settings");
         if (settingsData?.success) setSettings(settingsData.settings);
 
-        const catRes = await fetch("/api/categories");
-        const catData = await catRes.json();
+        const catData = await getMethod("/api/categories");
         if (catData?.success) {
           setCategories(catData.categories.filter((c: any) => c.type?.toLowerCase() === "product" || !c.type || c.type === "General"));
         }
 
-        const currRes = await fetch("/api/currency");
-        const currData = await currRes.json();
+        const currData = await getMethod("/api/currency");
         if (currData?.success && currData.currencies) {
           const defaultCurr = currData.currencies.find((c: any) => c.isDefault);
           if (defaultCurr) setCurrencySymbol(defaultCurr.symbol);
@@ -149,8 +148,7 @@ function MenuContent() {
         let url = "/api/products?";
         if (activeCategory !== "all") url += `category=${activeCategory}&`;
         if (searchQuery) url += `search=${encodeURIComponent(searchQuery)}&`;
-        const prodRes = await fetch(url);
-        const prodData = await prodRes.json();
+        const prodData = await getMethod(url);
         if (prodData?.success) {
           setProducts(prodData.products);
         }

@@ -6,8 +6,15 @@ import { verifyAdmin } from "@/utils/lib/auth";
 export async function GET(req: Request) {
   try {
     await dbConnect();
+    const { searchParams } = new URL(req.url);
+    const isDefault = searchParams.get("default") === "true";
     
-    const currencies = await Currency.find().sort({ createdAt: -1 });
+    let currencies;
+    if (isDefault) {
+      currencies = await Currency.find({ isDefault: true }).sort({ createdAt: -1 });
+    } else {
+      currencies = await Currency.find().sort({ createdAt: -1 });
+    }
     
     return NextResponse.json({ success: true, currencies }, { status: 200 });
   } catch (error: any) {

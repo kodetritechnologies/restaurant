@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Loader2, Package, SearchX, Clock, MapPin, Map, CreditCard, DollarSign } from "lucide-react";
 import { useCustomer } from "@/context/CustomerContext";
 import toast from "react-hot-toast";
+import BasicProvider from "@/utils/BasicProvider";
 
 interface OrderItem {
   productId: string;
@@ -30,39 +31,37 @@ interface Order {
 }
 
 export default function OrdersPage() {
+  const { getMethod } = BasicProvider();
   const { customer } = useCustomer();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [currency, setCurrency] = useState("$");
 
   useEffect(() => {
-    // Fetch currency
-    fetch("/api/currency")
-      .then(res => res.json())
-      .then(data => {
-        if (data?.success && data.currencies) {
-          const def = data.currencies.find((c: any) => c.isDefault);
+    const fetchData = async () => {
+      try {
+        // Fetch currency
+        const currData = await getMethod("/api/currency");
+        if (currData?.success && currData.currencies) {
+          const def = currData.currencies.find((c: any) => c.isDefault);
           if (def) setCurrency(def.symbol);
         }
-      })
-      .catch(() => { });
 
-    // Fetch orders
-    fetch("/api/customer/orders")
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setOrders(data.orders);
+        // Fetch orders
+        const ordersData = await getMethod("/api/customer/orders");
+        if (ordersData && ordersData.success) {
+          setOrders(ordersData.orders);
         } else {
           toast.error("Failed to load orders");
         }
-      })
-      .catch(() => {
-        toast.error("Network error while loading orders");
-      })
-      .finally(() => {
+      } catch (err) {
+        toast.error("Failed to load data");
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchData();
   }, []);
 
   const getStatusColor = (status: string) => {

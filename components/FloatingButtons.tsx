@@ -24,18 +24,17 @@ export default function FloatingButtons({ settings }: FloatingButtonsProps) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const rawPhone = settings?.shopPhone || "+33 1 45 67 89 00";
-  const rawWhatsapp = settings?.whatsappNumber || "+33145678900";
+  const rawPhone = settings?.shopPhone;
+  const rawWhatsapp = settings?.whatsappNumber;
   
-  const cleanedPhone = rawPhone.replace(/\D/g, "");
-  const cleanedWhatsapp = rawWhatsapp.replace(/\D/g, "");
+  const cleanedPhone = rawPhone?.replace(/\D/g, "");
+  const cleanedWhatsapp = rawWhatsapp?.replace(/\D/g, "");
 
-  const whatsappUrl = `https://wa.me/${cleanedWhatsapp || "33145678900"}`;
-  const telUrl = `tel:+${cleanedPhone || "33145678900"}`;
+  const whatsappUrl = `https://wa.me/${cleanedWhatsapp}`;
+  const telUrl = `tel:+${cleanedPhone}`;
 
   return (
     <>
-      {/* Floating buttons */}
       <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-3">
         <a
           href={whatsappUrl}
@@ -67,8 +66,6 @@ export default function FloatingButtons({ settings }: FloatingButtonsProps) {
           </button>
         )}
       </div>
-
-      {/* Sticky Call Waiter on mobile (instead of Reservation) */}
       <button
         onClick={() => alert("Waiter has been called to your table!")}
         className="fixed bottom-6 left-6 z-40 rounded-full bg-gradient-gold px-5 py-3 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-gold)] md:hidden flex items-center gap-2"

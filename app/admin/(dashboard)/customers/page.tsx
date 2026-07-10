@@ -69,10 +69,7 @@ export default function CustomersManager() {
     if (!result.isConfirmed) return;
 
     try {
-      const res = await fetch(`/api/admin/customers/${id}`, {
-        method: "DELETE",
-      });
-      const data = await res.json();
+      const data = await deleteMethod(`/api/admin/customers/${id}`);
       if (data && data.success) {
         toast.success("Customer moved to trash.");
         fetchCustomers(searchTerm);

@@ -13,6 +13,7 @@ import Faq from "@/components/Faq";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import FloatingButtons from "@/components/FloatingButtons";
+import BasicProvider from "@/utils/BasicProvider";
 
 function useReveal(deps: any[] = []) {
   useEffect(() => {
@@ -33,7 +34,8 @@ function useReveal(deps: any[] = []) {
   }, deps);
 }
 
-export default function Page() {
+export default function Home() {
+  const { getMethod } = BasicProvider();
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<any>(null);
   const [faqs, setFaqs] = useState<any[]>([]);
@@ -50,22 +52,19 @@ export default function Page() {
     const fetchLandingData = async () => {
       try {
         // Fetch settings
-        const settingsRes = await fetch("/api/settings");
-        const settingsData = await settingsRes.json();
+        const settingsData = await getMethod("/api/settings");
         if (settingsData && settingsData.success) {
           setSettings(settingsData.settings);
         }
 
         // Fetch FAQs
-        const faqsRes = await fetch("/api/faqs");
-        const faqsData = await faqsRes.json();
+        const faqsData = await getMethod("/api/faqs");
         if (faqsData && faqsData.success) {
           setFaqs(faqsData.faqs);
         }
 
         // Fetch Reviews
-        const reviewsRes = await fetch("/api/reviews");
-        const reviewsData = await reviewsRes.json();
+        const reviewsData = await getMethod("/api/reviews");
         if (reviewsData && reviewsData.success) {
           setReviews(reviewsData.reviews);
         }

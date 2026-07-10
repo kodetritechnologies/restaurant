@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { User, Phone, MapPin, Loader2, Save, Mail } from "lucide-react";
 import { useCustomer } from "@/context/CustomerContext";
 import toast from "react-hot-toast";
+import BasicProvider from "@/utils/BasicProvider";
 
 const INPUT_CLASS =
   "w-full rounded-xl border border-foreground/10 bg-background/60 px-4 py-3.5 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all focus:border-gold focus:ring-1 focus:ring-gold/30";
@@ -13,6 +14,7 @@ const LABEL_CLASS =
   "block text-[10px] font-semibold uppercase tracking-widest text-gold mb-1.5";
 
 export default function ProfilePage() {
+  const { putMethod } = BasicProvider();
   const { customer, refreshCustomer } = useCustomer();
   const [saving, setSaving] = useState(false);
   
@@ -23,7 +25,6 @@ export default function ProfilePage() {
     city: "",
   });
 
-  // Pre-fill form from context
   useEffect(() => {
     if (customer) {
       setForm({
@@ -40,15 +41,9 @@ export default function ProfilePage() {
     setSaving(true);
 
     try {
-      const res = await fetch("/api/customer/update", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      const data = await res.json();
+      const data = await putMethod("/api/customer/update", form);
       
-      if (data.success) {
+      if (data && data.success) {
         toast.success("Profile updated successfully");
         await refreshCustomer();
       } else {
@@ -77,7 +72,6 @@ export default function ProfilePage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-        {/* Readonly Email */}
         <div>
           <label className={LABEL_CLASS}>Email Address</label>
           <div className="relative">

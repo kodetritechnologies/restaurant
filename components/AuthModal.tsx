@@ -22,7 +22,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
       setStep("email");
@@ -54,7 +53,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
       setIsLoading(false);
       toast.success("OTP sent to your email.");
-      // In dev mode, we might see the devOtp
       if (data.devOtp) {
         toast("Dev OTP: " + data.devOtp, { icon: "🛠️" });
       }
@@ -99,16 +97,13 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
             className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
-          />
-
-          {/* Modal Content */}
+          /> 
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 pointer-events-none">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -117,11 +112,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               transition={{ duration: 0.3, ease: "easeOut" }}
               className="relative w-full max-w-md pointer-events-auto"
             >
-              {/* Glow border effect */}
               <div className="absolute -inset-0.5 bg-gradient-to-r from-gold/50 via-gold to-gold/30 rounded-3xl opacity-30 blur-sm" />
 
               <div className="relative glass rounded-3xl p-6 sm:p-8 shadow-elegant overflow-hidden">
-                {/* Close Button */}
                 <button
                   onClick={onClose}
                   className="absolute right-4 top-4 p-2 rounded-full hover:bg-foreground/10 text-muted-foreground hover:text-foreground transition-colors z-10"
@@ -129,11 +122,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   <X className="h-4 w-4" />
                 </button>
 
-                {/* Decorative Elements */}
                 <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-gold/10 blur-[80px] pointer-events-none" />
                 <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-gold/5 blur-[80px] pointer-events-none" />
 
-                {/* Logo & Header */}
                 <div className="relative flex flex-col items-center text-center mb-6">
                   <motion.div
                     whileHover={{ rotate: 15, scale: 1.05 }}
@@ -152,7 +143,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   </p>
                 </div>
 
-                {/* Form */}
                 <form onSubmit={step === "email" ? handleSendOtp : handleVerifyOtp} className="relative space-y-4">
                   <AnimatePresence mode="wait">
                     {step === "email" ? (
@@ -227,7 +217,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     )}
                   </AnimatePresence>
 
-                  {/* Validation Error Message */}
                   <AnimatePresence>
                     {error && (
                       <motion.div
@@ -242,7 +231,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     )}
                   </AnimatePresence>
 
-                  {/* Submit Button */}
                   <button
                     type="submit"
                     disabled={isLoading}
@@ -265,7 +253,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   </button>
                 </form>
 
-                {/* Credential Note at the bottom */}
                 <div className="mt-4 pt-4 border-t border-foreground/5 flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground/60">
                   <ShieldCheck className="h-3 w-3 text-gold/60" />
                   <span>Secure Passwordless Login</span>

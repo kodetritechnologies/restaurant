@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import BasicProvider from "@/utils/BasicProvider";
 
 interface Category {
   _id: string;
@@ -13,14 +14,14 @@ interface Category {
 }
 
 export default function Features() {
+  const { getMethod } = BasicProvider();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch("/api/categories?featured=true&type=product");
-        const data = await res.json();
+        const data = await getMethod("/api/categories?featured=true&type=product");
         if (data && data.success) {
           setCategories(data.categories);
         }
@@ -54,15 +55,14 @@ export default function Features() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((c) => (
             <div key={c._id} className="reveal glass rounded-2xl p-6 hover-lift flex flex-col">
-              {c.image ? (
-                <div className="relative h-48 w-full mb-6 rounded-xl overflow-hidden shadow-md">
-                  <Image src={c.image} alt={c.name} fill className="object-cover hover:scale-105 transition-transform duration-500" />
-                </div>
-              ) : (
-                <div className="grid h-14 w-14 place-items-center rounded-xl bg-gold/10 text-gold mb-6">
-                  <span className="text-2xl">✨</span>
-                </div>
-              )}
+              <div className="relative h-48 w-full mb-6 rounded-xl overflow-hidden shadow-md">
+                <Image 
+                  src={c.image || "/assets/no-image-food.jpg"} 
+                  alt={c.name} 
+                  fill 
+                  className="object-cover hover:scale-105 transition-transform duration-500" 
+                />
+              </div>
               <h3 className="font-serif text-2xl text-foreground">{c.name}</h3>
               {c.description && (
                 <p className="mt-3 text-sm text-foreground/65 flex-grow leading-relaxed">

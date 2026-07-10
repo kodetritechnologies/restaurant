@@ -36,7 +36,7 @@ interface Product {
 }
 
 export default function ProductsPage() {
-  const { getMethod, postMethod, putMethod, deleteMethod } = BasicProvider();
+  const { getMethod, postMethod, putMethod, deleteMethod, patchMethod } = BasicProvider();
   
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,12 +61,7 @@ export default function ProductsPage() {
 
   const handleRestore = async (id: string) => {
     try {
-      const response = await fetch(`/api/products/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "restore" })
-      });
-      const data = await response.json();
+      const data = await patchMethod(`/api/products/${id}`, { action: "restore" });
       if (data && data.success) {
         toast.success(data.message);
         fetchProducts();

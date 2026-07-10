@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { FaInstagram, FaFacebook } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 
 interface ChefsProps {
   chefs?: {
@@ -74,13 +76,11 @@ export default function Chefs({ chefs: dbChefs }: ChefsProps) {
         </div>
       </div>
       
-      {/* Slider Container */}
       <div 
         ref={scrollRef}
         className="flex gap-6 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-8 -mx-5 px-5 md:-mx-8 md:px-8 items-stretch"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }} // Hide scrollbar for Firefox/IE
       >
-        {/* We can duplicate the chefs list once to create a pseudo-infinite feel if there are few chefs, but native scrolling back to start is cleaner */}
         {finalChefs.map((c, idx) => (
           <div key={idx} className="flex-none w-[85%] md:w-[calc(33.333%-16px)] snap-center">
             <article className="h-full reveal group overflow-hidden rounded-3xl border border-foreground/5 bg-card hover-lift flex flex-col">
@@ -102,17 +102,17 @@ export default function Chefs({ chefs: dbChefs }: ChefsProps) {
                 <div className="mt-4 flex justify-center gap-3 text-foreground/70">
                   {c.instagram && (
                     <a href={c.instagram.startsWith("http") ? c.instagram : `https://instagram.com/${c.instagram}`} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="grid h-9 w-9 place-items-center rounded-full border border-foreground/10 text-xs transition-colors hover:border-gold hover:text-gold">
-                      IG
+                      <FaInstagram className="w-4 h-4" />
                     </a>
                   )}
                   {c.facebook && (
                     <a href={c.facebook.startsWith("http") ? c.facebook : `https://facebook.com/${c.facebook}`} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="grid h-9 w-9 place-items-center rounded-full border border-foreground/10 text-xs transition-colors hover:border-gold hover:text-gold">
-                      FB
+                      <FaFacebook className="w-4 h-4" />
                     </a>
                   )}
                   {c.twitter && (
                     <a href={c.twitter.startsWith("http") ? c.twitter : `https://twitter.com/${c.twitter}`} target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="grid h-9 w-9 place-items-center rounded-full border border-foreground/10 text-xs transition-colors hover:border-gold hover:text-gold">
-                      TW
+                      <FaXTwitter className="w-4 h-4" />
                     </a>
                   )}
                 </div>

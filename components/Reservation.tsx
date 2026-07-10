@@ -2,10 +2,12 @@
 
 import { FormEvent, useState } from "react";
 import toast from "react-hot-toast";
+import BasicProvider from "@/utils/BasicProvider";
 
 const hero = "/assets/hero.jpg";
 
 export default function Reservation() {
+  const { postMethod } = BasicProvider();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -22,11 +24,8 @@ export default function Reservation() {
     const { name, value } = e.target;
 
     if (name === "phone") {
-      // Remove all non-numeric characters
       const numericValue = value.replace(/\D/g, "");
-      // Restrict to max 10 digits
       if (numericValue.length > 10) return;
-      
       setFormData((prev) => ({ ...prev, [name]: numericValue }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
@@ -40,7 +39,6 @@ export default function Reservation() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // JS Validation
     const newErrors: Record<string, string> = {};
     
     if (!formData.name || formData.name.trim().length < 3) {
@@ -77,13 +75,7 @@ export default function Reservation() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/reservations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
+      const data = await postMethod("/api/reservations", formData);
       if (data && data.success) {
         toast.success("Reservation request sent! We will confirm shortly.");
         setFormData({ name: "", phone: "", email: "", guests: "", date: "", time: "", request: "" });

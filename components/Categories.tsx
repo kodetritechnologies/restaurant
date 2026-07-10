@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import BasicProvider from "@/utils/BasicProvider";
 
 interface Category {
   _id: string;
@@ -14,6 +15,7 @@ interface Category {
 }
 
 export default function Categories() {
+  const { getMethod } = BasicProvider();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -21,13 +23,12 @@ export default function Categories() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch("/api/categories?type=product&featured=true");
-        const data = await res.json();
+        const data = await getMethod("/api/categories?type=product");
         if (data && data.success) {
           setCategories(data.categories);
         }
       } catch (error) {
-        console.error("Failed to fetch featured categories:", error);
+        console.error("Failed to fetch categories:", error);
       } finally {
         setLoading(false);
       }
@@ -60,18 +61,12 @@ export default function Categories() {
             className="reveal group relative overflow-hidden rounded-2xl border border-foreground/5 bg-surface cursor-pointer"
           >
             <div className="aspect-[4/3] overflow-hidden relative">
-              {c.image ? (
-                <Image
-                  src={c.image}
-                  alt={c.name}
-                  fill
-                  className="object-cover transition-transform duration-[1200ms] group-hover:scale-110"
-                />
-              ) : (
-                <div className="h-full w-full bg-surface/50 flex items-center justify-center text-gold">
-                  <span className="text-4xl">✨</span>
-                </div>
-              )}
+              <Image
+                src={c.image || "/assets/no-image-food.jpg"}
+                alt={c.name}
+                fill
+                className="object-cover transition-transform duration-[1200ms] group-hover:scale-110"
+              />
             </div>
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-6 z-10 pointer-events-none">

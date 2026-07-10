@@ -11,20 +11,22 @@ import BasicProvider from "@/utils/BasicProvider";
 import { useState } from "react";
 
 export default function ProfileLayout({ children }: { children: React.ReactNode }) {
+  const { getMethod } = BasicProvider();
   const router = useRouter();
   const pathname = usePathname();
   const { customer, isLoading, logout } = useCustomer();
   const [settings, setSettings] = useState<any>(null);
 
   useEffect(() => {
-    fetch("/api/settings")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
+    const fetchSettings = async () => {
+      try {
+        const data = await getMethod("/api/settings");
+        if (data && data.success) {
           setSettings(data.settings);
         }
-      })
-      .catch(() => {});
+      } catch (err) {}
+    };
+    fetchSettings();
   }, []);
 
   useEffect(() => {

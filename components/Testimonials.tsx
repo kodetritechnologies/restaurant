@@ -2,17 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-interface TestimonialProps {
-  reviews?: {
-    _id: string;
-    name: string;
-    rating: number;
-    text: string;
-    imgUrl: string;
-  }[] | null;
-}
-
-export default function Testimonials({ reviews: dbReviews }: TestimonialProps) {
+export default function Testimonials({ reviews: dbReviews }: any) {
   const [reviewIdx, setReviewIdx] = useState(0);
 
   const displayReviews = dbReviews || [];
@@ -45,7 +35,7 @@ export default function Testimonials({ reviews: dbReviews }: TestimonialProps) {
           className="flex transition-transform duration-700 ease-out"
           style={{ transform: `translateX(-${reviewIdx * 100}%)` }}
         >
-          {displayReviews.map((r) => (
+          {displayReviews.map((r:any) => (
             <figure key={r._id} className="w-full shrink-0 px-4">
               <div className="glass mx-auto max-w-2xl rounded-3xl p-10 text-center">
                 <img src={r.imgUrl} alt={r.name} className="mx-auto h-20 w-20 rounded-full border-2 border-gold object-cover" />
@@ -61,7 +51,7 @@ export default function Testimonials({ reviews: dbReviews }: TestimonialProps) {
           ))}
         </div>
         <div className="mt-8 flex justify-center gap-2">
-          {displayReviews.map((_, i) => (
+          {displayReviews.map((_:any, i:any) => (
             <button
               key={i}
               aria-label={`Go to slide ${i + 1}`}

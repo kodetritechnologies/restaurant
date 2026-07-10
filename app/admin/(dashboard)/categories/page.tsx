@@ -125,13 +125,8 @@ export default function CategoriesPage() {
       let finalPublicId = publicId;
 
       if (filePreview && filePreview.startsWith("data:")) {
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ file: filePreview }),
-        });
+        const uploadData = await postMethod("/api/upload", { file: filePreview });
 
-        const uploadData = await uploadRes.json();
         if (!uploadData || !uploadData.success) {
           throw new Error(uploadData?.message || "Image upload failed.");
         }

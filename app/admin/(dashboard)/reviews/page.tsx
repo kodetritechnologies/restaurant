@@ -137,14 +137,9 @@ export default function ReviewsManager() {
 
       // Only upload if it's a new file (base64)
       if (filePreview.startsWith("data:image")) {
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ file: filePreview, folder: "reviews" }),
-        });
-        const uploadData = await uploadRes.json();
+        const uploadData = await postMethod("/api/upload", { file: filePreview, folder: "reviews" });
         
-        if (!uploadData.success) {
+        if (!uploadData || !uploadData.success) {
           toast.error(uploadData.error || uploadData.message || "Failed to upload image");
           setSaving(false);
           return;

@@ -114,13 +114,8 @@ export default function GalleryManager() {
 
       // Only upload if it's a new base64 image
       if (filePreview.startsWith("data:")) {
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ file: filePreview }),
-        });
+        const uploadData = await postMethod("/api/upload", { file: filePreview });
 
-        const uploadData = await uploadRes.json();
         if (!uploadData || !uploadData.success) {
           throw new Error(uploadData?.message || "Cloudinary upload failed.");
         }

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import BasicProvider from "@/utils/BasicProvider";
 import {
   ShoppingBag,
   Minus,
@@ -59,6 +60,7 @@ const LABEL_CLASS =
   "block text-[10px] font-semibold uppercase tracking-widest text-gold mb-1.5";
 
 export default function CheckoutPage() {
+  const { getMethod, postMethod } = BasicProvider();
   const router = useRouter();
 
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -95,15 +97,10 @@ export default function CheckoutPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [prodRes, currRes, settingsRes] = await Promise.all([
-          fetch("/api/products"),
-          fetch("/api/currency"),
-          fetch("/api/settings"),
-        ]);
         const [prodData, currData, settingsData] = await Promise.all([
-          prodRes.json(),
-          currRes.json(),
-          settingsRes.json(),
+          getMethod("/api/products"),
+          getMethod("/api/currency"),
+          getMethod("/api/settings"),
         ]);
 
         if (prodData?.success) setProducts(prodData.products);
@@ -122,10 +119,7 @@ export default function CheckoutPage() {
       const Cookies = require("js-cookie");
       const token = Cookies.get("customerToken");
       if (token) {
-        fetch("/api/customer/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-          .then((r) => r.json())
+        getMethod("/api/customer/me")
           .then((d) => {
             if (d?.success && d.customer) {
               setForm((prev) => ({
@@ -245,14 +239,9 @@ export default function CheckoutPage() {
         totalAmount: total,
       };
 
-      const res = await fetch("/api/customer/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const data = await postMethod("/api/customer/orders", payload);
 
-      const data = await res.json();
-      if (!data.success) {
+      if (!data || !data.success) {
         toast.error(data.message || "Failed to place order.");
         setPlacing(false);
         return;

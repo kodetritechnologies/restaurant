@@ -1,37 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-interface SignatureDish {
-  _id: string;
-  name: string;
-  shortDescription?: string;
-  featuredImage?: string;
-  regularPrice: number;
-  salePrice?: number;
-  featured?: boolean;
-}
+import BasicProvider from "@/utils/BasicProvider";
+import { ShoppingBag, Minus, Plus } from "lucide-react";
 
 export default function Menu() {
-  const [dishes, setDishes] = useState<SignatureDish[]>([]);
+  const { getMethod } = BasicProvider();
+
+  const [dishes, setDishes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currencySymbol, setCurrencySymbol] = useState<string>("$");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [prodRes, currRes] = await Promise.all([
-          fetch("/api/products?signature=true"),
-          fetch("/api/currency")
-        ]);
-
         const [prodData, currData] = await Promise.all([
-          prodRes.json(),
-          currRes.json()
+          getMethod("/api/products?signature=true&limit=8"),
+          getMethod("/api/currency")
         ]);
 
         if (prodData && prodData.success) {
-          setDishes(prodData.products.slice(0, 8));
+          setDishes(prodData.products);
         }
 
         if (currData?.success && currData.currencies) {
@@ -73,7 +62,7 @@ export default function Menu() {
               key={d._id}
               className="reveal group overflow-hidden rounded-2xl border border-foreground/5 bg-card hover-lift"
             >
-              <div className="aspect-square overflow-hidden">
+              <div className="aspect-[4/3] overflow-hidden">
                 <img
                   src={d.featuredImage || "/assets/no-image-food.jpg"}
                   alt={d.name}
@@ -84,7 +73,7 @@ export default function Menu() {
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
               </div>
-              <div className="p-5">
+              <div className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="font-serif text-xl">{d.name}</h3>
                   <span className="shrink-0 font-serif text-lg text-gold">
@@ -98,12 +87,31 @@ export default function Menu() {
                     )}
                   </span>
                 </div>
-                {d.shortDescription && (
-                  <p
-                    className="mt-2 text-sm text-foreground/65 line-clamp-2"
-                    dangerouslySetInnerHTML={{ __html: d.shortDescription }}
-                  />
-                )}
+
+                <div className="mt-4 flex flex-wrap items-center gap-2 w-full">
+                  <div className="flex items-center justify-between bg-foreground/5 border border-foreground/10 rounded-xl p-1 h-11 flex-1 min-w-[100px] shrink-0">
+                    <button
+                      className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <span className="font-medium text-foreground text-center">
+                      1
+                    </span>
+                    <button
+                      className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <button
+                    className="flex-[2] min-w-[130px] h-11 rounded-xl border border-foreground/10 hover:border-gold hover:bg-gold/5 text-foreground hover:text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ShoppingBag className="w-4 h-4" />
+                    Add to Cart
+                  </button>
+                </div>
               </div>
             </article>
           ))}

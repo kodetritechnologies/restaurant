@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Loader2, Trash2, Edit2, UploadCloud, X, Package, Star, Search, Filter } from "lucide-react";
+import { Plus, Loader2, Trash2, Edit2, UploadCloud, X } from "lucide-react";
 import toast from "react-hot-toast";
-import Swal from "sweetalert2";
 import BasicProvider from "@/utils/BasicProvider";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -69,7 +68,6 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
 
   useEffect(() => {
     const initData = async () => {
-      // Fetch categories
       try {
         const data = await getMethod("/api/categories");
         if (data && data.success) {
@@ -79,7 +77,6 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
         console.error("Failed to fetch categories");
       }
 
-      // Fetch variants if editing a variable product
       if (initialData?.productType === "variable") {
         try {
             const data = await getMethod(`/api/products/${initialData._id}`);
@@ -167,14 +164,9 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
   };
 
   const uploadImage = async (base64Img: string) => {
-      if (!base64Img.startsWith("data:")) return base64Img; // already uploaded URL
+      if (!base64Img.startsWith("data:")) return base64Img;
       
-      const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ file: base64Img }),
-      });
-      const uploadData = await uploadRes.json();
+      const uploadData = await postMethod("/api/upload", { file: base64Img });
       if (!uploadData || !uploadData.success) {
           throw new Error(uploadData?.message || "Image upload failed.");
       }
