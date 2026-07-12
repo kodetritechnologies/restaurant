@@ -46,7 +46,6 @@ function MenuContent() {
 
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<any | null>(null);
-  const [modalQuantity, setModalQuantity] = useState<number>(1);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -221,7 +220,6 @@ function MenuContent() {
                                 } else {
                                   setSelectedVariant(null);
                                 }
-                                setModalQuantity(1);
                               }}
                             >
                               {displayImage ? (
@@ -261,7 +259,6 @@ function MenuContent() {
                                     } else {
                                       setSelectedVariant(null);
                                     }
-                                    setModalQuantity(1);
                                   }}
                                 >
                                   {product.name}
@@ -294,7 +291,6 @@ function MenuContent() {
                                     onClick={() => {
                                       setSelectedProduct(product);
                                       setSelectedVariant(product.variants?.[0] || null);
-                                      setModalQuantity(1);
                                     }}
                                     className="w-full py-3 rounded-xl border border-foreground/10 hover:border-gold hover:bg-gold/5 text-foreground hover:text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2"
                                   >
@@ -396,7 +392,6 @@ function MenuContent() {
                                       } else {
                                         setSelectedVariant(null);
                                       }
-                                      setModalQuantity(1);
                                     }}
                                   >
                                     {displayImage ? (
@@ -436,7 +431,6 @@ function MenuContent() {
                                           } else {
                                             setSelectedVariant(null);
                                           }
-                                          setModalQuantity(1);
                                         }}
                                       >
                                         {product.name}
@@ -469,7 +463,6 @@ function MenuContent() {
                                           onClick={() => {
                                             setSelectedProduct(product);
                                             setSelectedVariant(product.variants?.[0] || null);
-                                            setModalQuantity(1);
                                           }}
                                           className="w-full py-3 rounded-xl border border-foreground/10 hover:border-gold hover:bg-gold/5 text-foreground hover:text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2"
                                         >
@@ -626,33 +619,43 @@ function MenuContent() {
                         </div>
 
                         <div className="flex items-center gap-3 w-full sm:w-auto">
-                          <div className="flex items-center justify-between bg-foreground/5 border border-foreground/10 rounded-xl p-1.5 h-12 w-28 shrink-0">
-                            <button
-                              onClick={() => setModalQuantity(Math.max(1, modalQuantity - 1))}
-                              className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
-                            >
-                              <Minus className="w-4 h-4" />
-                            </button>
-                            <span className="font-medium text-foreground">{modalQuantity}</span>
-                            <button
-                              onClick={() => setModalQuantity(selectedVariant.quantity !== null ? Math.min(selectedVariant.quantity, modalQuantity + 1) : modalQuantity + 1)}
-                              className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
-                            >
-                              <Plus className="w-4 h-4" />
-                            </button>
-                          </div>
-
-                          <button
-                            onClick={() => {
-                              addToCart(selectedProduct, selectedVariant, modalQuantity);
-                              setSelectedProduct(null); // Close modal after adding
-                            }}
-                            disabled={selectedVariant.quantity !== null && selectedVariant.quantity <= 0}
-                            className="h-12 px-6 flex-1 sm:flex-none rounded-xl border border-gold bg-gold/10 hover:bg-gold/20 text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <ShoppingBag className="w-4 h-4" />
-                            Add
-                          </button>
+                          {(() => {
+                            const cartItem = cartItems.find((i: any) => (typeof i.productId === 'object' ? i.productId?._id : i.productId) === selectedProduct._id && (typeof i.variantId === 'object' ? i.variantId?._id : i.variantId) === selectedVariant._id);
+                            const qtyInCart = cartItem ? cartItem.quantity : 0;
+                            
+                            if (qtyInCart > 0) {
+                              return (
+                                <div className="flex items-center justify-between bg-gold/10 border border-gold/20 rounded-xl p-1 h-12 w-32 shrink-0">
+                                  <button
+                                    onClick={() => updateQuantity(selectedProduct._id, selectedVariant._id, -1, selectedVariant.quantity)}
+                                    className="w-10 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-gold transition-colors"
+                                  >
+                                    <Minus className="w-4 h-4" />
+                                  </button>
+                                  <span className="font-medium text-gold text-lg">{qtyInCart}</span>
+                                  <button
+                                    onClick={() => updateQuantity(selectedProduct._id, selectedVariant._id, 1, selectedVariant.quantity)}
+                                    className="w-10 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-gold transition-colors"
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <button
+                                  onClick={() => {
+                                    addToCart(selectedProduct, selectedVariant, 1);
+                                  }}
+                                  disabled={selectedVariant.quantity !== null && selectedVariant.quantity <= 0}
+                                  className="h-12 px-8 flex-1 sm:flex-none rounded-xl border border-gold bg-gold/10 hover:bg-gold/20 text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  <ShoppingBag className="w-4 h-4" />
+                                  Add to Cart
+                                </button>
+                              );
+                            }
+                          })()}
                         </div>
                       </div>
                     )}
@@ -678,33 +681,43 @@ function MenuContent() {
                     </div>
 
                     <div className="flex items-center gap-3 w-full sm:w-auto">
-                      <div className="flex items-center justify-between bg-foreground/5 border border-foreground/10 rounded-xl p-1.5 h-12 w-28 shrink-0">
-                        <button
-                          onClick={() => setModalQuantity(Math.max(1, modalQuantity - 1))}
-                          className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
-                        >
-                          <Minus className="w-4 h-4" />
-                        </button>
-                        <span className="font-medium text-foreground">{modalQuantity}</span>
-                        <button
-                          onClick={() => setModalQuantity(selectedProduct.quantity !== null ? Math.min(selectedProduct.quantity, modalQuantity + 1) : modalQuantity + 1)}
-                          className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </button>
-                      </div>
-
-                      <button
-                        onClick={() => {
-                          addToCart(selectedProduct, null, modalQuantity);
-                          setSelectedProduct(null); // Close modal after adding
-                        }}
-                        disabled={selectedProduct.quantity !== null && selectedProduct.quantity <= 0}
-                        className="h-12 px-6 flex-1 sm:flex-none rounded-xl border border-gold bg-gold/10 hover:bg-gold/20 text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <ShoppingBag className="w-4 h-4" />
-                        Add
-                      </button>
+                      {(() => {
+                        const cartItem = cartItems.find((i: any) => (typeof i.productId === 'object' ? i.productId?._id : i.productId) === selectedProduct._id && !i.variantId);
+                        const qtyInCart = cartItem ? cartItem.quantity : 0;
+                        
+                        if (qtyInCart > 0) {
+                          return (
+                            <div className="flex items-center justify-between bg-gold/10 border border-gold/20 rounded-xl p-1 h-12 w-32 shrink-0">
+                              <button
+                                onClick={() => updateQuantity(selectedProduct._id, null, -1, selectedProduct.quantity)}
+                                className="w-10 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-gold transition-colors"
+                              >
+                                <Minus className="w-4 h-4" />
+                              </button>
+                              <span className="font-medium text-gold text-lg">{qtyInCart}</span>
+                              <button
+                                onClick={() => updateQuantity(selectedProduct._id, null, 1, selectedProduct.quantity)}
+                                className="w-10 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-gold transition-colors"
+                              >
+                                <Plus className="w-4 h-4" />
+                              </button>
+                            </div>
+                          );
+                        } else {
+                          return (
+                            <button
+                              onClick={() => {
+                                addToCart(selectedProduct, null, 1);
+                              }}
+                              disabled={selectedProduct.quantity !== null && selectedProduct.quantity <= 0}
+                              className="h-12 px-8 flex-1 sm:flex-none rounded-xl border border-gold bg-gold/10 hover:bg-gold/20 text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <ShoppingBag className="w-4 h-4" />
+                              Add to Cart
+                            </button>
+                          );
+                        }
+                      })()}
                     </div>
                   </div>
                 )}

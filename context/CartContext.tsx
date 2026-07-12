@@ -154,7 +154,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       (i) => {
         const id1 = typeof i.productId === 'object' ? i.productId?._id : i.productId;
         const v1 = typeof i.variantId === 'object' ? i.variantId?._id : i.variantId;
-        return id1 === product._id && (variant ? v1 === variant._id : (!v1));
+        return String(id1) === String(product._id) && (variant ? String(v1) === String(variant._id) : (!v1));
       }
     );
 
@@ -183,7 +183,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const existingItemIndex = items.findIndex(i => {
       const id1 = typeof i.productId === 'object' ? i.productId?._id : i.productId;
       const v1 = typeof i.variantId === 'object' ? i.variantId?._id : i.variantId;
-      return id1 === productId && (variantId ? v1 === variantId : (!v1));
+      return String(id1) === String(productId) && (variantId ? String(v1) === String(variantId) : (!v1));
     });
 
     if (existingItemIndex < 0) return;
@@ -207,7 +207,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       (i) => {
         const id1 = typeof i.productId === 'object' ? i.productId?._id : i.productId;
         const v1 = typeof i.variantId === 'object' ? i.variantId?._id : i.variantId;
-        return !(id1 === productId && v1 === variantId);
+        return !(String(id1) === String(productId) && (variantId ? String(v1) === String(variantId) : (!v1)));
       }
     );
     await saveCart(newItems);
