@@ -20,13 +20,22 @@ export async function POST(req: Request) {
 
     await dbConnect();
 
-    let customer = await Customer.findOne({ email });
+    let customer = await Customer.findOne({ email, deleted_at: null });
 
     if (customer) {
       customer.otp = otp;
       customer.otpExpires = otpExpires;
       await customer.save();
     } else {
+      const deletedCustomer = await Customer.findOne({ email, deleted_at: { $ne: null } });
+      
+      if (deletedCustomer) {
+        return NextResponse.json(
+          { success: false, message: "Account has been deleted" },
+          { status: 403 }
+        );
+      }
+
       customer = await Customer.create({
         email,
         otp,

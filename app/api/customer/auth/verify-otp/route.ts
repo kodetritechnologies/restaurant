@@ -17,9 +17,16 @@ export async function POST(req: Request) {
 
     await dbConnect();
 
-    const customer = await Customer.findOne({ email });
+    const customer = await Customer.findOne({ email, deleted_at: null });
 
     if (!customer) {
+      const deletedCustomer = await Customer.findOne({ email, deleted_at: { $ne: null } });
+      if (deletedCustomer) {
+        return NextResponse.json(
+          { success: false, message: "Account has been deleted" },
+          { status: 403 }
+        );
+      }
       return NextResponse.json(
         { success: false, message: "Customer not found. Please request a new OTP." },
         { status: 404 }
@@ -58,7 +65,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         success: true,
-        message: "OTP verified successfully.",
+        message: "Logged in successfully.",
         token,
         customer: {
           id: customer._id,

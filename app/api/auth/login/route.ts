@@ -17,8 +17,15 @@ export async function POST(req: Request) {
       );
     }
 
-    const admin = await Admin.findOne({ email });
+    const admin = await Admin.findOne({ email, deleted_at: null });
     if (!admin) {
+      const deletedAdmin = await Admin.findOne({ email, deleted_at: { $ne: null } });
+      if (deletedAdmin) {
+        return NextResponse.json(
+          { success: false, message: "Account has been deleted." },
+          { status: 403 }
+        );
+      }
       return NextResponse.json(
         { success: false, message: "Invalid email or password." },
         { status: 401 }

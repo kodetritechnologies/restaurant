@@ -25,7 +25,7 @@ interface CustomerContextType {
 const CustomerContext = createContext<CustomerContextType | undefined>(undefined);
 
 export function CustomerProvider({ children }: { children: ReactNode }) {
-  const { getMethod } = BasicProvider();
+  const { getMethod, postMethod } = BasicProvider();
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -52,10 +52,14 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
-    Cookies.remove("customerToken", { path: "/" });
+  const logout = async () => {
+    const data = await postMethod("/api/customer/auth/logout", {});
     setCustomer(null);
-    toast.success("Successfully logged out");
+    if (data?.success) {
+      toast.success(data.message || "Logged out successfully");
+    } else {
+      toast.error(data?.message || "Failed to logout");
+    }
   };
 
   useEffect(() => {

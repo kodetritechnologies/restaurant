@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BasicProvider from "@/utils/BasicProvider";
+import { useCart } from "@/context/CartContext";
 import {
   ShoppingBag,
   Minus,
@@ -28,27 +29,7 @@ import {
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
-interface CartItem {
-  productId: string;
-  variantId?: string;
-  quantity: number;
-}
 
-interface ProductData {
-  _id: string;
-  name: string;
-  featuredImage?: string;
-  regularPrice: number;
-  salePrice?: number;
-  productType: "simple" | "variable";
-  variants?: Array<{
-    _id: string;
-    variantName: string;
-    regularPrice: number;
-    salePrice?: number;
-    galleryImages?: string[];
-  }>;
-}
 
 type DeliveryType = "delivery" | "pickup" | "dinein";
 type PaymentMethod = "cod" | "online";
@@ -63,8 +44,14 @@ export default function CheckoutPage() {
   const { getMethod, postMethod } = BasicProvider();
   const router = useRouter();
 
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [products, setProducts] = useState<ProductData[]>([]);
+  const {
+    items: cartItems,
+    updateQuantity,
+    removeFromCart,
+    clearCart,
+    subtotalAmount: subtotal,
+  } = useCart();
+
   const [currencySymbol, setCurrencySymbol] = useState("$");
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -84,23 +71,14 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("cartItems");
-      if (stored) setCartItems(JSON.parse(stored));
-    } catch { }
-  }, []);
-
-  useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [prodData, currData, settingsData] = await Promise.all([
-          getMethod("/api/products"),
+        const [currData, settingsData] = await Promise.all([
           getMethod("/api/currency?default=true"),
           getMethod("/api/settings"),
         ]);
 
-        if (prodData?.success) setProducts(prodData.products);
         if (currData?.success && currData.currency) {
           setCurrencySymbol(currData.currency.symbol);
         }
@@ -131,58 +109,26 @@ export default function CheckoutPage() {
     } catch { }
   }, []);
 
-  const getItemDetails = useCallback(
-    (item: CartItem) => {
-      const product = products.find((p) => p._id === item.productId);
-      if (!product) return null;
+  const getItemDetails = useCallback((item: any) => {
+    const productObj = typeof item.productId === 'object' ? item.productId : null;
+    const variantObj = typeof item.variantId === 'object' ? item.variantId : null;
 
-      let title = product.name;
-      let price = product.salePrice || product.regularPrice;
-      let image = product.featuredImage || "";
-      let variantName = "";
+    if (!productObj) return null;
 
-      if (product.productType === "variable" && item.variantId) {
-        const variant = product.variants?.find((v) => v._id === item.variantId);
-        if (variant) {
-          variantName = variant.variantName;
-          price = variant.salePrice || variant.regularPrice;
-          image = variant.galleryImages?.[0] || image;
-        }
+    let title = productObj.name || "Unknown Product";
+    let price = item.price;
+    let image = productObj.featuredImage || "";
+    let variantName = "";
+
+    if (variantObj) {
+      variantName = variantObj.variantName;
+      if (variantObj.galleryImages?.[0]) {
+        image = variantObj.galleryImages[0];
       }
+    }
 
-      return { title, price, image, variantName };
-    },
-    [products]
-  );
-
-  const updateQty = (productId: string, variantId: string | undefined, delta: number) => {
-    setCartItems((prev) => {
-      const updated = prev
-        .map((i) =>
-          i.productId === productId && i.variantId === variantId
-            ? { ...i, quantity: i.quantity + delta }
-            : i
-        )
-        .filter((i) => i.quantity > 0);
-      localStorage.setItem("cartItems", JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  const removeItem = (productId: string, variantId: string | undefined) => {
-    setCartItems((prev) => {
-      const updated = prev.filter(
-        (i) => !(i.productId === productId && i.variantId === variantId)
-      );
-      localStorage.setItem("cartItems", JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  const subtotal = cartItems.reduce((acc, item) => {
-    const details = getItemDetails(item);
-    return acc + (details?.price || 0) * item.quantity;
-  }, 0);
+    return { title, price, image, variantName };
+  }, []);
 
   const deliveryFee = deliveryType === "delivery" ? 3.99 : 0;
   const total = subtotal + deliveryFee;
@@ -212,11 +158,14 @@ export default function CheckoutPage() {
 
     setPlacing(true);
     try {
-      const orderItems = cartItems.map(item => {
+      const orderItems = cartItems.map((item: any) => {
         const details = getItemDetails(item);
+        const pId = typeof item.productId === 'object' ? item.productId?._id : item.productId;
+        const vId = typeof item.variantId === 'object' ? item.variantId?._id : item.variantId;
+        
         return {
-          productId: item.productId,
-          variantId: item.variantId || null,
+          productId: pId,
+          variantId: vId || null,
           quantity: item.quantity,
           price: details?.price || 0,
           name: details?.title || "Unknown Item",
@@ -244,8 +193,7 @@ export default function CheckoutPage() {
       }
 
       // Clear cart
-      localStorage.removeItem("cartItems");
-      setCartItems([]);
+      await clearCart();
       setSuccess(true);
     } catch {
       toast.error("Failed to place order. Please try again.");
@@ -630,12 +578,17 @@ export default function CheckoutPage() {
 
                     {/* Items */}
                     <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
-                      {cartItems.map((item, idx) => {
+                      {cartItems.map((item: any, idx) => {
                         const details = getItemDetails(item);
                         if (!details) return null;
+                        
+                        const pId = typeof item.productId === 'object' ? item.productId?._id : item.productId;
+                        const vId = typeof item.variantId === 'object' ? item.variantId?._id : item.variantId;
+                        const maxStock = (item.variantId?.quantity) ?? (item.productId?.quantity) ?? null;
+
                         return (
                           <div
-                            key={`${item.productId}-${item.variantId || idx}`}
+                            key={`${pId}-${vId || idx}`}
                             className="flex gap-3 p-3 rounded-xl bg-foreground/5 border border-foreground/5 group"
                           >
                             <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-black/20 border border-foreground/5">
@@ -671,7 +624,7 @@ export default function CheckoutPage() {
                               <button
                                 type="button"
                                 onClick={() =>
-                                  removeItem(item.productId, item.variantId)
+                                  removeFromCart(pId, vId)
                                 }
                                 className="p-1 text-muted-foreground hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors opacity-0 group-hover:opacity-100"
                               >
@@ -681,11 +634,7 @@ export default function CheckoutPage() {
                                 <button
                                   type="button"
                                   onClick={() =>
-                                    updateQty(
-                                      item.productId,
-                                      item.variantId,
-                                      -1
-                                    )
+                                    updateQuantity(pId, vId, -1, maxStock)
                                   }
                                   className="w-6 h-full rounded flex items-center justify-center text-muted-foreground hover:text-white hover:bg-foreground/10 transition-colors"
                                 >
@@ -697,11 +646,7 @@ export default function CheckoutPage() {
                                 <button
                                   type="button"
                                   onClick={() =>
-                                    updateQty(
-                                      item.productId,
-                                      item.variantId,
-                                      1
-                                    )
+                                    updateQuantity(pId, vId, 1, maxStock)
                                   }
                                   className="w-6 h-full rounded flex items-center justify-center text-muted-foreground hover:text-white hover:bg-foreground/10 transition-colors"
                                 >
