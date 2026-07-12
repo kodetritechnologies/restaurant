@@ -2,8 +2,6 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import BasicProvider from "@/utils/BasicProvider";
 import { useCart } from "@/context/CartContext";
 import {
@@ -32,7 +30,7 @@ import { useRouter } from "next/navigation";
 
 
 type DeliveryType = "delivery" | "pickup" | "dinein";
-type PaymentMethod = "cod" | "online";
+type PaymentMethod = "cod" | "razorpay" | "payLater";
 
 const INPUT_CLASS =
   "w-full rounded-xl border border-foreground/10 bg-background/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all focus:border-gold focus:ring-1 focus:ring-gold/30";
@@ -58,8 +56,10 @@ export default function CheckoutPage() {
   const [placing, setPlacing] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const [deliveryType, setDeliveryType] = useState<DeliveryType>("delivery");
+  const [deliveryType, setDeliveryType] = useState<DeliveryType | "">("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cod");
+  const [availablePaymentMethods, setAvailablePaymentMethods] = useState<PaymentMethod[]>(["cod", "razorpay"]);
+  const [paymentConfig, setPaymentConfig] = useState({ cod: false, razorpay: false, payLater: false });
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -69,26 +69,51 @@ export default function CheckoutPage() {
     tableNumber: "",
     note: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const methods: PaymentMethod[] = [];
+    if (deliveryType === "dinein") {
+      if (paymentConfig.razorpay) methods.push("razorpay");
+      if (paymentConfig.payLater) methods.push("payLater");
+    } else {
+      if (paymentConfig.cod) methods.push("cod");
+      if (paymentConfig.razorpay) methods.push("razorpay");
+    }
+    setAvailablePaymentMethods(methods);
+    
+    setPaymentMethod((prev) => {
+      if (methods.length > 0 && !methods.includes(prev)) {
+        return methods[0];
+      }
+      return prev;
+    });
+  }, [deliveryType, paymentConfig]);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [currData, settingsData] = await Promise.all([
+        const [currData, settingsData, paymentData] = await Promise.all([
           getMethod("/api/currency?default=true"),
-          getMethod("/api/settings"),
+          getMethod("/api/settings?field=deliveryFee"),
+          getMethod("/api/payment-methods"),
         ]);
 
         if (currData?.success && currData.currency) {
           setCurrencySymbol(currData.currency.symbol);
         }
-        if (settingsData?.success) setSettings(settingsData.settings);
+        if (settingsData?.success) {
+          setSettings(settingsData.settings);
+        }
+        if (paymentData?.success && paymentData.paymentMethods) {
+          setPaymentConfig(paymentData.paymentMethods);
+        }
       } catch { }
       setLoading(false);
     };
     fetchData();
 
-    // Try to pre-fill from customer cookie
     try {
       const Cookies = require("js-cookie");
       const token = Cookies.get("customerToken");
@@ -101,6 +126,8 @@ export default function CheckoutPage() {
                 name: d.customer.name || "",
                 email: d.customer.email || "",
                 phone: d.customer.phone || "",
+                address: d.customer.address || "",
+                city: d.customer.city || "",
               }));
             }
           })
@@ -130,7 +157,7 @@ export default function CheckoutPage() {
     return { title, price, image, variantName };
   }, []);
 
-  const deliveryFee = deliveryType === "delivery" ? 3.99 : 0;
+  const deliveryFee = (deliveryType === "delivery" && settings?.isDeliveryFeeActive) ? (settings?.deliveryFee || 0) : 0;
   const total = subtotal + deliveryFee;
 
   const deliveryLabel =
@@ -143,16 +170,47 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    let newErrors: Record<string, string> = {};
+
+    if (String(form.name || "").trim().length < 3) {
+      newErrors.name = "Minimum 3 characters required";
+    }
+    
+    if (!/^\d{10}$/.test(String(form.phone || "").trim())) {
+      newErrors.phone = "Phone number must be exactly 10 digits";
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(String(form.email || "").trim())) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    if (deliveryType === "delivery") {
+      if (!String(form.city || "").trim()) {
+        newErrors.city = "City is required for delivery";
+      }
+      if (!String(form.address || "").trim()) {
+        newErrors.address = "Delivery address is required";
+      }
+    }
+
+    if (!deliveryType) {
+      toast.error("Please select a Delivery Method");
+      newErrors.deliveryType = "Please select a delivery method";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    setErrors({});
+
     if (cartItems.length === 0) {
       toast.error("Your cart is empty.");
       return;
     }
     if (deliveryType === "dinein" && !form.tableNumber) {
       toast.error("Please enter your table number.");
-      return;
-    }
-    if (deliveryType === "delivery" && !form.address) {
-      toast.error("Please enter your delivery address.");
       return;
     }
 
@@ -162,7 +220,7 @@ export default function CheckoutPage() {
         const details = getItemDetails(item);
         const pId = typeof item.productId === 'object' ? item.productId?._id : item.productId;
         const vId = typeof item.variantId === 'object' ? item.variantId?._id : item.variantId;
-        
+
         return {
           productId: pId,
           variantId: vId || null,
@@ -194,7 +252,12 @@ export default function CheckoutPage() {
 
       // Clear cart
       await clearCart();
-      setSuccess(true);
+      
+      if (paymentMethod === "cod") {
+        router.push(`/order/success?orderId=${data.order._id}`);
+      } else {
+        router.push(`/order/pending?orderId=${data.order._id}`);
+      }
     } catch {
       toast.error("Failed to place order. Please try again.");
     } finally {
@@ -202,60 +265,11 @@ export default function CheckoutPage() {
     }
   };
 
-  if (success) {
-    return (
-      <div className="min-h-screen bg-background text-foreground flex flex-col">
-        <Header />
-        <main className="flex-1 flex items-center justify-center px-5 pt-32 pb-24">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center max-w-md"
-          >
-            <div className="relative inline-block mb-8">
-              <div className="absolute inset-0 rounded-full bg-green-500/20 blur-2xl scale-150" />
-              <div className="relative w-24 h-24 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center mx-auto">
-                <CheckCircle2 className="w-12 h-12 text-green-400" />
-              </div>
-            </div>
-            <h1 className="font-serif text-4xl font-bold text-foreground mb-3">
-              Order Placed!
-            </h1>
-            <p className="text-muted-foreground text-lg mb-2">
-              Thank you for your order. We're preparing it now.
-            </p>
-            <p className="text-sm text-muted-foreground mb-10">
-              You'll receive a confirmation{" "}
-              {form.email ? `at ${form.email}` : "shortly"}.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button
-                onClick={() => router.push("/menu")}
-                className="px-8 py-3 rounded-full bg-gold text-primary-foreground font-semibold text-sm hover:bg-gold/90 transition-colors"
-              >
-                Continue Shopping
-              </button>
-              <button
-                onClick={() => router.push("/")}
-                className="px-8 py-3 rounded-full border border-foreground/10 hover:border-gold/40 text-muted-foreground hover:text-gold font-semibold text-sm transition-colors"
-              >
-                Back to Home
-              </button>
-            </div>
-          </motion.div>
-        </main>
-        <Footer settings={settings} />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <Header />
+    <>
 
       <main className="flex-1 pt-32 pb-24">
         <section className="px-5 md:px-8 max-w-7xl mx-auto">
-          {/* Page Header */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -305,30 +319,38 @@ export default function CheckoutPage() {
               </button>
             </motion.div>
           ) : (
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 items-start">
-                {/* ── Left column: Details ── */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5 }}
                   className="space-y-6"
                 >
-                  {/* Delivery / Pickup toggle */}
                   <div className="glass rounded-2xl p-6 space-y-4">
                     <h2 className="font-serif text-xl font-bold text-foreground flex items-center gap-2">
                       <Truck className="w-5 h-5 text-gold" />
                       Delivery Method
                     </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className={`grid grid-cols-1 ${
+                      (settings?.isDeliveryFeeActive ? 1 : 0) + 1 + (paymentConfig.payLater ? 1 : 0) === 3
+                        ? "sm:grid-cols-3"
+                        : (settings?.isDeliveryFeeActive ? 1 : 0) + 1 + (paymentConfig.payLater ? 1 : 0) === 2
+                        ? "sm:grid-cols-2"
+                        : "sm:grid-cols-1"
+                    } gap-3`}>
                       {([
-                        {
-                          type: "delivery" as DeliveryType,
-                          label: "Home Delivery",
-                          icon: <Truck className="w-5 h-5" />,
-                          sub: `+${currencySymbol}3.99 fee`,
-                          subClass: "text-muted-foreground",
-                        },
+                        ...(settings?.isDeliveryFeeActive
+                          ? [
+                            {
+                              type: "delivery" as DeliveryType,
+                              label: "Home Delivery",
+                              icon: <Truck className="w-5 h-5" />,
+                              sub: `+${currencySymbol}${settings?.deliveryFee || 0} fee`,
+                              subClass: "text-muted-foreground",
+                            },
+                          ]
+                          : []),
                         {
                           type: "pickup" as DeliveryType,
                           label: "Pick Up",
@@ -336,22 +358,25 @@ export default function CheckoutPage() {
                           sub: "Free",
                           subClass: "text-green-400",
                         },
-                        {
+                        ...(paymentConfig.payLater ? [{
                           type: "dinein" as DeliveryType,
                           label: "Dine In",
                           icon: <Sofa className="w-5 h-5" />,
                           sub: "Free",
                           subClass: "text-green-400",
-                        },
+                        }] : []),
                       ]).map(({ type, label, icon, sub, subClass }) => (
                         <button
                           key={type}
                           type="button"
-                          onClick={() => setDeliveryType(type)}
+                          onClick={() => {
+                            setDeliveryType(type);
+                            if (errors.deliveryType) setErrors({ ...errors, deliveryType: "" });
+                          }}
                           className={`flex flex-col items-center gap-2 py-4 px-3 rounded-xl border text-sm font-semibold transition-all ${deliveryType === type
-                              ? "border-gold bg-gold/10 text-gold"
-                              : "border-foreground/10 text-muted-foreground hover:border-foreground/20 hover:text-foreground"
-                            }`}
+                            ? "border-gold bg-gold/10 text-gold"
+                            : "border-foreground/10 text-muted-foreground hover:border-foreground/20 hover:text-foreground"
+                            } ${errors.deliveryType ? "border-red-500/50" : ""}`}
                         >
                           {icon}
                           <span className="text-center leading-tight">{label}</span>
@@ -361,9 +386,9 @@ export default function CheckoutPage() {
                         </button>
                       ))}
                     </div>
+                    {errors.deliveryType && <span className="text-[10px] text-red-400 mt-1 block">{errors.deliveryType}</span>}
                   </div>
 
-                  {/* Customer Details */}
                   <div className="glass rounded-2xl p-6 space-y-4">
                     <h2 className="font-serif text-xl font-bold text-foreground flex items-center gap-2">
                       <User className="w-5 h-5 text-gold" />
@@ -377,14 +402,15 @@ export default function CheckoutPage() {
                           <input
                             type="text"
                             placeholder="John Doe"
-                            required
                             value={form.name}
-                            onChange={(e) =>
-                              setForm((f) => ({ ...f, name: e.target.value }))
-                            }
-                            className={INPUT_CLASS + " pl-11"}
+                            onChange={(e) => {
+                              setForm((f) => ({ ...f, name: e.target.value }));
+                              if (errors.name) setErrors({ ...errors, name: "" });
+                            }}
+                            className={`${INPUT_CLASS} pl-11 ${errors.name ? "border-red-500/50 focus:border-red-500" : ""}`}
                           />
                         </div>
+                        {errors.name && <span className="text-[10px] text-red-400 mt-1 block">{errors.name}</span>}
                       </div>
                       <div>
                         <label className={LABEL_CLASS}>Email</label>
@@ -393,14 +419,15 @@ export default function CheckoutPage() {
                           <input
                             type="email"
                             placeholder="you@example.com"
-                            required
                             value={form.email}
-                            onChange={(e) =>
-                              setForm((f) => ({ ...f, email: e.target.value }))
-                            }
-                            className={INPUT_CLASS + " pl-11"}
+                            onChange={(e) => {
+                              setForm((f) => ({ ...f, email: e.target.value }));
+                              if (errors.email) setErrors({ ...errors, email: "" });
+                            }}
+                            className={`${INPUT_CLASS} pl-11 ${errors.email ? "border-red-500/50 focus:border-red-500" : ""}`}
                           />
                         </div>
+                        {errors.email && <span className="text-[10px] text-red-400 mt-1 block">{errors.email}</span>}
                       </div>
                       <div>
                         <label className={LABEL_CLASS}>Phone</label>
@@ -408,15 +435,17 @@ export default function CheckoutPage() {
                           <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                           <input
                             type="tel"
-                            placeholder="+1 555 000 0000"
-                            required
+                            placeholder="5550000000"
                             value={form.phone}
-                            onChange={(e) =>
-                              setForm((f) => ({ ...f, phone: e.target.value }))
-                            }
-                            className={INPUT_CLASS + " pl-11"}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                              setForm((f) => ({ ...f, phone: val }));
+                              if (errors.phone) setErrors({ ...errors, phone: "" });
+                            }}
+                            className={`${INPUT_CLASS} pl-11 ${errors.phone ? "border-red-500/50 focus:border-red-500" : ""}`}
                           />
                         </div>
+                        {errors.phone && <span className="text-[10px] text-red-400 mt-1 block">{errors.phone}</span>}
                       </div>
                       {deliveryType === "delivery" && (
                         <div>
@@ -427,15 +456,16 @@ export default function CheckoutPage() {
                               type="text"
                               placeholder="New York"
                               value={form.city}
-                              onChange={(e) =>
-                                setForm((f) => ({ ...f, city: e.target.value }))
-                              }
-                              className={INPUT_CLASS + " pl-11"}
+                              onChange={(e) => {
+                                setForm((f) => ({ ...f, city: e.target.value }));
+                                if (errors.city) setErrors({ ...errors, city: "" });
+                              }}
+                              className={`${INPUT_CLASS} pl-11 ${errors.city ? "border-red-500/50 focus:border-red-500" : ""}`}
                             />
                           </div>
+                          {errors.city && <span className="text-[10px] text-red-400 mt-1 block">{errors.city}</span>}
                         </div>
                       )}
-                      {/* Table number for dine-in */}
                       <AnimatePresence>
                         {deliveryType === "dinein" && (
                           <motion.div
@@ -482,20 +512,15 @@ export default function CheckoutPage() {
                             <textarea
                               rows={2}
                               placeholder="123 Main Street, Apartment 4B"
-                              required={deliveryType === "delivery"}
                               value={form.address}
-                              onChange={(e) =>
-                                setForm((f) => ({
-                                  ...f,
-                                  address: e.target.value,
-                                }))
-                              }
-                              className={
-                                INPUT_CLASS +
-                                " pl-11 resize-none leading-relaxed"
-                              }
+                              onChange={(e) => {
+                                setForm((f) => ({ ...f, address: e.target.value }));
+                                if (errors.address) setErrors({ ...errors, address: "" });
+                              }}
+                              className={`${INPUT_CLASS} pl-11 resize-none leading-relaxed ${errors.address ? "border-red-500/50 focus:border-red-500" : ""}`}
                             />
                           </div>
+                          {errors.address && <span className="text-[10px] text-red-400 mt-1 block">{errors.address}</span>}
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -521,40 +546,33 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  {/* Payment Method */}
                   <div className="glass rounded-2xl p-6 space-y-4">
                     <h2 className="font-serif text-xl font-bold text-foreground flex items-center gap-2">
                       <ShieldCheck className="w-5 h-5 text-gold" />
                       Payment Method
                     </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {(["cod", "online"] as PaymentMethod[]).map((method) => (
-                        <button
-                          key={method}
-                          type="button"
-                          onClick={() => setPaymentMethod(method)}
-                          className={`flex items-center gap-3 py-4 px-5 rounded-xl border text-sm font-semibold transition-all ${paymentMethod === method
-                              ? "border-gold bg-gold/10 text-gold"
-                              : "border-foreground/10 text-muted-foreground hover:border-foreground/20 hover:text-foreground"
+                    {availablePaymentMethods.length === 0 ? (
+                      <p className="text-sm text-red-400">No payment methods available right now.</p>
+                    ) : (
+                      <div className="flex flex-col gap-3">
+                        {availablePaymentMethods.map((method) => (
+                          <button
+                            key={method}
+                            type="button"
+                            onClick={() => setPaymentMethod(method)}
+                            className={`flex items-center gap-3 py-4 px-5 rounded-xl border text-sm font-semibold transition-all ${
+                              paymentMethod === method
+                                ? "border-gold bg-gold/10 text-gold"
+                                : "border-foreground/10 text-muted-foreground hover:border-foreground/20 hover:text-foreground"
                             }`}
-                        >
-                          <span
-                            className={`h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0 ${paymentMethod === method
-                                ? "border-gold"
-                                : "border-foreground/30"
-                              }`}
                           >
-                            {paymentMethod === method && (
-                              <span className="w-2 h-2 rounded-full bg-gold" />
-                            )}
-                          </span>
-                          {method === "cod"
-                            ? "Cash on Delivery"
-                            : "Pay Online"}
-                        </button>
-                      ))}
-                    </div>
-                    {paymentMethod === "online" && (
+                            <ShieldCheck className={`h-5 w-5 ${paymentMethod === method ? "text-gold" : "text-muted-foreground"}`} />
+                            {method === "cod" ? "Cash on Delivery" : method === "payLater" ? "Pay Later" : "Razorpay"}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {paymentMethod === "razorpay" && (
                       <p className="text-xs text-muted-foreground bg-foreground/5 rounded-xl px-4 py-3 border border-foreground/5">
                         🔒 You'll be redirected to our secure payment gateway
                         after confirming your order.
@@ -563,7 +581,6 @@ export default function CheckoutPage() {
                   </div>
                 </motion.div>
 
-                {/* ── Right column: Order Summary ── */}
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -576,12 +593,11 @@ export default function CheckoutPage() {
                       Order Summary
                     </h2>
 
-                    {/* Items */}
                     <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
                       {cartItems.map((item: any, idx) => {
                         const details = getItemDetails(item);
                         if (!details) return null;
-                        
+
                         const pId = typeof item.productId === 'object' ? item.productId?._id : item.productId;
                         const vId = typeof item.variantId === 'object' ? item.variantId?._id : item.variantId;
                         const maxStock = (item.variantId?.quantity) ?? (item.productId?.quantity) ?? null;
@@ -659,7 +675,6 @@ export default function CheckoutPage() {
                       })}
                     </div>
 
-                    {/* Divider */}
                     <div className="border-t border-foreground/5 pt-4 space-y-2">
                       <div className="flex justify-between text-sm text-muted-foreground">
                         <span>Subtotal</span>
@@ -690,7 +705,6 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  {/* Place Order Button */}
                   <button
                     type="submit"
                     disabled={placing}
@@ -714,7 +728,6 @@ export default function CheckoutPage() {
                     Your information is secure and encrypted
                   </p>
 
-                  {/* Back to menu */}
                   <button
                     type="button"
                     onClick={() => router.push("/menu")}
@@ -729,8 +742,6 @@ export default function CheckoutPage() {
           )}
         </section>
       </main>
-
-      <Footer settings={settings} />
-    </div>
+    </>
   );
 }

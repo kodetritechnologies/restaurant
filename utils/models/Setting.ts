@@ -64,6 +64,14 @@ const SettingSchema = new Schema(
       type: String,
       trim: true,
     },
+    deliveryFee: {
+      type: Number,
+      default: 0,
+    },
+    isDeliveryFeeActive: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

@@ -3,7 +3,9 @@ import dbConnect from "@/utils/lib/dbConnect";
 import Setting from "@/utils/models/Setting";
 import { verifyAdmin } from "@/utils/lib/auth";
 
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const field = searchParams.get("field");
   try {
     await dbConnect();
     let settings = await Setting.findOne({});
@@ -25,7 +27,22 @@ export async function GET() {
         facebookUsername: "aurea.dining",
         twitterUsername: "aurea.dining",
         shopDescription: "A modern sanctuary of fine dining. Since 2012.",
+        deliveryFee: 0,
+        isDeliveryFeeActive: false,
       });
+    }
+
+    if (field === "deliveryFee") {
+      return NextResponse.json(
+        { 
+          success: true, 
+          settings: { 
+            deliveryFee: settings.deliveryFee, 
+            isDeliveryFeeActive: settings.isDeliveryFeeActive 
+          } 
+        },
+        { status: 200 }
+      );
     }
 
     return NextResponse.json(

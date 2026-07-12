@@ -10,14 +10,6 @@ const orderItemSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     default: null,
   },
-  name: {
-    type: String,
-    required: true,
-  },
-  variantName: {
-    type: String,
-    default: "",
-  },
   quantity: {
     type: Number,
     required: true,
@@ -28,10 +20,6 @@ const orderItemSchema = new mongoose.Schema({
     required: true,
     min: 0,
   },
-  image: {
-    type: String,
-    default: "",
-  }
 });
 
 const orderSchema = new mongoose.Schema(
@@ -49,13 +37,21 @@ const orderSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ["cod", "online"],
+      enum: ["cod", "online", "payLater", "razorpay"],
       required: true,
+    },
+    paymentMode: {
+      type: String,
+      default: null,
     },
     paymentStatus: {
       type: String,
       enum: ["pending", "paid", "failed"],
       default: "pending",
+    },
+    transactionId: {
+      type: String,
+      default: null,
     },
     status: {
       type: String,

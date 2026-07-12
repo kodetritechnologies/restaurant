@@ -3,7 +3,6 @@ import { Inter, Cormorant_Garamond, Great_Vibes } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import { CustomerProvider } from "@/context/CustomerContext";
 import { CartProvider } from "@/context/CartContext";
-import CartDrawer from "@/components/CartDrawer";
 import "./globals.css";
 
 const inter = Inter({
@@ -54,7 +53,6 @@ export default function RootLayout({
         <CustomerProvider>
           <CartProvider>
             {children}
-            <CartDrawer />
           </CartProvider>
         </CustomerProvider>
         <Toaster 

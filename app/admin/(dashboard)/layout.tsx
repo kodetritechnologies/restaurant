@@ -21,8 +21,9 @@ import {
   Package,
   ChevronDown,
   ChevronUp,
-  CircleDollarSign,
-  User
+  User,
+  Key,
+  CircleDollarSign
 } from "lucide-react";
 import Cookies from "js-cookie";
 import BasicProvider from "@/utils/BasicProvider";
@@ -119,6 +120,7 @@ export default function AdminDashboardLayout({
     { href: "/admin/chefs", label: "Chefs Team", icon: Users },
     { href: "/admin/faqs", label: "FAQs", icon: HelpCircle },
     { href: "/admin/currency", label: "Currency", icon: CircleDollarSign },
+    { href: "/admin/credentials", label: "Credentials", icon: Key },
     { href: "/admin/settings", label: "Settings", icon: Settings },
   ];
 

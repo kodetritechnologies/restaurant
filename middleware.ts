@@ -65,61 +65,47 @@ async function verifyJwt(token: string, secret: string): Promise<boolean> {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  // ==========================================
-  // 1. ADMIN ROUTE PROTECTION
-  // ==========================================
   const isAdminRoute = pathname.startsWith('/admin');
-  
+
   if (isAdminRoute) {
     const adminToken = request.cookies.get('adminToken')?.value;
     const isAdminValid = adminToken ? await verifyJwt(adminToken, JWT_SECRET) : false;
     const isAdminLoginRoute = pathname === '/admin/login';
 
     if (isAdminLoginRoute) {
-      // If admin is already logged in, redirect them to dashboard
       if (isAdminValid) {
         return NextResponse.redirect(new URL('/admin', request.url));
       }
       return NextResponse.next();
     }
 
-    // For all other /admin routes, block unauthenticated access
     if (!isAdminValid) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
-    
+
     return NextResponse.next();
   }
 
-  // ==========================================
-  // 2. CUSTOMER ROUTE PROTECTION
-  // ==========================================
-  // Define which paths require a customer to be logged in
-  const isCustomerProtectedRoute = pathname.startsWith('/profile') || pathname.startsWith('/checkout');
-  
+  const isCustomerProtectedRoute = pathname.startsWith('/profile');
+
   if (isCustomerProtectedRoute) {
     const customerToken = request.cookies.get('customerToken')?.value;
     const isCustomerValid = customerToken ? await verifyJwt(customerToken, JWT_SECRET) : false;
 
     if (!isCustomerValid) {
-      // Redirect unauthenticated customers to the home page
       const homeUrl = new URL('/', request.url);
       return NextResponse.redirect(homeUrl);
     }
-    
+
     return NextResponse.next();
   }
 
-  // Allow all other public routes
   return NextResponse.next();
 }
 
 export const config = {
-  // Add your protected customer routes to the matcher
   matcher: [
-    '/admin/:path*', 
-    '/profile/:path*', 
-    '/checkout/:path*'
+    '/admin/:path*',
+    '/profile/:path*',
   ],
 };

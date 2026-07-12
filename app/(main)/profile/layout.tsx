@@ -5,8 +5,6 @@ import { useRouter, usePathname } from "next/navigation";
 import { useCustomer } from "@/context/CustomerContext";
 import { User, ShoppingBag, LogOut, Loader2 } from "lucide-react";
 import Link from "next/link";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import BasicProvider from "@/utils/BasicProvider";
 import { useState } from "react";
 
@@ -49,8 +47,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <Header />
+    <>
       
       <main className="flex-1 pt-32 pb-24">
         <div className="max-w-7xl mx-auto px-5 md:px-8">
@@ -100,8 +97,6 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
           </div>
         </div>
       </main>
-
-      <Footer settings={settings} />
-    </div>
+    </>
   );
 }

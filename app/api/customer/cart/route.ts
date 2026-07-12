@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import { cookies } from "next/headers";
 import dbConnect from "@/utils/lib/dbConnect";
 import Cart from "@/utils/models/Cart";
+import "@/utils/models/Product";
+import "@/utils/models/ProductVariant";
 import { verifyToken } from "@/utils/lib/jwt";
 
 export async function GET() {

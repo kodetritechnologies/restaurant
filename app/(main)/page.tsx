@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Loader from "@/components/Loader";
-import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Categories from "@/components/Categories";
 import Menu from "@/components/Menu";
@@ -11,8 +10,6 @@ import Reservation from "@/components/Reservation";
 import Stats from "@/components/Stats";
 import Faq from "@/components/Faq";
 import Contact from "@/components/Contact";
-import Footer from "@/components/Footer";
-import FloatingButtons from "@/components/FloatingButtons";
 import BasicProvider from "@/utils/BasicProvider";
 
 function useReveal(deps: any[] = []) {
@@ -78,7 +75,6 @@ export default function Home() {
   return (
     <>
       <Loader loading={loading} />
-      <Header />
       <main id="home">
         <Hero />
         <Categories />
@@ -88,9 +84,7 @@ export default function Home() {
         <Stats />
         <Faq faqs={faqs} />
         <Contact settings={settings} />
-        <Footer settings={settings} />
       </main>
-      <FloatingButtons settings={settings} />
     </>
   );
 }

@@ -3,9 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Loader from "@/components/Loader";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import FloatingButtons from "@/components/FloatingButtons";
 import { ShoppingBag, Star, Plus, Minus, X, Package, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -87,9 +84,8 @@ function MenuContent() {
 
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <>
       <Loader loading={loading} />
-      <Header />
 
       <main className="flex-1 pt-32 pb-24">
         <section className="relative px-5 md:px-8 max-w-7xl mx-auto mb-16 text-center">
@@ -726,10 +722,7 @@ function MenuContent() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      <Footer settings={settings} />
-      <FloatingButtons settings={settings} />
-    </div>
+    </>
   );
 }
 
