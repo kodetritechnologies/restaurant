@@ -81,7 +81,7 @@ export default function CheckoutPage() {
       if (paymentConfig.razorpay) methods.push("razorpay");
     }
     setAvailablePaymentMethods(methods);
-    
+
     setPaymentMethod((prev) => {
       if (methods.length > 0 && !methods.includes(prev)) {
         return methods[0];
@@ -153,7 +153,6 @@ export default function CheckoutPage() {
         image = variantObj.galleryImages[0];
       }
     }
-
     return { title, price, image, variantName };
   }, []);
 
@@ -167,6 +166,16 @@ export default function CheckoutPage() {
         ? "Pick Up"
         : "Dine In";
 
+  const loadRazorpayScript = (): Promise<boolean> =>
+    new Promise((resolve) => {
+      if ((window as any).Razorpay) return resolve(true);
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -175,7 +184,7 @@ export default function CheckoutPage() {
     if (String(form.name || "").trim().length < 3) {
       newErrors.name = "Minimum 3 characters required";
     }
-    
+
     if (!/^\d{10}$/.test(String(form.phone || "").trim())) {
       newErrors.phone = "Phone number must be exactly 10 digits";
     }
@@ -232,31 +241,96 @@ export default function CheckoutPage() {
         };
       });
 
-      const payload = {
-        cartItems: orderItems,
-        customerDetails: form,
-        deliveryType,
-        paymentMethod,
-        subtotal,
-        deliveryFee,
-        totalAmount: total,
-      };
+      if (paymentMethod === "cod") {
+        const payload = {
+          cartItems: orderItems,
+          customerDetails: form,
+          deliveryType,
+          paymentMethod,
+          subtotal,
+          deliveryFee,
+          totalAmount: total,
+        };
 
-      const data = await postMethod("/api/customer/orders", payload);
-
-      if (!data || !data.success) {
-        toast.error(data.message || "Failed to place order.");
-        setPlacing(false);
+        const data = await postMethod("/api/customer/orders", payload);
+        if (!data || !data.success) {
+          toast.error(data?.message || "Failed to place order.");
+          setPlacing(false);
+          return;
+        }
+        await clearCart();
+        router.push(`/order/success?orderId=${data.order._id}`);
         return;
       }
 
-      // Clear cart
-      await clearCart();
-      
-      if (paymentMethod === "cod") {
-        router.push(`/order/success?orderId=${data.order._id}`);
-      } else {
-        router.push(`/order/pending?orderId=${data.order._id}`);
+      if (paymentMethod === "razorpay") {
+        const scriptLoaded = await loadRazorpayScript();
+        if (!scriptLoaded) {
+          toast.error("Failed to load payment gateway. Please try again.");
+          setPlacing(false);
+          return;
+        }
+
+        const rzpOrderRes = await postMethod("/api/razorpay/create-order", {
+          amount: total,
+        });
+
+        if (!rzpOrderRes?.success) {
+          toast.error(rzpOrderRes?.message || "Could not initiate payment.");
+          setPlacing(false);
+          return;
+        }
+
+        await new Promise<void>((resolve, reject) => {
+          const options = {
+            key: rzpOrderRes.keyId,
+            amount: rzpOrderRes.amount,
+            currency: rzpOrderRes.currency,
+            name: "Restaurant",
+            description: "Order Payment",
+            order_id: rzpOrderRes.orderId,
+            prefill: {
+              name: form.name,
+              email: form.email,
+              contact: form.phone,
+            },
+            handler: async (response: any) => {
+              const payload = {
+                cartItems: orderItems,
+                customerDetails: form,
+                deliveryType,
+                paymentMethod,
+                subtotal,
+                deliveryFee,
+                totalAmount: total,
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              };
+
+              const data = await postMethod("/api/customer/orders", payload);
+              if (!data || !data.success) {
+                toast.error(data?.message || "Order could not be saved after payment.");
+                reject(new Error(data?.message));
+                return;
+              }
+              await clearCart();
+              router.push(`/order/success?orderId=${data.order._id}`);
+              resolve();
+            },
+            modal: {
+              ondismiss: () => {
+                toast.error("Payment cancelled.");
+                setPlacing(false);
+                resolve();
+              },
+            },
+          };
+          const rzp = new (window as any).Razorpay(options);
+          rzp.open();
+        });
+
+        return;
       }
     } catch {
       toast.error("Failed to place order. Please try again.");
@@ -332,13 +406,12 @@ export default function CheckoutPage() {
                       <Truck className="w-5 h-5 text-gold" />
                       Delivery Method
                     </h2>
-                    <div className={`grid grid-cols-1 ${
-                      (settings?.isDeliveryFeeActive ? 1 : 0) + 1 + (paymentConfig.payLater ? 1 : 0) === 3
-                        ? "sm:grid-cols-3"
-                        : (settings?.isDeliveryFeeActive ? 1 : 0) + 1 + (paymentConfig.payLater ? 1 : 0) === 2
+                    <div className={`grid grid-cols-1 ${(settings?.isDeliveryFeeActive ? 1 : 0) + 1 + (paymentConfig.payLater ? 1 : 0) === 3
+                      ? "sm:grid-cols-3"
+                      : (settings?.isDeliveryFeeActive ? 1 : 0) + 1 + (paymentConfig.payLater ? 1 : 0) === 2
                         ? "sm:grid-cols-2"
                         : "sm:grid-cols-1"
-                    } gap-3`}>
+                      } gap-3`}>
                       {([
                         ...(settings?.isDeliveryFeeActive
                           ? [
@@ -560,11 +633,10 @@ export default function CheckoutPage() {
                             key={method}
                             type="button"
                             onClick={() => setPaymentMethod(method)}
-                            className={`flex items-center gap-3 py-4 px-5 rounded-xl border text-sm font-semibold transition-all ${
-                              paymentMethod === method
-                                ? "border-gold bg-gold/10 text-gold"
-                                : "border-foreground/10 text-muted-foreground hover:border-foreground/20 hover:text-foreground"
-                            }`}
+                            className={`flex items-center gap-3 py-4 px-5 rounded-xl border text-sm font-semibold transition-all ${paymentMethod === method
+                              ? "border-gold bg-gold/10 text-gold"
+                              : "border-foreground/10 text-muted-foreground hover:border-foreground/20 hover:text-foreground"
+                              }`}
                           >
                             <ShieldCheck className={`h-5 w-5 ${paymentMethod === method ? "text-gold" : "text-muted-foreground"}`} />
                             {method === "cod" ? "Cash on Delivery" : method === "payLater" ? "Pay Later" : "Razorpay"}

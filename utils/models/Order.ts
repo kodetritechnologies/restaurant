@@ -79,6 +79,10 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    deletedAt: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );

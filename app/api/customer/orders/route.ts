@@ -4,8 +4,8 @@ import dbConnect from "@/utils/lib/dbConnect";
 import Order from "@/utils/models/Order";
 import Customer from "@/utils/models/Customer";
 import { verifyToken } from "@/utils/lib/jwt";
-
-// Get customer orders
+import { getPaginatedData } from "@/utils/lib/pagination";
+import { processPayment } from "@/utils/lib/paymentHandlers";
 export async function GET(req: Request) {
   try {
     const cookieStore = await cookies();
@@ -25,30 +25,22 @@ export async function GET(req: Request) {
     await dbConnect();
 
     const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get("page") || "1", 10);
-    const limit = parseInt(searchParams.get("limit") || "5", 10);
-    const skip = (page - 1) * limit;
+    const page = searchParams.get("page");
+    const limit = searchParams.get("limit");
 
-    // Fetch orders sorted by newest first
-    const orders = await Order.find({ customerId: decoded.id })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    const totalOrders = await Order.countDocuments({ customerId: decoded.id });
-    const totalPages = Math.ceil(totalOrders / limit);
+    const { data: orders, totalCount, totalPages, currentPage } = await getPaginatedData(
+      Order,
+      { customerId: decoded.id },
+      { page, limit: limit || "5" }
+    );
 
     return NextResponse.json({ 
-      success: true, 
+      success: true,
+      count: orders.length,
+      totalCount,
+      totalPages,
+      currentPage,
       orders,
-      pagination: {
-        page,
-        totalPages,
-        hasPrevPage: page > 1,
-        hasNextPage: page < totalPages,
-        prevPage: page > 1 ? page - 1 : null,
-        nextPage: page < totalPages ? page + 1 : null,
-      }
     });
   } catch (error: any) {
     console.error("Get Orders Error:", error);
@@ -56,7 +48,6 @@ export async function GET(req: Request) {
   }
 }
 
-// Create a new order
 export async function POST(req: Request) {
   try {
     const cookieStore = await cookies();
@@ -75,7 +66,10 @@ export async function POST(req: Request) {
       } catch (err) {}
     }
 
-    const { cartItems, customerDetails, deliveryType, paymentMethod, subtotal, deliveryFee, totalAmount } = await req.json();
+
+    const body = await req.json();
+    const { cartItems, customerDetails, deliveryType, paymentMethod, subtotal, deliveryFee, totalAmount } = body;
+
 
     if (!cartItems || cartItems.length === 0) {
       return NextResponse.json({ success: false, message: "Cart is empty" }, { status: 400 });
@@ -83,13 +77,65 @@ export async function POST(req: Request) {
 
     await dbConnect();
 
-    // If not logged in, but email provided, try to find customer by email or create a placeholder logic
-    // For simplicity, if not logged in, we reject, or we allow guest checkout without linking?
-    // Since the instruction is for a customer dashboard, let's require authentication for this route, or allow guests by using a null customerId (but the schema requires it). Let's require customerId.
-    if (!customerId) {
-      // In a real app, you might want to create a guest account here.
-      // But we will return an error because it's a customer-focused feature now.
-      return NextResponse.json({ success: false, message: "Please log in to place an order." }, { status: 401 });
+    if (!customerDetails || !customerDetails.phone) {
+      return NextResponse.json({ success: false, message: "Phone number is required to place an order." }, { status: 400 });
+    }
+
+    let customer = await Customer.findOne({ phone: customerDetails.phone });
+
+    if (customer) {
+      let updateData: any = {};
+      if (customerDetails.name && customerDetails.name !== customer.name) updateData.name = customerDetails.name;
+      if (customerDetails.email && customerDetails.email !== customer.email) updateData.email = customerDetails.email;
+      if (customerDetails.address && customerDetails.address !== customer.address) updateData.address = customerDetails.address;
+      if (customerDetails.city && customerDetails.city !== customer.city) updateData.city = customerDetails.city;
+
+      if (Object.keys(updateData).length > 0) {
+        if (updateData.email) {
+          const existingEmail = await Customer.findOne({ email: updateData.email, _id: { $ne: customer._id } });
+          if (existingEmail) {
+            delete updateData.email;  
+          }
+        }
+        customer = await Customer.findByIdAndUpdate(customer._id, updateData, { new: true });
+      }
+      customerId = customer._id;
+    } else {
+      if (customerDetails.email) {
+        const existingEmail = await Customer.findOne({ email: customerDetails.email });
+        if (existingEmail) {
+           return NextResponse.json({ success: false, message: "This email is associated with a different phone number. Please use a different email or log in." }, { status: 400 });
+        }
+      }
+
+      customer = await Customer.create({
+        name: customerDetails.name,
+        email: customerDetails.email,
+        phone: customerDetails.phone,
+        address: customerDetails.address,
+        city: customerDetails.city,
+      });
+      customerId = customer._id;
+    }
+
+ const paymentPayload = {
+      cartItems,
+      customerDetails,
+      deliveryType,
+      paymentMethod,
+      subtotal,
+      deliveryFee,
+      totalAmount,
+      ...body, 
+    };
+
+    const paymentResult = await processPayment(paymentMethod, paymentPayload);
+
+    if (!paymentResult.success) {
+      return NextResponse.json(
+        { success: false, message: paymentResult.message ?? "Payment failed." },
+        { status: 402 }
+      );
     }
 
     const newOrder = await Order.create({
@@ -101,6 +147,7 @@ export async function POST(req: Request) {
       subtotal,
       deliveryFee,
       totalAmount,
+      ...(paymentResult.transactionId && { transactionId: paymentResult.transactionId }),
     });
 
     return NextResponse.json({ success: true, message: "Order placed successfully", order: newOrder }, { status: 201 });
