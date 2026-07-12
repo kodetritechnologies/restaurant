@@ -30,8 +30,8 @@ export default function OrderStatusPage() {
           glowColor: "bg-green-500/20",
           title: "Order Placed!",
           description: "Thank you for your order. We're preparing it now.",
-          actionText: "View Orders",
-          actionRoute: "/profile/orders",
+          actionText: "Continue New Order",
+          actionRoute: "/menu",
         };
       case "cancel":
         return {

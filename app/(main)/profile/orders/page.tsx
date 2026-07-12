@@ -2,12 +2,13 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { motion } from "framer-motion";
-import { Loader2, Package, SearchX, Clock, MapPin, Map, CreditCard, DollarSign } from "lucide-react";
+import { Loader2, Package, SearchX, Clock, MapPin, Map, CreditCard, Banknote, Eye, Trash2 } from "lucide-react";
 import { useCustomer } from "@/context/CustomerContext";
 import toast from "react-hot-toast";
 import BasicProvider from "@/utils/BasicProvider";
 import { useSearchParams } from "next/navigation";
 import Pagination from "@/components/Pagination";
+import Link from "next/link";
 
 interface OrderItem {
   productId: string;
@@ -35,12 +36,13 @@ interface Order {
 function OrdersContent() {
   const searchParams = useSearchParams();
   const page = searchParams.get("page") || "1";
-  const { getMethod } = BasicProvider();
+  const { getMethod, deleteMethod } = BasicProvider();
   const { customer } = useCustomer();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currency, setCurrency] = useState("$");
+  const [currency, setCurrency] = useState("");
   const [paginationData, setPaginationData] = useState<any>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -66,6 +68,25 @@ function OrdersContent() {
 
     fetchData();
   }, [page]);
+
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!confirm("Are you sure you want to delete this order?")) return;
+
+    setDeletingId(orderId);
+    try {
+      const res = await deleteMethod(`/api/customer/orders/${orderId}`);
+      if (res && res.success) {
+        toast.success("Order deleted successfully");
+        setOrders(orders.filter(order => order._id !== orderId));
+      } else {
+        toast.error(res?.message || "Failed to delete order");
+      }
+    } catch (error) {
+      toast.error("An error occurred while deleting the order");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -117,73 +138,65 @@ function OrdersContent() {
         </div>
       ) : (
         <div className="space-y-6">
-          {orders.map((order) => (
-            <motion.div
-              key={order._id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="glass rounded-2xl p-6 border border-foreground/5 hover:border-gold/30 transition-all duration-300"
-            >
-              {/* Order Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-foreground/5">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="font-semibold text-foreground text-lg">Order #{order._id.slice(-6).toUpperCase()}</h3>
-                    <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${getStatusColor(order.status)}`}>
-                      {order.status.replace(/_/g, " ")}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {new Date(order.createdAt).toLocaleDateString()} at {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                  </div>
-                </div>
-
-                <div className="text-left sm:text-right">
-                  <div className="text-sm text-muted-foreground mb-1">Total Amount</div>
-                  <div className="text-2xl font-bold text-gold">{currency}{order.totalAmount.toFixed(2)}</div>
-                </div>
-              </div>
-
-              {/* Order Items */}
-              <div className="space-y-4 mb-6 pb-6 border-b border-foreground/5">
-                {order.items.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-foreground/5 shrink-0">
-                      {item.image ? (
-                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <img src="/assets/no-image-food.jpg" alt="No image" className="w-full h-full object-cover" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground text-sm line-clamp-1">{item.name}</p>
-                      {item.variantName && <p className="text-xs text-muted-foreground mt-0.5">{item.variantName}</p>}
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-sm font-semibold text-foreground">{currency}{item.price.toFixed(2)}</p>
-                      <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
-                    </div>
-                  </div>
+          <div className="overflow-x-auto rounded-xl border border-foreground/10 bg-foreground/5">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-foreground/10 text-muted-foreground text-sm uppercase tracking-wider">
+                  <th className="py-4 px-6 font-semibold">Order ID</th>
+                  <th className="py-4 px-6 font-semibold">Date</th>
+                  <th className="py-4 px-6 font-semibold">Status</th>
+                  <th className="py-4 px-6 font-semibold">Total</th>
+                  <th className="py-4 px-6 font-semibold text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.map((order) => (
+                  <tr key={order._id} className="border-b border-foreground/5 hover:bg-foreground/5 transition-colors">
+                    <td className="py-4 px-6">
+                      <span className="font-bold text-foreground">#{order._id.slice(-6).toUpperCase()}</span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="text-sm text-foreground">{new Date(order.createdAt).toLocaleDateString()}</div>
+                      <div className="text-xs text-muted-foreground">{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${getStatusColor(order.status)}`}>
+                        {order.status.replace(/_/g, " ")}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 font-bold text-gold">
+                      {currency}{order.totalAmount.toFixed(2)}
+                    </td>
+                    <td className="py-4 px-6 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link 
+                          href={`/profile/orders/${order._id}`} 
+                          title="View Details"
+                          className="inline-flex items-center justify-center w-9 h-9 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 text-foreground hover:text-gold hover:bg-gold/10 border border-foreground/10 hover:border-gold/30"
+                        >
+                          <Eye className="w-4 h-4" />
+                          <span className="sr-only">View Details</span>
+                        </Link>
+                        <button
+                          onClick={() => handleDeleteOrder(order._id)}
+                          disabled={deletingId === order._id}
+                          title="Delete Order"
+                          className="inline-flex items-center justify-center w-9 h-9 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 text-foreground hover:text-red-500 hover:bg-red-500/10 border border-foreground/10 hover:border-red-500/30"
+                        >
+                          {deletingId === order._id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                          <span className="sr-only">Delete Order</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
                 ))}
-              </div>
-
-              {/* Order Details Footer */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="space-y-1.5">
-                  <span className="text-[10px] uppercase tracking-widest text-gold font-semibold flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> Delivery Method</span>
-                  <p className="text-sm text-foreground capitalize">{order.deliveryType}</p>
-                </div>
-                <div className="space-y-1.5">
-                  <span className="text-[10px] uppercase tracking-widest text-gold font-semibold flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5" /> Payment Method</span>
-                  <p className="text-sm text-foreground uppercase">{order.paymentMethod === "cod" ? "Cash on Delivery" : "Online Payment"}</p>
-                </div>
-                <div className="space-y-1.5">
-                  <span className="text-[10px] uppercase tracking-widest text-gold font-semibold flex items-center gap-1.5"><DollarSign className="w-3.5 h-3.5" /> Payment Status</span>
-                  <p className={`text-sm font-medium capitalize ${getPaymentStatusColor(order.paymentStatus)}`}>{order.paymentStatus}</p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+              </tbody>
+            </table>
+          </div>
           
           {/* Pagination */}
           {paginationData && <Pagination data={paginationData} />}

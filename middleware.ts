@@ -30,17 +30,17 @@ function decodeJwtPayload(payloadB64: string) {
   return JSON.parse(json);
 }
 
-async function verifyJwt(token: string, secret: string): Promise<boolean> {
+async function verifyJwt(token: string, secret: string): Promise<any | null> {
   try {
     const parts = token.split('.');
-    if (parts.length !== 3) return false;
+    if (parts.length !== 3) return null;
 
     const [headerB64, payloadB64, signatureB64] = parts;
 
     const payload = decodeJwtPayload(payloadB64);
 
     if (payload.exp && Date.now() >= payload.exp * 1000) {
-      return false;
+      return null;
     }
 
     const encoder = new TextEncoder();
@@ -56,10 +56,11 @@ async function verifyJwt(token: string, secret: string): Promise<boolean> {
     const data = encoder.encode(`${headerB64}.${payloadB64}`);
     const signatureBytes = base64UrlDecode(signatureB64);
 
-    return await crypto.subtle.verify('HMAC', key, signatureBytes as any, data);
+    const isValid = await crypto.subtle.verify('HMAC', key, signatureBytes as any, data);
+    return isValid ? payload : null;
   } catch (error) {
     console.error('JWT verification error in middleware:', error);
-    return false;
+    return null;
   }
 }
 
@@ -69,7 +70,8 @@ export async function middleware(request: NextRequest) {
 
   if (isAdminRoute) {
     const adminToken = request.cookies.get('adminToken')?.value;
-    const isAdminValid = adminToken ? await verifyJwt(adminToken, JWT_SECRET) : false;
+    const adminPayload = adminToken ? await verifyJwt(adminToken, JWT_SECRET) : null;
+    const isAdminValid = !!adminPayload;
     const isAdminLoginRoute = pathname === '/admin/login';
 
     if (isAdminLoginRoute) {
@@ -90,7 +92,8 @@ export async function middleware(request: NextRequest) {
 
   if (isCustomerProtectedRoute) {
     const customerToken = request.cookies.get('customerToken')?.value;
-    const isCustomerValid = customerToken ? await verifyJwt(customerToken, JWT_SECRET) : false;
+    const customerPayload = customerToken ? await verifyJwt(customerToken, JWT_SECRET) : null;
+    const isCustomerValid = !!customerPayload;
 
     if (!isCustomerValid) {
       const homeUrl = new URL('/', request.url);
@@ -100,6 +103,27 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  const isCustomerApiRoute = pathname.startsWith('/api/customer');
+
+  if (isCustomerApiRoute) {
+    const customerToken = request.cookies.get('customerToken')?.value;
+    const requestHeaders = new Headers(request.headers);
+    
+    if (customerToken) {
+      const payload = await verifyJwt(customerToken, JWT_SECRET);
+      if (payload && payload.id) {
+        requestHeaders.set('x-customer-id', payload.id);
+        requestHeaders.set('x-customer-email', payload.email || '');
+      }
+    }
+
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      }
+    });
+  }
+
   return NextResponse.next();
 }
 
@@ -107,5 +131,6 @@ export const config = {
   matcher: [
     '/admin/:path*',
     '/profile/:path*',
+    '/api/customer/:path*',
   ],
 };

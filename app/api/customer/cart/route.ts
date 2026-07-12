@@ -1,30 +1,20 @@
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
-import { cookies } from "next/headers";
 import dbConnect from "@/utils/lib/dbConnect";
 import Cart from "@/utils/models/Cart";
 import "@/utils/models/Product";
 import "@/utils/models/ProductVariant";
-import { verifyToken } from "@/utils/lib/jwt";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("customerToken")?.value;
+    const customerId = req.headers.get("x-customer-id");
 
-    if (!token) {
+    if (!customerId) {
       return NextResponse.json({ success: false, message: "Not authenticated" }, { status: 401 });
     }
 
-    let decoded: any;
-    try {
-      decoded = verifyToken(token);
-    } catch (err) {
-      return NextResponse.json({ success: false, message: "Invalid or expired token" }, { status: 401 });
-    }
-
     await dbConnect();
-    const cart = await Cart.findOne({ customerId: decoded.id })
+    const cart = await Cart.findOne({ customerId: customerId })
       .populate("items.productId", "name featuredImage productType quantity salePrice regularPrice")
       .populate("items.variantId", "variantName quantity salePrice regularPrice galleryImages");
 
@@ -37,18 +27,10 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("customerToken")?.value;
+    const customerId = req.headers.get("x-customer-id");
 
-    if (!token) {
+    if (!customerId) {
       return NextResponse.json({ success: false, message: "Not authenticated" }, { status: 401 });
-    }
-
-    let decoded: any;
-    try {
-      decoded = verifyToken(token);
-    } catch (err) {
-      return NextResponse.json({ success: false, message: "Invalid or expired token" }, { status: 401 });
     }
 
     const { items } = await req.json();
@@ -69,11 +51,11 @@ export async function POST(req: Request) {
     const subtotalAmount = formattedItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
     const cart = await Cart.findOneAndUpdate(
-      { customerId: decoded.id },
+      { customerId: customerId },
       { 
         $set: { 
           items: formattedItems,
-          customerId: new mongoose.Types.ObjectId(decoded.id),
+          customerId: new mongoose.Types.ObjectId(customerId),
           subtotalAmount: subtotalAmount,
           totalAmount: subtotalAmount
         } 

@@ -1,25 +1,15 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import dbConnect from "@/utils/lib/dbConnect";
 import Order from "@/utils/models/Order";
 import Customer from "@/utils/models/Customer";
-import { verifyToken } from "@/utils/lib/jwt";
 import { getPaginatedData } from "@/utils/lib/pagination";
 import { processPayment } from "@/utils/lib/paymentHandlers";
 export async function GET(req: Request) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("customerToken")?.value;
+    const customerId = req.headers.get("x-customer-id");
 
-    if (!token) {
+    if (!customerId) {
       return NextResponse.json({ success: false, message: "Not authenticated" }, { status: 401 });
-    }
-
-    let decoded: any;
-    try {
-      decoded = verifyToken(token);
-    } catch (err) {
-      return NextResponse.json({ success: false, message: "Invalid token" }, { status: 401 });
     }
 
     await dbConnect();
@@ -30,7 +20,7 @@ export async function GET(req: Request) {
 
     const { data: orders, totalCount, totalPages, currentPage } = await getPaginatedData(
       Order,
-      { customerId: decoded.id },
+      { customerId: customerId },
       { page, limit: limit || "5" }
     );
 
@@ -50,21 +40,8 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("customerToken")?.value;
-
-    let customerId = null;
-    let customerEmail = null;
-
-    if (token) {
-      try {
-        const decoded: any = verifyToken(token);
-        if (decoded && decoded.id) {
-          customerId = decoded.id;
-          customerEmail = decoded.email;
-        }
-      } catch (err) {}
-    }
+    let customerId = req.headers.get("x-customer-id") || null;
+    let customerEmail = req.headers.get("x-customer-email") || null;
 
 
     const body = await req.json();

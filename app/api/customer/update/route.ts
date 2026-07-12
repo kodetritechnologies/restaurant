@@ -1,29 +1,18 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import dbConnect from "@/utils/lib/dbConnect";
 import Customer from "@/utils/models/Customer";
-import { verifyToken } from "@/utils/lib/jwt";
-
 export async function PUT(req: Request) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("customerToken")?.value;
+    const customerId = req.headers.get("x-customer-id");
 
-    if (!token) {
+    if (!customerId) {
       return NextResponse.json({ success: false, message: "Not authenticated" }, { status: 401 });
-    }
-
-    let decoded: any;
-    try {
-      decoded = verifyToken(token);
-    } catch (err) {
-      return NextResponse.json({ success: false, message: "Invalid token" }, { status: 401 });
     }
 
     const { name, phone, address, city } = await req.json();
 
     await dbConnect();
-    const customer = await Customer.findById(decoded.id);
+    const customer = await Customer.findById(customerId);
 
     if (!customer) {
       return NextResponse.json({ success: false, message: "Customer not found" }, { status: 404 });
