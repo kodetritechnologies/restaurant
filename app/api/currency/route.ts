@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getPaginatedData } from "@/utils/lib/pagination";
 import dbConnect from "@/utils/lib/dbConnect";
 import Currency from "@/utils/models/Currency";
 import { verifyAdmin } from "@/utils/lib/auth";
@@ -9,14 +10,28 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const isDefault = searchParams.get("default") === "true";
     
-    let currencies;
     if (isDefault) {
-      currencies = await Currency.find({ isDefault: true }).sort({ createdAt: -1 });
-    } else {
-      currencies = await Currency.find().sort({ createdAt: -1 });
+      const currency = await Currency.findOne({ isDefault: true });
+      return NextResponse.json({ success: true, currency }, { status: 200 });
     }
     
-    return NextResponse.json({ success: true, currencies }, { status: 200 });
+    const page = searchParams.get("page");
+    const limit = searchParams.get("limit");
+
+    const { data: currencies, totalCount, totalPages, currentPage } = await getPaginatedData(
+      Currency,
+      {},
+      { page, limit }
+    );
+
+    return NextResponse.json({ 
+      success: true, 
+      count: currencies.length,
+      totalCount,
+      totalPages,
+      currentPage,
+      currencies 
+    }, { status: 200 });
   } catch (error: any) {
     console.error("GET Currency Error:", error);
     return NextResponse.json(
@@ -48,7 +63,6 @@ export async function POST(req: Request) {
 
     await dbConnect();
 
-    // Check if it's the first currency ever added
     const count = await Currency.countDocuments();
     let willBeDefault = isDefault;
     if (count === 0) {

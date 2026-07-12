@@ -71,7 +71,6 @@ export default function CheckoutPage() {
   const [placing, setPlacing] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Form state
   const [deliveryType, setDeliveryType] = useState<DeliveryType>("delivery");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cod");
   const [form, setForm] = useState({
@@ -84,7 +83,6 @@ export default function CheckoutPage() {
     note: "",
   });
 
-  // Load cart from localStorage
   useEffect(() => {
     try {
       const stored = localStorage.getItem("cartItems");
@@ -92,21 +90,19 @@ export default function CheckoutPage() {
     } catch { }
   }, []);
 
-  // Fetch products for all items in cart
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
         const [prodData, currData, settingsData] = await Promise.all([
           getMethod("/api/products"),
-          getMethod("/api/currency"),
+          getMethod("/api/currency?default=true"),
           getMethod("/api/settings"),
         ]);
 
         if (prodData?.success) setProducts(prodData.products);
-        if (currData?.success && currData.currencies) {
-          const def = currData.currencies.find((c: any) => c.isDefault);
-          if (def) setCurrencySymbol(def.symbol);
+        if (currData?.success && currData.currency) {
+          setCurrencySymbol(currData.currency.symbol);
         }
         if (settingsData?.success) setSettings(settingsData.settings);
       } catch { }

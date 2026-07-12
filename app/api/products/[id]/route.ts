@@ -99,7 +99,6 @@ export async function PUT(
         simpleVariant.regularPrice = body.regularPrice;
         simpleVariant.salePrice = body.salePrice;
         simpleVariant.quantity = body.quantity;
-        simpleVariant.status = body.status || "active";
         await simpleVariant.save();
         
         // Delete any extra variants
@@ -115,7 +114,6 @@ export async function PUT(
           regularPrice: body.regularPrice,
           salePrice: body.salePrice,
           quantity: body.quantity,
-          status: body.status || "active",
         });
       }
       updatedVariantIds.push(simpleVariant._id);

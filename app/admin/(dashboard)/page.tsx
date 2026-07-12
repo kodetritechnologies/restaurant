@@ -92,7 +92,6 @@ export default function AdminOverview() {
 
   return (
     <div className="space-y-8">
-      {/* Header Title */}
       <div>
         <h2 className="font-serif text-3xl font-extrabold text-gradient-gold leading-none">
           Restaurant Overview
@@ -102,7 +101,6 @@ export default function AdminOverview() {
         </p>
       </div>
 
-      {/* Metrics Cards */}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { label: "Total Bookings", value: stats.totalBookingsCount, icon: CalendarDays, change: "All table reservations", path: "/admin/bookings" },
@@ -136,9 +134,7 @@ export default function AdminOverview() {
         })}
       </div>
 
-      {/* Analytical Charts & Service Stats */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Analytic Graph */}
         <div className="glass p-6 rounded-3xl shadow-elegant lg:col-span-2 space-y-6">
           <div className="flex justify-between items-center">
             <div>
@@ -151,15 +147,12 @@ export default function AdminOverview() {
             </span>
           </div>
 
-          {/* SVG Chart */}
           <div className="h-56 w-full flex items-end justify-between pt-6 border-b border-foreground/5 px-2">
             {stats.chartItems.map((item, idx) => (
               <div key={idx} className="flex flex-col items-center gap-2 group w-10 relative">
-                {/* Tooltip */}
                 <span className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-[-30px] bg-gold text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded shadow-elegant whitespace-nowrap z-10">
                   {item.count} bks
                 </span>
-                {/* Bar */}
                 <div
                   style={{ height: item.height }}
                   className="w-4 sm:w-6 bg-gradient-gold rounded-t-lg transition-all duration-500 hover:brightness-110 shadow-gold group-hover:scale-y-[1.03] origin-bottom"
@@ -171,8 +164,6 @@ export default function AdminOverview() {
             ))}
           </div>
         </div>
-
-        {/* Popular Service Progress list */}
         <div className="glass p-6 rounded-3xl shadow-elegant space-y-6">
           <div>
             <h3 className="font-serif text-lg font-bold text-foreground">Popular Hours</h3>
@@ -199,8 +190,6 @@ export default function AdminOverview() {
           </div>
         </div>
       </div>
-
-      {/* Quick actions & Recent bookings summary */}
       <div className="glass p-6 rounded-3xl shadow-elegant space-y-6">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
           <div>
@@ -215,8 +204,6 @@ export default function AdminOverview() {
             <ArrowRight className="h-3 w-3" />
           </button>
         </div>
-
-        {/* List of pending bookings */}
         <div className="divide-y divide-white/5">
           {stats.pendingBookings.length === 0 ? (
             <p className="text-center py-6 text-sm text-muted-foreground">No pending confirmations!</p>

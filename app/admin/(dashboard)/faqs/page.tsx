@@ -5,7 +5,7 @@ import { Plus, Trash2, Edit2, ArrowLeft } from "lucide-react";
 import BasicProvider from "@/utils/BasicProvider";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import Swal from "sweetalert2";
+import { confirmDelete } from "@/utils/swal";
 
 interface FaqItem {
   _id: string;
@@ -115,17 +115,7 @@ export default function FaqsManager() {
   };
 
   const handleDeleteFaq = async (id: string) => {
-    const result = await Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this FAQ deletion!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d4af37',
-      cancelButtonColor: '#ef4444',
-      confirmButtonText: 'Yes, delete it!',
-      background: '#1a1a1a',
-      color: '#ffffff',
-    });
+    const result = await confirmDelete("You won't be able to revert this FAQ deletion!");
 
     if (!result.isConfirmed) return;
 

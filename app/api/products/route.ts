@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getPaginatedData } from "@/utils/lib/pagination";
 import dbConnect from "@/utils/lib/dbConnect";
 import Product from "@/utils/models/Product";
 import ProductVariant from "@/utils/models/ProductVariant";
@@ -27,11 +28,24 @@ export async function GET(req: Request) {
 
     await dbConnect();
     
-    const products = await Product.find(query)
-      .populate('variants')
-      .sort({ createdAt: -1 });
+    const page = searchParams.get("page");
+    const limit = searchParams.get("limit");
+
+    const { data: products, totalCount, totalPages, currentPage } = await getPaginatedData(
+      Product,
+      query,
+      { page, limit, populate: "variants" },
+      { createdAt: -1 }
+    );
     
-    return NextResponse.json({ success: true, products }, { status: 200 });
+    return NextResponse.json({ 
+      success: true, 
+      count: products.length,
+      totalCount,
+      totalPages,
+      currentPage,
+      products 
+    }, { status: 200 });
   } catch (error: any) {
     console.error("GET Products Error:", error);
     return NextResponse.json(
@@ -65,8 +79,7 @@ export async function POST(req: Request) {
       signature,
       categories,
       productType,
-      status,
-      variants, // Array of variant objects if variable product
+      variants, 
     } = body;
 
     if (!name) {
@@ -100,7 +113,6 @@ export async function POST(req: Request) {
 
     await dbConnect();
 
-    // Create the product first
     const newProduct = await Product.create({
       name,
       shortDescription,
@@ -114,14 +126,11 @@ export async function POST(req: Request) {
       signature,
       categories: categories || [],
       productType,
-      status,
     });
 
-    // Create variants and store their IDs on the product
     let createdVariantIds: any[] = [];
     
     if (productType === "simple") {
-      // Auto-create a single variant for the simple product
       const simpleVariant = await ProductVariant.create({
         productId: newProduct._id,
         variantName: "Default",
@@ -129,7 +138,6 @@ export async function POST(req: Request) {
         regularPrice,
         salePrice,
         quantity,
-        status: status || "active",
       });
       createdVariantIds.push(simpleVariant._id);
     } else if (productType === "variable" && variants && variants.length > 0) {
@@ -141,14 +149,12 @@ export async function POST(req: Request) {
         salePrice: v.salePrice,
         quantity: v.quantity,
         galleryImages: v.galleryImages || [],
-        status: v.status || "active",
       }));
       
       const insertedVariants = await ProductVariant.insertMany(variantDocs);
       createdVariantIds = insertedVariants.map(v => v._id);
     }
 
-    // Attach variant IDs to product
     newProduct.variants = createdVariantIds;
     await newProduct.save();
 

@@ -6,7 +6,7 @@ import Customer from "@/utils/models/Customer";
 import { verifyToken } from "@/utils/lib/jwt";
 
 // Get customer orders
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("customerToken")?.value;
@@ -24,10 +24,32 @@ export async function GET() {
 
     await dbConnect();
 
-    // Fetch orders sorted by newest first
-    const orders = await Order.find({ customerId: decoded.id }).sort({ createdAt: -1 });
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "5", 10);
+    const skip = (page - 1) * limit;
 
-    return NextResponse.json({ success: true, orders });
+    // Fetch orders sorted by newest first
+    const orders = await Order.find({ customerId: decoded.id })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const totalOrders = await Order.countDocuments({ customerId: decoded.id });
+    const totalPages = Math.ceil(totalOrders / limit);
+
+    return NextResponse.json({ 
+      success: true, 
+      orders,
+      pagination: {
+        page,
+        totalPages,
+        hasPrevPage: page > 1,
+        hasNextPage: page < totalPages,
+        prevPage: page > 1 ? page - 1 : null,
+        nextPage: page < totalPages ? page + 1 : null,
+      }
+    });
   } catch (error: any) {
     console.error("Get Orders Error:", error);
     return NextResponse.json({ success: false, message: "Server error", error: error.message }, { status: 500 });

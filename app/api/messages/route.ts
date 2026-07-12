@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getPaginatedData } from "@/utils/lib/pagination";
 import dbConnect from "@/utils/lib/dbConnect";
 import Message from "@/utils/models/Message";
 import { verifyAdmin } from "@/utils/lib/auth";
@@ -65,10 +66,25 @@ export async function GET(req: Request) {
       ];
     }
 
-    const messages = await Message.find(query).sort({ createdAt: -1 });
+    const page = url.searchParams.get("page");
+    const limit = url.searchParams.get("limit");
+
+    const { data: messages, totalCount, totalPages, currentPage } = await getPaginatedData(
+      Message,
+      query,
+      { page, limit },
+      { createdAt: -1 }
+    );
 
     return NextResponse.json(
-      { success: true, count: messages.length, messages },
+      { 
+        success: true, 
+        count: messages.length, 
+        totalCount,
+        totalPages,
+        currentPage,
+        messages 
+      },
       { status: 200 }
     );
   } catch (error: any) {

@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { Plus, Trash2, Edit2, ArrowLeft, Upload, X } from "lucide-react";
 import BasicProvider from "@/utils/BasicProvider";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import Swal from "sweetalert2";
+import { useRouter, useSearchParams } from "next/navigation";
+import { confirmDelete } from "@/utils/swal";
+import Pagination from "@/components/Pagination";
 
 interface ReviewItem {
   _id: string;
@@ -16,12 +17,19 @@ interface ReviewItem {
   publicId: string;
 }
 
-export default function ReviewsManager() {
+function ReviewsContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  
+  const itemsPerPage = 10;
+  const pageParam = searchParams.get("page");
+  const currentPage = pageParam ? parseInt(pageParam, 10) : 1;
 
   // Form states
   const [name, setName] = useState("");
@@ -40,9 +48,11 @@ export default function ReviewsManager() {
   const fetchReviews = async () => {
     setLoading(true);
     try {
-      const data = await getMethod("/api/reviews");
+      const data = await getMethod(`/api/reviews?limit=${itemsPerPage}&page=${currentPage}`);
       if (data && data.success) {
         setReviews(data.reviews);
+        setTotalPages(data.totalPages || 1);
+        setTotalCount(data.totalCount || data.reviews.length);
       } else {
         toast.error("Failed to load reviews.");
       }
@@ -56,7 +66,7 @@ export default function ReviewsManager() {
 
   useEffect(() => {
     fetchReviews();
-  }, []);
+  }, [currentPage]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -120,9 +130,7 @@ export default function ReviewsManager() {
       newErrors.text = "Review text must be at least 10 characters";
     }
 
-    if (!filePreview) {
-      newErrors.image = "Reviewer image is required";
-    }
+    // Image is optional
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -179,17 +187,7 @@ export default function ReviewsManager() {
   };
 
   const handleDeleteReview = async (id: string) => {
-    const result = await Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this review deletion!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d4af37',
-      cancelButtonColor: '#ef4444',
-      confirmButtonText: 'Yes, delete it!',
-      background: '#1a1a1a',
-      color: '#ffffff',
-    });
+    const result = await confirmDelete("You won't be able to revert this review deletion!");
 
     if (!result.isConfirmed) return;
 
@@ -204,6 +202,13 @@ export default function ReviewsManager() {
     } catch (err: any) {
       toast.error(err.message || "Failed to delete item.");
     }
+  };
+
+  const currentReviews = reviews;
+
+  const paginationData = {
+    currentPage,
+    totalPages,
   };
 
   return (
@@ -237,7 +242,7 @@ export default function ReviewsManager() {
             {/* Image Uploader */}
             <div className="space-y-2">
               <label className="block text-xs font-semibold uppercase tracking-widest text-gold">
-                Guest Photo
+                Guest Photo <span className="text-muted-foreground normal-case font-normal">(Optional)</span>
               </label>
               
               {filePreview ? (
@@ -379,43 +384,75 @@ export default function ReviewsManager() {
               No reviews added yet. Use the form on the left to start adding some!
             </p>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {reviews.map((review) => (
-                <div
-                  key={review._id}
-                  className="group relative flex flex-col p-5 rounded-2xl border border-foreground/5 bg-background/20 hover:border-gold/30 transition-all shadow-elegant text-center"
-                >
-                  <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => handleEditReview(review)}
-                      className="p-1.5 bg-foreground/10 hover:bg-gold/80 hover:text-primary-foreground border border-foreground/10 text-muted-foreground rounded-lg transition-colors cursor-pointer backdrop-blur-md"
-                      title="Edit Review"
-                    >
-                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                    </button>
-                    <button
-                      onClick={() => handleDeleteReview(review._id)}
-                      className="p-1.5 bg-foreground/10 hover:bg-destructive/80 hover:text-white border border-foreground/10 text-muted-foreground rounded-lg transition-colors cursor-pointer backdrop-blur-md"
-                      title="Delete Review"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                  
-                  <img src={review.imgUrl || "/assets/no-image-customer.png"} alt={review.name} className="w-16 h-16 rounded-full mx-auto border-2 border-gold/40 object-cover mb-3" onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/assets/no-image-customer.png"; }} />
-                  <div className="text-gold text-xs mb-2">{"★".repeat(review.rating)}</div>
-                  <blockquote className="text-xs text-foreground/80 italic mb-3 flex-1">
-                    "{review.text}"
-                  </blockquote>
-                  <h4 className="font-serif text-sm font-bold text-foreground">
-                    — {review.name}
-                  </h4>
+            <div className="space-y-4">
+              <div className="overflow-x-auto rounded-xl border border-foreground/10">
+                <table className="w-full text-left text-sm text-foreground/80">
+                  <thead className="bg-foreground/5 text-xs uppercase text-foreground/60">
+                    <tr>
+                      <th className="px-4 py-3">Guest</th>
+                      <th className="px-4 py-3">Rating</th>
+                      <th className="px-4 py-3 min-w-[200px]">Review</th>
+                      <th className="px-4 py-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-foreground/10">
+                    {currentReviews.map((review) => (
+                      <tr key={review._id} className="hover:bg-foreground/5 transition-colors">
+                        <td className="px-4 py-3 flex items-center gap-3">
+                          <img src={review.imgUrl || "/assets/no-image-customer.png"} alt={review.name} className="w-8 h-8 rounded-full border border-gold/40 object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/assets/no-image-customer.png"; }} />
+                          <span className="font-medium text-foreground whitespace-nowrap">{review.name}</span>
+                        </td>
+                        <td className="px-4 py-3 text-gold whitespace-nowrap">
+                          {"★".repeat(review.rating)}
+                        </td>
+                        <td className="px-4 py-3 max-w-[200px] sm:max-w-xs truncate" title={review.text}>
+                          {review.text}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => handleEditReview(review)}
+                              className="p-1.5 bg-foreground/10 hover:bg-gold/80 hover:text-primary-foreground border border-foreground/10 text-muted-foreground rounded-lg transition-colors cursor-pointer backdrop-blur-md"
+                              title="Edit Review"
+                            >
+                              <Edit2 className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteReview(review._id)}
+                              className="p-1.5 bg-foreground/10 hover:bg-destructive/80 hover:text-white border border-foreground/10 text-muted-foreground rounded-lg transition-colors cursor-pointer backdrop-blur-md"
+                              title="Delete Review"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex flex-col items-center justify-center pt-6 pb-6 gap-3">
+                  <Pagination data={paginationData} isAdmin={true} />
+                  <span className="text-xs text-muted-foreground">
+                    Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} entries
+                  </span>
                 </div>
-              ))}
+              )}
             </div>
           )}
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ReviewsManager() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-gold border-t-transparent rounded-full animate-spin"></div></div>}>
+      <ReviewsContent />
+    </Suspense>
   );
 }

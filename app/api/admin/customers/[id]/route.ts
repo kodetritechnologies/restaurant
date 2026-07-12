@@ -3,7 +3,6 @@ import dbConnect from "@/utils/lib/dbConnect";
 import Customer from "@/utils/models/Customer";
 import { verifyAdmin } from "@/utils/lib/auth";
 
-// DELETE /api/admin/customers/[id] — soft-delete (move to trash)
 export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> }

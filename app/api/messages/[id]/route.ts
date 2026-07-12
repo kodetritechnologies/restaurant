@@ -3,6 +3,44 @@ import dbConnect from "@/utils/lib/dbConnect";
 import Message from "@/utils/models/Message";
 import { verifyAdmin } from "@/utils/lib/auth";
 
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const admin = await verifyAdmin(req);
+    if (!admin) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized." },
+        { status: 401 }
+      );
+    }
+
+    const { id } = await params;
+
+    await dbConnect();
+    const message = await Message.findById(id);
+
+    if (!message) {
+      return NextResponse.json(
+        { success: false, message: "Message not found." },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: true, message: "Message found.", messageData: message },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error("Get Message Error:", error);
+    return NextResponse.json(
+      { success: false, message: "Server error finding message.", error: error.message },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> }

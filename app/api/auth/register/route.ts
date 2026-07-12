@@ -9,7 +9,6 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
 
-    // Require authentication if at least one admin already exists (bootstrapping restriction)
     const adminCount = await Admin.countDocuments({});
     if (adminCount > 0) {
       const requester = await verifyAdmin(req);

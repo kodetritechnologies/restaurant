@@ -3,13 +3,12 @@ import dbConnect from "@/utils/lib/dbConnect";
 import Category from "@/utils/models/Category";
 import { verifyAdmin } from "@/utils/lib/auth";
 
-// Helper function to create a unique slug
 async function generateUniqueSlug(name: string) {
   const baseSlug = name
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)+/g, ""); // Remove trailing/leading hyphens
+    .replace(/(^-|-$)+/g, "");
 
   if (!baseSlug) return "category-" + Date.now();
 
@@ -42,13 +41,11 @@ export async function GET(req: Request) {
     }
 
     if (type) {
-      // Case-insensitive regex match for type
       query.type = { $regex: new RegExp(`^${type}$`, "i") };
     }
 
     await dbConnect();
-    // Return all categories based on query
-    const categories = await Category.find(query).sort({ order: 1, createdAt: -1 });
+    const categories = await Category.find(query).sort({ createdAt: -1 });
     return NextResponse.json({ success: true, categories }, { status: 200 });
   } catch (error: any) {
     console.error("GET Categories Error:", error);
@@ -83,7 +80,6 @@ export async function POST(req: Request) {
 
     await dbConnect();
 
-    let baseOrder = await Category.countDocuments();
     const createdCategories = [];
 
     for (const singleName of names) {
@@ -97,7 +93,6 @@ export async function POST(req: Request) {
         type: type || "General",
         featured: featured || false,
         description: description || "",
-        order: baseOrder++,
       });
       createdCategories.push(newCategory);
     }
@@ -106,7 +101,7 @@ export async function POST(req: Request) {
       {
         success: true,
         message: `${createdCategories.length} category(s) created successfully.`,
-        category: createdCategories[0] // fallback for frontend relying on singular `category`
+        category: createdCategories[0] 
       },
       { status: 201 }
     );

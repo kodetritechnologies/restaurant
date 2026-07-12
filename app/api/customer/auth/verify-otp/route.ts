@@ -17,7 +17,6 @@ export async function POST(req: Request) {
 
     await dbConnect();
 
-    // Find customer by email
     const customer = await Customer.findOne({ email });
 
     if (!customer) {
@@ -27,7 +26,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Verify OTP and expiration
     if (customer.otp !== otp) {
       return NextResponse.json(
         { success: false, message: "Invalid OTP" },
@@ -42,23 +40,19 @@ export async function POST(req: Request) {
       );
     }
 
-    // Mark as verified and clear OTP
     customer.isVerified = true;
     customer.otp = null;
     customer.otpExpires = null;
     await customer.save();
-
-    // Generate JWT token
     const token = generateToken({ id: customer._id, email: customer.email });
 
-    // Set cookie on server side
     const cookieStore = await cookies();
     cookieStore.set("customerToken", token, {
       path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 7,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
-      httpOnly: false, // false allows client-side reading for basic state management if needed
+      httpOnly: false,
     });
 
     return NextResponse.json(

@@ -72,22 +72,18 @@ export default function AdminLogin() {
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center bg-background px-4 py-16 overflow-hidden">
-      {/* Decorative Background Glows */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gold/10 blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-gold/5 blur-[120px]" />
 
-      {/* Premium Login Box */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="relative w-full max-w-lg"
       >
-        {/* Glow border effect */}
         <div className="absolute -inset-0.5 bg-gradient-to-r from-gold/50 via-gold to-gold/30 rounded-3xl opacity-30 blur-sm" />
 
         <div className="relative glass rounded-3xl p-8 sm:p-10 shadow-elegant">
-          {/* Logo & Header */}
           <div className="flex flex-col items-center text-center mb-8">
             <motion.div
               whileHover={{ rotate: 15, scale: 1.05 }}
@@ -112,10 +108,8 @@ export default function AdminLogin() {
             </p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <AnimatePresence mode="popLayout">
-              {/* Name Field (Sign Up Only) */}
               {!isLogin && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
@@ -144,7 +138,6 @@ export default function AdminLogin() {
               )}
             </AnimatePresence>
 
-            {/* Email Field */}
             <div className="space-y-2">
               <label className="block text-xs font-semibold uppercase tracking-widest text-gold">
                 Email Address
@@ -163,8 +156,6 @@ export default function AdminLogin() {
                 />
               </div>
             </div>
-
-            {/* Password Field */}
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <label className="block text-xs font-semibold uppercase tracking-widest text-gold">
@@ -197,8 +188,6 @@ export default function AdminLogin() {
                 </button>
               </div>
             </div>
-
-            {/* Terms / Remember */}
             <div className="flex items-center justify-between py-1">
               {!isLogin ? (
                 <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -223,8 +212,6 @@ export default function AdminLogin() {
                 </label>
               )}
             </div>
-
-            {/* Validation Error Message */}
             <AnimatePresence>
               {error && (
                 <motion.div
@@ -239,7 +226,6 @@ export default function AdminLogin() {
               )}
             </AnimatePresence>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
@@ -262,7 +248,6 @@ export default function AdminLogin() {
             </button>
           </form>
 
-          {/* Tab Switcher */}
           <div className="mt-8 pt-6 border-t border-foreground/10 text-center">
             <p className="text-xs text-muted-foreground">
               {isLogin ? "Not registered as admin yet?" : "Already have an admin account?"}
@@ -280,7 +265,6 @@ export default function AdminLogin() {
         </div>
       </motion.div>
 
-      {/* Credential Note at the bottom */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[11px] text-muted-foreground/60 text-center flex items-center gap-1.5 whitespace-nowrap">
         <ShieldCheck className="h-3 w-3 text-gold/60" />
         <span>Bootstrapping: First user to register becomes the Administrator</span>

@@ -16,7 +16,6 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     const { id } = await params;
     await dbConnect();
 
-    // Find all children and sub-children IDs to delete them recursively
     async function getCategoryIdsToDelete(categoryId: string): Promise<string[]> {
       let ids = [categoryId];
       const children = await Category.find({ parent: categoryId });
@@ -64,8 +63,6 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const body = await req.json();
     await dbConnect();
 
-    // If name changes, we could re-generate slug, but usually slugs shouldn't change to avoid breaking links.
-    // For simplicity, we just allow updating name, parent, order here.
 
     const updatedCategory = await Category.findByIdAndUpdate(
       id,

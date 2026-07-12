@@ -5,7 +5,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Search, Trash2, CheckCircle2, XCircle, Check, ArrowLeft, RefreshCw } from "lucide-react";
 import BasicProvider from "@/utils/BasicProvider";
 import toast from "react-hot-toast";
-import Swal from "sweetalert2";
+import { confirmDelete } from "@/utils/swal";
+import Pagination from "@/components/Pagination";
 
 interface Reservation {
   _id: string;
@@ -23,8 +24,15 @@ interface Reservation {
 export default function BookingsManager() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const initialStatus = searchParams.get("status") || "All";
+
+  const itemsPerPage = 10;
+  const pageParam = searchParams.get("page");
+  const currentPage = pageParam ? parseInt(pageParam, 10) : 1;
+
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +42,6 @@ export default function BookingsManager() {
 
   const { getMethod, patchMethod, deleteMethod } = BasicProvider();
 
-  // Simple debounce logic
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
@@ -45,10 +52,12 @@ export default function BookingsManager() {
   const fetchReservations = async (status = statusFilter, search = debouncedSearch) => {
     setLoading(true);
     try {
-      const endpoint = `/api/reservations?status=${status}&search=${search}`;
+      const endpoint = `/api/reservations?status=${status}&search=${search}&page=${currentPage}&limit=${itemsPerPage}`;
       const data = await getMethod(endpoint);
       if (data && data.success) {
         setReservations(data.reservations);
+        setTotalPages(data.totalPages || 1);
+        setTotalCount(data.totalCount || data.reservations.length);
       } else {
         toast.error(data?.message || "Failed to load reservations.");
       }
@@ -62,7 +71,7 @@ export default function BookingsManager() {
 
   useEffect(() => {
     fetchReservations(statusFilter, debouncedSearch);
-  }, [statusFilter, debouncedSearch]);
+  }, [statusFilter, debouncedSearch, currentPage]);
 
   const handleUpdateStatus = async (id: string, newStatus: Reservation["status"]) => {
     try {
@@ -79,20 +88,10 @@ export default function BookingsManager() {
   };
 
   const handleDelete = async (id: string) => {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this deleted reservation!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d4af37",
-      cancelButtonColor: "#ef4444",
-      confirmButtonText: "Yes, delete it!",
-      background: "#1a1a1a",
-      color: "#ffffff",
-    });
+    const result = await confirmDelete("You won't be able to revert this deleted reservation!");
 
     if (!result.isConfirmed) return;
-    
+
     try {
       const data = await deleteMethod(`/api/reservations/${id}`);
       if (data && data.success) {
@@ -108,7 +107,6 @@ export default function BookingsManager() {
 
   const handleStatusChange = (val: string) => {
     setStatusFilter(val);
-    // update URL parameter
     startTransition(() => {
       const params = new URLSearchParams(window.location.search);
       if (val === "All") {
@@ -116,13 +114,18 @@ export default function BookingsManager() {
       } else {
         params.set("status", val);
       }
+      params.set("page", "1");
       router.push(`/admin/bookings?${params.toString()}`);
     });
   };
 
+  const paginationData = {
+    currentPage,
+    totalPages,
+  };
+
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center gap-4">
         <button
           onClick={() => router.push("/admin")}
@@ -140,9 +143,7 @@ export default function BookingsManager() {
         </div>
       </div>
 
-      {/* Filters and Search Bar */}
       <div className="grid gap-4 md:flex md:items-center md:justify-between">
-        {/* Search */}
         <div className="relative flex-1 max-w-md">
           <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
             <Search className="h-4 w-4" />
@@ -156,17 +157,15 @@ export default function BookingsManager() {
           />
         </div>
 
-        {/* Status filters */}
         <div className="flex flex-wrap gap-2 items-center">
           {["All", "Pending", "Confirmed", "Completed", "Cancelled"].map((status) => (
             <button
               key={status}
               onClick={() => handleStatusChange(status)}
-              className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
-                statusFilter === status
-                  ? "bg-gold border-gold text-primary-foreground shadow-gold"
-                  : "bg-surface/50 border-foreground/10 text-muted-foreground hover:text-gold hover:border-gold/40"
-              }`}
+              className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all cursor-pointer ${statusFilter === status
+                ? "bg-gold border-gold text-primary-foreground shadow-gold"
+                : "bg-surface/50 border-foreground/10 text-muted-foreground hover:text-gold hover:border-gold/40"
+                }`}
             >
               {status}
             </button>
@@ -181,7 +180,6 @@ export default function BookingsManager() {
         </div>
       </div>
 
-      {/* Main logs list */}
       <div className="glass overflow-hidden rounded-2xl border border-foreground/5">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -306,6 +304,15 @@ export default function BookingsManager() {
             </tbody>
           </table>
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex flex-col items-center justify-center pt-6 pb-6 gap-3">
+            <Pagination data={paginationData} isAdmin={true} />
+            <span className="text-xs text-muted-foreground">
+              Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} entries
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

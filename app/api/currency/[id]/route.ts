@@ -29,13 +29,11 @@ export async function PUT(
       );
     }
 
-    // Apply updates
     if (body.name) currency.name = body.name;
     if (body.code) currency.code = body.code;
     if (body.symbol) currency.symbol = body.symbol;
     if (body.isDefault !== undefined) currency.isDefault = body.isDefault;
 
-    // The pre-save hook handles unsetting other defaults if this is true
     await currency.save();
 
     return NextResponse.json(

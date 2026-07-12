@@ -26,10 +26,6 @@ const CategorySchema = new Schema(
       type: String,
       default: "",
     },
-    order: {
-      type: Number,
-      default: 0,
-    },
     type: {
       type: String,
       default: "General",

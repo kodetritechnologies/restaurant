@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Package, SearchX, Clock, MapPin, Map, CreditCard, DollarSign } from "lucide-react";
 import { useCustomer } from "@/context/CustomerContext";
 import toast from "react-hot-toast";
 import BasicProvider from "@/utils/BasicProvider";
+import { useSearchParams } from "next/navigation";
+import Pagination from "@/components/Pagination";
 
 interface OrderItem {
   productId: string;
@@ -30,27 +32,28 @@ interface Order {
   createdAt: string;
 }
 
-export default function OrdersPage() {
+function OrdersContent() {
+  const searchParams = useSearchParams();
+  const page = searchParams.get("page") || "1";
   const { getMethod } = BasicProvider();
   const { customer } = useCustomer();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [currency, setCurrency] = useState("$");
+  const [paginationData, setPaginationData] = useState<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch currency
-        const currData = await getMethod("/api/currency");
-        if (currData?.success && currData.currencies) {
-          const def = currData.currencies.find((c: any) => c.isDefault);
-          if (def) setCurrency(def.symbol);
+        const currData = await getMethod("/api/currency?default=true");
+        if (currData?.success && currData.currency) {
+          setCurrency(currData.currency.symbol);
         }
 
-        // Fetch orders
-        const ordersData = await getMethod("/api/customer/orders");
+        const ordersData = await getMethod(`/api/customer/orders?page=${page}`);
         if (ordersData && ordersData.success) {
           setOrders(ordersData.orders);
+          setPaginationData(ordersData.pagination);
         } else {
           toast.error("Failed to load orders");
         }
@@ -62,7 +65,7 @@ export default function OrdersPage() {
     };
 
     fetchData();
-  }, []);
+  }, [page]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -181,8 +184,23 @@ export default function OrdersPage() {
               </div>
             </motion.div>
           ))}
+          
+          {/* Pagination */}
+          {paginationData && <Pagination data={paginationData} />}
         </div>
       )}
     </motion.div>
+  );
+}
+
+export default function OrdersPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-[300px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-gold" />
+      </div>
+    }>
+      <OrdersContent />
+    </Suspense>
   );
 }

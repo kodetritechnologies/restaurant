@@ -24,7 +24,6 @@ export async function POST(req: Request) {
 
     await dbConnect();
     
-    // Retrieve the admin with password field to compare
     const adminWithPassword = await Admin.findById(admin._id);
     if (!adminWithPassword) {
       return NextResponse.json(

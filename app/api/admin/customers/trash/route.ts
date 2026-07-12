@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
+import { getPaginatedData } from "@/utils/lib/pagination";
 import dbConnect from "@/utils/lib/dbConnect";
 import Customer from "@/utils/models/Customer";
 import { verifyAdmin } from "@/utils/lib/auth";
 
-// GET /api/admin/customers/trash — list soft-deleted customers
 export async function GET(req: Request) {
   try {
     const admin = await verifyAdmin(req);
@@ -25,16 +25,37 @@ export async function GET(req: Request) {
       query.$or = [
         { email: { $regex: search, $options: "i" } },
         { name: { $regex: search, $options: "i" } },
-        { phone: { $regex: search, $options: "i" } },
       ];
+      query.$or.push({
+        $expr: {
+          $regexMatch: {
+            input: { $toString: "$phone" },
+            regex: search,
+            options: "i"
+          }
+        }
+      });
     }
 
-    const customers = await Customer.find(query)
-      .select("-otp -otpExpires")
-      .sort({ deleted_at: -1 });
+    const page = url.searchParams.get("page");
+    const limit = url.searchParams.get("limit");
+
+    const { data: customers, totalCount, totalPages, currentPage } = await getPaginatedData(
+      Customer,
+      query,
+      { page, limit, select: "-otp -otpExpires" },
+      { deleted_at: -1 }
+    );
 
     return NextResponse.json(
-      { success: true, count: customers.length, customers },
+      { 
+        success: true, 
+        count: customers.length, 
+        totalCount,
+        totalPages,
+        currentPage,
+        customers 
+      },
       { status: 200 }
     );
   } catch (error: any) {
@@ -46,7 +67,6 @@ export async function GET(req: Request) {
   }
 }
 
-// PATCH /api/admin/customers/trash — restore a customer { id }
 export async function PATCH(req: Request) {
   try {
     const admin = await verifyAdmin(req);
@@ -93,7 +113,6 @@ export async function PATCH(req: Request) {
   }
 }
 
-// DELETE /api/admin/customers/trash — permanently delete a customer ?id=...
 export async function DELETE(req: Request) {
   try {
     const admin = await verifyAdmin(req);

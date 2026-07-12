@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getPaginatedData } from "@/utils/lib/pagination";
 import dbConnect from "@/utils/lib/dbConnect";
 import Reservation from "@/utils/models/Reservation";
 import { verifyAdmin } from "@/utils/lib/auth";
@@ -49,11 +50,13 @@ export async function GET(req: Request) {
     }
 
     await dbConnect();
-    
-    // Parse filters
+
     const url = new URL(req.url);
     const status = url.searchParams.get("status");
     const search = url.searchParams.get("search");
+
+    const page = url.searchParams.get("page");
+    const limit = url.searchParams.get("limit");
 
     let query: any = {};
     if (status && status !== "All") {
@@ -67,10 +70,21 @@ export async function GET(req: Request) {
       ];
     }
 
-    const reservations = await Reservation.find(query).sort({ createdAt: -1 });
+    const { data: reservations, totalCount, totalPages, currentPage } = await getPaginatedData(
+      Reservation,
+      query,
+      { page, limit }
+    );
 
     return NextResponse.json(
-      { success: true, count: reservations.length, reservations },
+      {
+        success: true,
+        count: reservations.length,
+        totalCount,
+        totalPages,
+        currentPage,
+        reservations
+      },
       { status: 200 }
     );
   } catch (error: any) {
@@ -81,3 +95,4 @@ export async function GET(req: Request) {
     );
   }
 }
+

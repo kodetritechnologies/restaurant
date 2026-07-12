@@ -1,13 +1,29 @@
 import { NextResponse } from "next/server";
+import { getPaginatedData } from "@/utils/lib/pagination";
 import dbConnect from "@/utils/lib/dbConnect";
 import Chef from "@/utils/models/Chef";
 import { verifyAdmin } from "@/utils/lib/auth";
-
-export async function GET() {
+export async function GET(req: Request) {
   try {
     await dbConnect();
-    const chefs = await Chef.find({}).sort({ createdAt: -1 });
-    return NextResponse.json({ success: true, count: chefs.length, chefs }, { status: 200 });
+    const url = new URL(req.url);
+    const page = url.searchParams.get("page");
+    const limit = url.searchParams.get("limit");
+
+    const { data: chefs, totalCount, totalPages, currentPage } = await getPaginatedData(
+      Chef,
+      {},
+      { page, limit }
+    );
+
+    return NextResponse.json({ 
+      success: true, 
+      count: chefs.length,
+      totalCount,
+      totalPages,
+      currentPage,
+      chefs 
+    }, { status: 200 });
   } catch (error: any) {
     console.error("GET Chefs Error:", error);
     return NextResponse.json(

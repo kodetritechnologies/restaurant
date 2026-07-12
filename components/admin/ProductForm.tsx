@@ -21,7 +21,6 @@ interface ProductVariant {
   salePrice?: number;
   quantity: number | null | "";
   galleryImages?: string[];
-  status: string;
 }
 
 interface Product {
@@ -38,7 +37,6 @@ interface Product {
   signature: boolean;
   categories?: string[];
   productType: "simple" | "variable";
-  status: "active" | "inactive";
 }
 
 export default function ProductForm({ initialData }: { initialData?: Product }) {
@@ -58,7 +56,6 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
   const [featured, setFeatured] = useState(initialData?.featured || false);
   const [signature, setSignature] = useState((initialData as any)?.signature || false);
   const [productType, setProductType] = useState<"simple" | "variable">(initialData?.productType || "simple");
-  const [status, setStatus] = useState<"active" | "inactive">(initialData?.status || "active");
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initialData?.categories || []);
   const [allCategories, setAllCategories] = useState<any[]>([]);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
@@ -241,7 +238,6 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
         signature,
         categories: selectedCategories,
         productType,
-        status,
         variants: finalVariants
       };
       
@@ -274,7 +270,6 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
           regularPrice: 0,
           quantity: "",
           galleryImages: [],
-          status: "active"
       }]);
   };
   
@@ -356,17 +351,7 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                                 <option value="variable" className="bg-surface">Variable Product</option>
                             </select>
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-muted-foreground">Status</label>
-                            <select
-                                value={status}
-                                onChange={(e) => setStatus(e.target.value as "active" | "inactive")}
-                                className="w-full bg-surface/50 border border-foreground/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors appearance-none"
-                            >
-                                <option value="active" className="bg-surface">Active</option>
-                                <option value="inactive" className="bg-surface">Inactive</option>
-                            </select>
-                        </div>
+
                     </div>
                     <div className="space-y-3">
                         <label className="text-sm font-medium text-muted-foreground">Categories</label>
@@ -640,17 +625,6 @@ export default function ProductForm({ initialData }: { initialData?: Product }) 
                                                   placeholder="Unlimited"
                                                   className="w-full bg-black/20 border border-foreground/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold transition-colors"
                                               />
-                                          </div>
-                                          <div className="space-y-1">
-                                              <label className="text-xs text-muted-foreground">Status</label>
-                                              <select
-                                                  value={variant.status}
-                                                  onChange={(e) => updateVariant(index, 'status', e.target.value)}
-                                                  className="w-full bg-black/20 border border-foreground/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold transition-colors appearance-none"
-                                              >
-                                                  <option value="active" className="bg-surface">Active</option>
-                                                  <option value="inactive" className="bg-surface">Inactive</option>
-                                              </select>
                                           </div>
                                       </div>
 

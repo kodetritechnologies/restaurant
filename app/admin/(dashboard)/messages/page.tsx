@@ -2,9 +2,11 @@
 
 import { useEffect, useState, startTransition } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Search, Trash2, Mail, MailOpen, Check, ArrowLeft, RefreshCw } from "lucide-react";
+import { Search, Trash2, Mail, MailOpen, Check, ArrowLeft, RefreshCw, Eye } from "lucide-react";
 import BasicProvider from "@/utils/BasicProvider";
 import toast from "react-hot-toast";
+import Pagination from "@/components/Pagination";
+import { confirmDelete } from "@/utils/swal";
 
 interface Message {
   _id: string;
@@ -21,6 +23,13 @@ export default function MessagesManager() {
   const searchParams = useSearchParams();
   
   const initialStatus = searchParams.get("status") || "All";
+
+  const itemsPerPage = 10;
+  const pageParam = searchParams.get("page");
+  const currentPage = pageParam ? parseInt(pageParam, 10) : 1;
+
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,10 +50,12 @@ export default function MessagesManager() {
   const fetchMessages = async (status = statusFilter, search = debouncedSearch) => {
     setLoading(true);
     try {
-      const endpoint = `/api/messages?status=${status}&search=${search}`;
+      const endpoint = `/api/messages?status=${status}&search=${search}&page=${currentPage}&limit=${itemsPerPage}`;
       const data = await getMethod(endpoint);
       if (data && data.success) {
         setMessages(data.messages);
+        setTotalPages(data.totalPages || 1);
+        setTotalCount(data.totalCount || data.messages.length);
       } else {
         toast.error(data?.message || "Failed to load messages.");
       }
@@ -58,7 +69,7 @@ export default function MessagesManager() {
 
   useEffect(() => {
     fetchMessages(statusFilter, debouncedSearch);
-  }, [statusFilter, debouncedSearch]);
+  }, [statusFilter, debouncedSearch, currentPage]);
 
   const handleUpdateStatus = async (id: string, newStatus: Message["status"]) => {
     try {
@@ -75,7 +86,8 @@ export default function MessagesManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this message record?")) return;
+    const result = await confirmDelete("Are you sure you want to delete this message record?");
+    if (!result.isConfirmed) return;
     try {
       const data = await deleteMethod(`/api/messages/${id}`);
       if (data && data.success) {
@@ -163,8 +175,8 @@ export default function MessagesManager() {
         </div>
       </div>
 
-      {/* Message Cards */}
-      <div className="space-y-4">
+      {/* Message Table */}
+      <div className="glass overflow-hidden rounded-2xl border border-foreground/5 shadow-elegant">
         {loading ? (
           <div className="text-center py-20">
             <p className="text-sm font-semibold tracking-widest text-gold uppercase animate-pulse">
@@ -172,87 +184,112 @@ export default function MessagesManager() {
             </p>
           </div>
         ) : messages.length === 0 ? (
-          <div className="glass p-12 text-center text-muted-foreground rounded-2xl border border-foreground/5">
+          <div className="p-12 text-center text-muted-foreground">
             No inquiries in inbox matching criteria.
           </div>
         ) : (
-          messages.map((m) => {
-            let statusBadge = "";
-            switch (m.status) {
-              case "Unread":
-                statusBadge = "bg-blue-500/10 border-blue-500/20 text-blue-400";
-                break;
-              case "Read":
-                statusBadge = "bg-foreground/5 border-foreground/10 text-foreground/80";
-                break;
-              case "Replied":
-                statusBadge = "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
-                break;
-            }
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-foreground/5 text-[10px] uppercase tracking-widest text-muted-foreground">
+                  <th className="py-3 px-4 font-semibold">Contact Info</th>
+                  <th className="py-3 px-4 font-semibold">Subject</th>
+                  <th className="py-3 px-4 font-semibold">Status</th>
+                  <th className="py-3 px-4 font-semibold">Date</th>
+                  <th className="py-3 px-4 font-semibold text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {messages.map((m) => {
+                  let statusBadge = "";
+                  switch (m.status) {
+                    case "Unread":
+                      statusBadge = "bg-blue-500/10 border-blue-500/20 text-blue-400";
+                      break;
+                    case "Read":
+                      statusBadge = "bg-foreground/5 border-foreground/10 text-foreground/80";
+                      break;
+                    case "Replied":
+                      statusBadge = "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
+                      break;
+                  }
 
-            return (
-              <div
-                key={m._id}
-                className={`glass p-6 rounded-2xl border border-foreground/5 flex flex-col gap-4 transition-all hover:border-foreground/10 ${
-                  m.status === "Unread" ? "border-l-4 border-l-gold" : ""
-                }`}
-              >
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold text-base text-foreground">{m.name}</h3>
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${statusBadge}`}>
-                        {m.status}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">{m.email}</p>
-                    <p className="text-sm font-semibold text-gold mt-2">Subject: {m.subject}</p>
-                  </div>
-                  <div className="flex flex-col sm:items-end text-left sm:text-right shrink-0">
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(m.createdAt).toLocaleDateString()} @ {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                    {/* Action buttons */}
-                    <div className="flex items-center gap-1.5 mt-3 justify-start sm:justify-end">
-                      {m.status === "Unread" && (
-                        <button
-                          onClick={() => handleUpdateStatus(m._id, "Read")}
-                          className="p-1.5 bg-foreground/5 hover:bg-gold/15 border border-foreground/10 hover:border-gold/30 text-muted-foreground hover:text-gold rounded-lg transition-colors cursor-pointer"
-                          title="Mark as Read"
-                        >
-                          <MailOpen className="h-4 w-4" />
-                        </button>
-                      )}
-                      {m.status !== "Replied" && (
-                        <button
-                          onClick={() => handleUpdateStatus(m._id, "Replied")}
-                          className="p-1.5 bg-foreground/5 hover:bg-emerald-500/15 border border-foreground/10 hover:border-emerald-500/30 text-muted-foreground hover:text-emerald-400 rounded-lg transition-colors cursor-pointer"
-                          title="Mark as Replied"
-                        >
-                          <Check className="h-4 w-4" />
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleDelete(m._id)}
-                        className="p-1.5 bg-foreground/5 hover:bg-destructive/15 border border-foreground/10 hover:border-destructive/30 text-muted-foreground hover:text-destructive-foreground rounded-lg transition-colors cursor-pointer"
-                        title="Delete Message"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                  return (
+                    <tr
+                      key={m._id}
+                      className={`border-b border-foreground/5 hover:bg-foreground/5 transition-colors group ${
+                        m.status === "Unread" ? "bg-foreground/[0.02]" : ""
+                      }`}
+                    >
+                      <td className="py-4 px-4">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-foreground">{m.name}</span>
+                          <span className="text-xs text-muted-foreground">{m.email}</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-sm text-foreground/90 max-w-[200px] truncate">
+                        {m.subject}
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${statusBadge}`}>
+                          {m.status}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4 text-xs text-muted-foreground whitespace-nowrap">
+                        {new Date(m.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="py-4 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5 transition-opacity">
+                          <button
+                            onClick={() => router.push(`/admin/messages/${m._id}`)}
+                            className="p-1.5 bg-foreground/5 hover:bg-gold/15 border border-foreground/10 hover:border-gold/30 text-muted-foreground hover:text-gold rounded-lg transition-colors cursor-pointer"
+                            title="View Message Details"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </button>
+                          {m.status === "Unread" && (
+                            <button
+                              onClick={() => handleUpdateStatus(m._id, "Read")}
+                              className="p-1.5 bg-foreground/5 hover:bg-blue-500/15 border border-foreground/10 hover:border-blue-500/30 text-muted-foreground hover:text-blue-400 rounded-lg transition-colors cursor-pointer"
+                              title="Mark as Read"
+                            >
+                              <MailOpen className="h-4 w-4" />
+                            </button>
+                          )}
+                          {m.status !== "Replied" && (
+                            <button
+                              onClick={() => handleUpdateStatus(m._id, "Replied")}
+                              className="p-1.5 bg-foreground/5 hover:bg-emerald-500/15 border border-foreground/10 hover:border-emerald-500/30 text-muted-foreground hover:text-emerald-400 rounded-lg transition-colors cursor-pointer"
+                              title="Mark as Replied"
+                            >
+                              <Check className="h-4 w-4" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDelete(m._id)}
+                            className="p-1.5 bg-foreground/5 hover:bg-destructive/15 border border-foreground/10 hover:border-destructive/30 text-muted-foreground hover:text-destructive-foreground rounded-lg transition-colors cursor-pointer"
+                            title="Delete Message"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-                {/* Body Message */}
-                <div className="bg-surface/50 border border-foreground/5 p-4 rounded-xl">
-                  <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
-                    {m.message}
-                  </p>
-                </div>
-              </div>
-            );
-          })
+        {totalPages > 1 && (
+          <div className="flex flex-col items-center justify-center pt-6 pb-6 gap-3 border-t border-foreground/5">
+            <Pagination data={{ currentPage, totalPages }} isAdmin={true} />
+            <span className="text-xs text-muted-foreground">
+              Showing {messages.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to{" "}
+              {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} messages
+            </span>
+          </div>
         )}
       </div>
     </div>

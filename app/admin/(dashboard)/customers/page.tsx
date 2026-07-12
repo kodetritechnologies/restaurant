@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Search, User, Trash2 } from "lucide-react";
 import BasicProvider from "@/utils/BasicProvider";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import Swal from "sweetalert2";
+import { useRouter, useSearchParams } from "next/navigation";
+import Pagination from "@/components/Pagination";
+import { confirmDelete } from "@/utils/swal";
 
 interface CustomerItem {
   _id: string;
@@ -17,6 +18,15 @@ interface CustomerItem {
 
 export default function CustomersManager() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const itemsPerPage = 10;
+  const pageParam = searchParams.get("page");
+  const currentPage = pageParam ? parseInt(pageParam, 10) : 1;
+
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
   const [customers, setCustomers] = useState<CustomerItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,10 +36,14 @@ export default function CustomersManager() {
   const fetchCustomers = async (search = "") => {
     setLoading(true);
     try {
-      const url = search ? `/api/admin/customers?search=${search}` : "/api/admin/customers";
+      const url = search 
+        ? `/api/admin/customers?search=${search}&page=${currentPage}&limit=${itemsPerPage}` 
+        : `/api/admin/customers?page=${currentPage}&limit=${itemsPerPage}`;
       const data = await getMethod(url);
       if (data && data.success) {
         setCustomers(data.customers);
+        setTotalPages(data.totalPages || 1);
+        setTotalCount(data.totalCount || data.customers.length);
       } else {
         toast.error("Failed to load customers.");
       }
@@ -42,8 +56,8 @@ export default function CustomersManager() {
   };
 
   useEffect(() => {
-    fetchCustomers();
-  }, []);
+    fetchCustomers(searchTerm);
+  }, [currentPage]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,15 +70,7 @@ export default function CustomersManager() {
   };
 
   const handleSoftDelete = async (id: string, email: string) => {
-    const result = await Swal.fire({
-      title: "Move to Trash?",
-      text: `Customer "${email}" will be moved to trash and can be restored later.`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "var(--destructive)",
-      cancelButtonColor: "var(--muted)",
-      confirmButtonText: "Move to Trash",
-    });
+    const result = await confirmDelete(`Customer "${email}" will be moved to trash and can be restored later.`);
 
     if (!result.isConfirmed) return;
 
@@ -216,6 +222,16 @@ export default function CustomersManager() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div className="flex flex-col items-center justify-center pt-6 pb-6 gap-3">
+            <Pagination data={{ currentPage, totalPages }} isAdmin={true} />
+            <span className="text-xs text-muted-foreground">
+              Showing {customers.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to{" "}
+              {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} customers
+            </span>
           </div>
         )}
       </div>

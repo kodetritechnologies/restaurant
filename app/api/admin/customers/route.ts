@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getPaginatedData } from "@/utils/lib/pagination";
 import dbConnect from "@/utils/lib/dbConnect";
 import Customer from "@/utils/models/Customer";
 import { verifyAdmin } from "@/utils/lib/auth";
@@ -14,27 +15,46 @@ export async function GET(req: Request) {
     }
 
     await dbConnect();
-    
-    // Parse filters
+
     const url = new URL(req.url);
     const search = url.searchParams.get("search");
 
     let query: any = { deleted_at: null };
-    
+
     if (search) {
       query.$or = [
         { email: { $regex: search, $options: "i" } },
         { name: { $regex: search, $options: "i" } },
-        { phone: { $regex: search, $options: "i" } },
       ];
+      query.$or.push({
+        $expr: {
+          $regexMatch: {
+            input: { $toString: "$phone" },
+            regex: search,
+            options: "i"
+          }
+        }
+      });
     }
 
-    const customers = await Customer.find(query)
-      .select("-otp -otpExpires") // Don't return sensitive OTP fields
-      .sort({ createdAt: -1 });
+    const page = url.searchParams.get("page");
+    const limit = url.searchParams.get("limit");
+
+    const { data: customers, totalCount, totalPages, currentPage } = await getPaginatedData(
+      Customer,
+      query,
+      { page, limit, select: "-otp -otpExpires" }
+    );
 
     return NextResponse.json(
-      { success: true, count: customers.length, customers },
+      {
+        success: true,
+        count: customers.length,
+        totalCount,
+        totalPages,
+        currentPage,
+        customers
+      },
       { status: 200 }
     );
   } catch (error: any) {

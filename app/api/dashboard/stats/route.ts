@@ -20,27 +20,24 @@ export async function GET(req: Request) {
     const pendingBookingsCount = await Reservation.countDocuments({ status: "Pending" });
     const totalMessagesCount = await Message.countDocuments({ status: "Unread" });
 
-    // Revenue calculation: $50 estimated per guest on Confirmed/Completed reservations
-    const revenueReservations = await Reservation.find({ status: { $in: ["Confirmed", "Completed"] } });
-    const totalRevenue = revenueReservations.reduce((acc, curr) => acc + (curr.guests * 50), 0);
+    const revenueAggregation = await Reservation.aggregate([
+      { $match: { status: { $in: ["Confirmed", "Completed"] } } },
+      { $group: { _id: null, totalGuests: { $sum: "$guests" } } }
+    ]);
+    const totalRevenue = revenueAggregation.length > 0 ? revenueAggregation[0].totalGuests * 50 : 0;
 
-    // Live pending bookings
     const pendingBookings = await Reservation.find({ status: "Pending" }).sort({ createdAt: -1 }).limit(5);
 
-    // Chart items: last 7 days distribution of reservations
     const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const chartItems = [];
     
-    // Get count for last 7 calendar days
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const dayName = daysOfWeek[d.getDay()];
       
-      // format YYYY-MM-DD for match check
       const dateStr = d.toISOString().split('T')[0];
       
-      // Let's count matching reservations
       const count = await Reservation.countDocuments({
         date: dateStr
       });
@@ -52,7 +49,6 @@ export async function GET(req: Request) {
       });
     }
 
-    // Popular reservation hours breakdown
     const popularHours = [
       { name: "18:00 - 19:30 (Dinner Intro)", count: await Reservation.countDocuments({ time: { $regex: "^18:|^19:0" } }), percentage: 0 },
       { name: "19:30 - 21:00 (Dinner Peak)", count: await Reservation.countDocuments({ time: { $regex: "^19:3|^20:" } }), percentage: 0 },

@@ -17,7 +17,6 @@ export async function GET(req: Request) {
         admin: {
           name: admin.name,
           email: admin.email,
-          role: admin.role,
         },
       },
       { status: 200 }

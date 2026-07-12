@@ -30,7 +30,7 @@ function MenuContent() {
   useEffect(() => {
     if (initCategory) setActiveCategory(initCategory);
     else setActiveCategory("all");
-    
+
     if (initSearch) setSearchQuery(initSearch);
     else setSearchQuery("");
   }, [initCategory, initSearch]);
@@ -43,80 +43,22 @@ function MenuContent() {
     }
   };
 
-  // Cart State
-  const [cartItems, setCartItems] = useState<{ productId: string, variantId?: string, quantity: number }[]>([]);
-  const [cartLoaded, setCartLoaded] = useState(false);
+  const cartItems: any[] = [];
 
-  // Variant Modal State
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<any | null>(null);
   const [modalQuantity, setModalQuantity] = useState<number>(1);
   const [localQuantities, setLocalQuantities] = useState<Record<string, number>>({});
 
-  // Cart Drawer State
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const getCartQuantity = (productId: string, variantId?: string) => {
-    const item = cartItems.find(i => i.productId === productId && i.variantId === variantId);
-    return item ? item.quantity : 0;
-  };
 
   const updateCartQuantity = (productId: string, variantId: string | undefined, delta: number, maxStock: number | null) => {
-    setCartItems(prev => {
-      const existingItem = prev.find(i => i.productId === productId && i.variantId === variantId);
-      let newQuantity = existingItem ? existingItem.quantity + delta : delta;
-
-      if (newQuantity < 0) newQuantity = 0;
-      if (maxStock !== null && maxStock !== undefined && newQuantity > maxStock) newQuantity = maxStock;
-
-      if (newQuantity === 0) {
-        return prev.filter(i => !(i.productId === productId && i.variantId === variantId));
-      }
-
-      if (existingItem) {
-        return prev.map(i =>
-          (i.productId === productId && i.variantId === variantId) ? { ...i, quantity: newQuantity } : i
-        );
-      }
-
-      return [...prev, { productId, variantId, quantity: newQuantity }];
-    });
+    toast.success("Cart functionality will be implemented via API soon!");
   };
 
-  // Persist cart to localStorage whenever it changes (after initial load)
-  useEffect(() => {
-    if (!cartLoaded) return;
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
-  }, [cartItems, cartLoaded]);
-
-  // Restore cart from localStorage on mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem("cartItems");
-      if (stored) setCartItems(JSON.parse(stored));
-    } catch { }
-    setCartLoaded(true);
-  }, []);
-
-  const cartTotalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-
-  const getCartSubtotal = () => {
-    let total = 0;
-    cartItems.forEach(item => {
-      const product = products.find(p => p._id === item.productId);
-      if (!product) return;
-
-      if (product.productType === "variable" && item.variantId) {
-        const variant = product.variants?.find((v: any) => v._id === item.variantId);
-        if (variant) {
-          total += (variant.salePrice || variant.regularPrice) * item.quantity;
-        }
-      } else {
-        total += (product.salePrice || product.regularPrice) * item.quantity;
-      }
-    });
-    return total;
-  };
+  const cartTotalItems = 0;
+  const getCartSubtotal = () => 0;
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -129,10 +71,9 @@ function MenuContent() {
           setCategories(catData.categories.filter((c: any) => c.type?.toLowerCase() === "product" || !c.type || c.type === "General"));
         }
 
-        const currData = await getMethod("/api/currency");
-        if (currData?.success && currData.currencies) {
-          const defaultCurr = currData.currencies.find((c: any) => c.isDefault);
-          if (defaultCurr) setCurrencySymbol(defaultCurr.symbol);
+        const currData = await getMethod("/api/currency?default=true");
+        if (currData?.success && currData.currency) {
+          setCurrencySymbol(currData.currency.symbol);
         }
       } catch (err) {
         console.error("Failed to fetch initial data", err);
@@ -169,7 +110,6 @@ function MenuContent() {
       <Header />
 
       <main className="flex-1 pt-32 pb-24">
-        {/* Hero Section */}
         <section className="relative px-5 md:px-8 max-w-7xl mx-auto mb-16 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -192,14 +132,12 @@ function MenuContent() {
         </section>
 
 
-        {/* Categories Filter Slider */}
         {categories.length > 0 && (
           <div className="sticky top-[64px] sm:top-[72px] md:top-[88px] lg:top-[104px] z-40 bg-background/95 backdrop-blur-xl border-b border-foreground/5 py-4 mb-12 -mt-4 transition-all shadow-sm">
             <div className="relative max-w-7xl mx-auto px-5 md:px-8 group">
-              
-              {/* Left Scroll Button */}
+
               <div className="absolute left-0 top-0 bottom-0 w-16 md:w-20 bg-gradient-to-r from-background via-background/90 to-transparent z-10 flex items-center justify-start px-2 pointer-events-none">
-                <button 
+                <button
                   onClick={() => scroll("left")}
                   className="pointer-events-auto w-8 h-8 rounded-full bg-surface border border-foreground/10 hover:border-gold hover:text-gold flex items-center justify-center shadow-md transition-colors text-foreground"
                   aria-label="Scroll left"
@@ -208,9 +146,8 @@ function MenuContent() {
                 </button>
               </div>
 
-              {/* Right Scroll Button */}
               <div className="absolute right-0 top-0 bottom-0 w-16 md:w-20 bg-gradient-to-l from-background via-background/90 to-transparent z-10 flex items-center justify-end px-2 pointer-events-none">
-                <button 
+                <button
                   onClick={() => scroll("right")}
                   className="pointer-events-auto w-8 h-8 rounded-full bg-surface border border-foreground/10 hover:border-gold hover:text-gold flex items-center justify-center shadow-md transition-colors text-foreground"
                   aria-label="Scroll right"
@@ -219,21 +156,21 @@ function MenuContent() {
                 </button>
               </div>
 
-              {/* Scrollable Container */}
-              <section 
+              <section
                 ref={scrollContainerRef}
                 className="flex overflow-x-auto gap-3 pb-2 -mb-2 snap-x hide-scrollbar px-6 md:px-8"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
-                <style dangerouslySetInnerHTML={{__html: `
+                <style dangerouslySetInnerHTML={{
+                  __html: `
                   section.hide-scrollbar::-webkit-scrollbar { display: none; }
                 `}} />
-                
+
                 <button
                   onClick={() => { setActiveCategory("all"); setSearchQuery(""); router.replace('/menu'); }}
                   className={`shrink-0 snap-start px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === "all" && !searchQuery
-                      ? "bg-gold text-primary-foreground shadow-gold"
-                      : "bg-surface/50 text-muted-foreground border border-foreground/10 hover:border-gold hover:text-gold"
+                    ? "bg-gold text-primary-foreground shadow-gold"
+                    : "bg-surface/50 text-muted-foreground border border-foreground/10 hover:border-gold hover:text-gold"
                     }`}
                 >
                   All
@@ -243,8 +180,8 @@ function MenuContent() {
                     key={cat._id}
                     onClick={() => { setActiveCategory(cat._id); setSearchQuery(""); router.replace(`/menu?category=${cat._id}`); }}
                     className={`shrink-0 snap-start px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === cat._id && !searchQuery
-                        ? "bg-gold text-primary-foreground shadow-gold"
-                        : "bg-surface/50 text-muted-foreground border border-foreground/10 hover:border-gold hover:text-gold"
+                      ? "bg-gold text-primary-foreground shadow-gold"
+                      : "bg-surface/50 text-muted-foreground border border-foreground/10 hover:border-gold hover:text-gold"
                       }`}
                   >
                     {cat.name}
@@ -255,7 +192,6 @@ function MenuContent() {
           </div>
         )}
 
-        {/* Menu Grid */}
         <section className="px-5 md:px-8 max-w-7xl mx-auto min-h-[400px]">
           {products.length === 0 && !loading ? (
             <div className="text-center py-20 glass rounded-3xl">
@@ -293,8 +229,7 @@ function MenuContent() {
                             transition={{ duration: 0.5, delay: index * 0.1 }}
                             className="glass rounded-3xl overflow-hidden group hover:border-gold/30 transition-all duration-500 h-full flex flex-col"
                           >
-                            {/* Image */}
-                            <div 
+                            <div
                               className="relative aspect-[4/3] overflow-hidden bg-black/10 flex items-center justify-center cursor-pointer"
                               onClick={() => {
                                 setSelectedProduct(product);
@@ -332,10 +267,9 @@ function MenuContent() {
                               )}
                             </div>
 
-                            {/* Content */}
                             <div className="p-6 flex flex-col flex-1">
                               <div className="flex justify-between items-start gap-4 mb-2">
-                                <h3 
+                                <h3
                                   className="text-xl font-serif font-bold text-foreground group-hover:text-gold transition-colors cursor-pointer"
                                   onClick={() => {
                                     setSelectedProduct(product);
@@ -371,7 +305,6 @@ function MenuContent() {
                               </div>
 
 
-                              {/* Actions */}
                               <div className="mt-auto pt-4">
                                 {product.productType === "variable" ? (
                                   <button
@@ -468,8 +401,7 @@ function MenuContent() {
                                   transition={{ duration: 0.5, delay: index * 0.1 }}
                                   className="glass rounded-3xl overflow-hidden group hover:border-gold/30 transition-all duration-500 h-full flex flex-col"
                                 >
-                                  {/* Image */}
-                                  <div 
+                                  <div
                                     className="relative aspect-[4/3] overflow-hidden bg-black/10 flex items-center justify-center cursor-pointer"
                                     onClick={() => {
                                       setSelectedProduct(product);
@@ -507,21 +439,20 @@ function MenuContent() {
                                     )}
                                   </div>
 
-                                  {/* Content */}
                                   <div className="p-6 flex flex-col flex-1">
                                     <div className="flex justify-between items-start gap-4 mb-2">
-                                      <h3 
-                                    className="text-xl font-serif font-bold text-foreground group-hover:text-gold transition-colors cursor-pointer"
-                                    onClick={() => {
-                                      setSelectedProduct(product);
-                                      if (product.productType === "variable") {
-                                        setSelectedVariant(product.variants?.[0] || null);
-                                      } else {
-                                        setSelectedVariant(null);
-                                      }
-                                      setModalQuantity(1);
-                                    }}
-                                  >
+                                      <h3
+                                        className="text-xl font-serif font-bold text-foreground group-hover:text-gold transition-colors cursor-pointer"
+                                        onClick={() => {
+                                          setSelectedProduct(product);
+                                          if (product.productType === "variable") {
+                                            setSelectedVariant(product.variants?.[0] || null);
+                                          } else {
+                                            setSelectedVariant(null);
+                                          }
+                                          setModalQuantity(1);
+                                        }}
+                                      >
                                         {product.name}
                                       </h3>
                                       <div className="text-right shrink-0">
@@ -546,7 +477,6 @@ function MenuContent() {
                                     </div>
 
 
-                                    {/* Actions */}
                                     <div className="mt-auto pt-4">
                                       {product.productType === "variable" ? (
                                         <button
@@ -614,7 +544,6 @@ function MenuContent() {
         </section>
       </main>
 
-      {/* Variant Selection Modal */}
       <AnimatePresence>
         {selectedProduct && (
           <motion.div
@@ -677,8 +606,8 @@ function MenuContent() {
                             key={variant._id}
                             onClick={() => setSelectedVariant(variant)}
                             className={`px-4 py-2 rounded-xl border text-sm font-medium transition-all ${selectedVariant?._id === variant._id
-                                ? 'border-gold bg-gold/10 text-gold'
-                                : 'border-foreground/10 hover:border-foreground/30 text-muted-foreground hover:text-white'
+                              ? 'border-gold bg-gold/10 text-gold'
+                              : 'border-foreground/10 hover:border-foreground/30 text-muted-foreground hover:text-white'
                               }`}
                           >
                             {variant.variantName}
@@ -688,7 +617,7 @@ function MenuContent() {
                     </div>
 
                     {selectedVariant && (
-                      <div className="flex items-center justify-between pt-6 border-t border-foreground/5">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-foreground/5">
                         <div>
                           <div className="flex items-center gap-2">
                             {selectedVariant.salePrice ? (
@@ -707,8 +636,8 @@ function MenuContent() {
                           </p>
                         </div>
 
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center justify-between bg-foreground/5 border border-foreground/10 rounded-xl p-1.5 h-12 w-28">
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                          <div className="flex items-center justify-between bg-foreground/5 border border-foreground/10 rounded-xl p-1.5 h-12 w-28 shrink-0">
                             <button
                               onClick={() => setModalQuantity(Math.max(1, modalQuantity - 1))}
                               className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
@@ -731,7 +660,7 @@ function MenuContent() {
                               setSelectedProduct(null); // Close modal after adding
                             }}
                             disabled={selectedVariant.quantity !== null && selectedVariant.quantity <= 0}
-                            className="h-12 px-6 rounded-xl border border-gold bg-gold/10 hover:bg-gold/20 text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="h-12 px-6 flex-1 sm:flex-none rounded-xl border border-gold bg-gold/10 hover:bg-gold/20 text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <ShoppingBag className="w-4 h-4" />
                             Add
@@ -741,7 +670,7 @@ function MenuContent() {
                     )}
                   </>
                 ) : (
-                  <div className="flex items-center justify-between pt-6 border-t border-foreground/5 mt-8">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-foreground/5 mt-8">
                     <div>
                       <div className="flex items-center gap-2">
                         {selectedProduct.salePrice ? (
@@ -760,8 +689,8 @@ function MenuContent() {
                       </p>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3">
-                      <div className="flex items-center justify-between bg-foreground/5 border border-foreground/10 rounded-xl p-1.5 h-12 w-28">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                      <div className="flex items-center justify-between bg-foreground/5 border border-foreground/10 rounded-xl p-1.5 h-12 w-28 shrink-0">
                         <button
                           onClick={() => setModalQuantity(Math.max(1, modalQuantity - 1))}
                           className="w-8 h-full rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center text-foreground transition-colors"
@@ -776,7 +705,7 @@ function MenuContent() {
                           <Plus className="w-4 h-4" />
                         </button>
                       </div>
-                      
+
                       <button
                         onClick={() => {
                           updateCartQuantity(selectedProduct._id, undefined, modalQuantity, selectedProduct.quantity);
@@ -784,7 +713,7 @@ function MenuContent() {
                           setSelectedProduct(null); // Close modal after adding
                         }}
                         disabled={selectedProduct.quantity !== null && selectedProduct.quantity <= 0}
-                        className="h-12 px-6 rounded-xl border border-gold bg-gold/10 hover:bg-gold/20 text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="h-12 px-6 flex-1 sm:flex-none rounded-xl border border-gold bg-gold/10 hover:bg-gold/20 text-gold transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <ShoppingBag className="w-4 h-4" />
                         Add
@@ -798,7 +727,6 @@ function MenuContent() {
         )}
       </AnimatePresence>
 
-      {/* Floating Cart Button */}
       {cartTotalItems > 0 && (
         <button
           onClick={() => setIsCartOpen(true)}
@@ -823,7 +751,6 @@ function MenuContent() {
               onClick={() => setIsCartOpen(false)}
               className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm"
             />
-            {/* Drawer */}
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
@@ -845,7 +772,6 @@ function MenuContent() {
                 </button>
               </div>
 
-              {/* Cart Items */}
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 {cartItems.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
@@ -918,7 +844,6 @@ function MenuContent() {
                 )}
               </div>
 
-              {/* Footer / Checkout */}
               {cartItems.length > 0 && (
                 <div className="p-6 border-t border-foreground/10 bg-[#111] shrink-0">
                   <div className="flex justify-between items-center mb-6">

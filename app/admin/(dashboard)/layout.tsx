@@ -133,7 +133,6 @@ export default function AdminDashboardLayout({
 
   return (
     <div className="min-h-screen lg:h-screen lg:overflow-hidden bg-background text-foreground flex flex-col lg:flex-row relative">
-      {/* Sidebar for Desktop */}
       <aside className="hidden lg:flex w-72 shrink-0 flex-col border-r border-foreground/5 bg-surface/50 backdrop-blur-md p-6 justify-between z-30">
         <div className="flex flex-col gap-8 flex-1 overflow-hidden">
           <div className="flex items-center gap-3">
@@ -245,7 +244,6 @@ export default function AdminDashboardLayout({
         </button>
       </aside>
 
-      {/* Header for Mobile */}
       <header className="lg:hidden flex items-center justify-between border-b border-foreground/5 bg-surface/50 backdrop-blur-md px-6 py-4 z-40">
         <div className="flex items-center gap-3">
           <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-gold shadow-gold">
@@ -265,7 +263,6 @@ export default function AdminDashboardLayout({
         </button>
       </header>
 
-      {/* Mobile Sidebar overlay */}
       <AnimatePresence>
         {sidebarOpen && (
           <>
@@ -398,7 +395,6 @@ export default function AdminDashboardLayout({
         )}
       </AnimatePresence>
 
-      {/* Main content body */}
       <main className="flex-1 p-4 sm:p-6 lg:p-10 overflow-y-auto max-w-7xl mx-auto w-full flex flex-col gap-8">
         {showBanner && bannerText && (
           <div className="relative overflow-hidden rounded-2xl bg-gradient-gold p-4 text-primary-foreground font-semibold flex items-center justify-between shadow-gold shrink-0">

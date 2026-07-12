@@ -28,8 +28,8 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
       const fetchCurrency = async () => {
         try {
           const data = await getMethod("/api/currency?default=true");
-          if (data?.success && data.currencies && data.currencies.length > 0) {
-            setCurrencySymbol(data.currencies[0].symbol);
+          if (data?.success && data.currency) {
+            setCurrencySymbol(data.currency.symbol);
           }
         } catch (error) {
           console.error(error);

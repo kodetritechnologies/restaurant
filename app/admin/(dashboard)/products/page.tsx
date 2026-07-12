@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { Plus, Loader2, Trash2, Edit2, UploadCloud, X, Package, Star, Search, Filter } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import Swal from "sweetalert2";
 import BasicProvider from "@/utils/BasicProvider";
+import Pagination from "@/components/Pagination";
+import { confirmDelete } from "@/utils/swal";
+import { useSearchParams, useRouter } from "next/navigation";
 
 interface ProductVariant {
   _id?: string;
@@ -36,17 +38,44 @@ interface Product {
 }
 
 export default function ProductsPage() {
-  const { getMethod, postMethod, putMethod, deleteMethod } = BasicProvider();
+  const { getMethod, deleteMethod } = BasicProvider();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const itemsPerPage = 10;
+  const pageParam = searchParams.get("page");
+  const currentPage = pageParam ? parseInt(pageParam, 10) : 1;
+
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [productTypeFilter, setProductTypeFilter] = useState("");
+
+  // Simple search debounce logic
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 450);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const data = await getMethod("/api/products");
+      let queryUrl = `/api/products?page=${currentPage}&limit=${itemsPerPage}`;
+      if (debouncedSearch) queryUrl += `&search=${debouncedSearch}`;
+      if (productTypeFilter) queryUrl += `&productType=${productTypeFilter}`;
+
+      const data = await getMethod(queryUrl);
       if (data && data.success) {
         setProducts(data.products);
+        setTotalPages(data.totalPages || 1);
+        setTotalCount(data.totalCount || data.products.length);
       }
     } catch (error) {
       toast.error("Failed to load products");
@@ -57,18 +86,10 @@ export default function ProductsPage() {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [currentPage, debouncedSearch, productTypeFilter]);
 
   const handleDelete = async (id: string) => {
-    const result = await Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, delete it!'
-    });
+    const result = await confirmDelete("You won't be able to revert this product deletion!");
     
     if (!result.isConfirmed) return;
     
@@ -112,23 +133,24 @@ export default function ProductsPage() {
                     <input 
                         type="text" 
                         placeholder="Search products..." 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full pl-9 pr-4 py-2 bg-surface/50 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-gold transition-colors"
                     />
                 </div>
                 <div className="flex items-center gap-2 w-full md:w-auto">
                     <div className="relative w-full md:w-32">
                         <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                        <select className="w-full pl-9 pr-4 py-2 bg-surface/50 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-gold transition-colors appearance-none">
+                        <select 
+                            value={productTypeFilter}
+                            onChange={(e) => setProductTypeFilter(e.target.value)}
+                            className="w-full pl-9 pr-4 py-2 bg-surface/50 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-gold transition-colors appearance-none"
+                        >
                             <option value="">All Types</option>
                             <option value="simple">Simple</option>
                             <option value="variable">Variable</option>
                         </select>
                     </div>
-                    <select className="w-full md:w-32 px-4 py-2 bg-surface/50 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-gold transition-colors appearance-none">
-                        <option value="">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                    </select>
                 </div>
             </div>
 
@@ -238,6 +260,16 @@ export default function ProductsPage() {
                     })}
                   </tbody>
                 </table>
+              </div>
+            )}
+
+            {totalPages > 1 && (
+              <div className="flex flex-col items-center justify-center pt-6 pb-6 gap-3">
+                <Pagination data={{ currentPage, totalPages }} isAdmin={true} />
+                <span className="text-xs text-muted-foreground">
+                  Showing {products.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to{" "}
+                  {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} products
+                </span>
               </div>
             )}
         </div>

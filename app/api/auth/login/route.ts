@@ -17,7 +17,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Find admin by email
     const admin = await Admin.findOne({ email });
     if (!admin) {
       return NextResponse.json(
@@ -56,7 +55,6 @@ export async function POST(req: Request) {
         admin: {
           name: admin.name,
           email: admin.email,
-          role: admin.role,
         },
       },
       { status: 200 }

@@ -64,7 +64,6 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 items-start">
-            {/* Sidebar Navigation */}
             <aside className="glass rounded-3xl p-4 flex flex-col gap-2">
               {tabs.map((tab) => {
                 const isActive = pathname === tab.href;
@@ -95,7 +94,6 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
               </button>
             </aside>
 
-            {/* Page Content */}
             <div className="glass rounded-3xl p-6 md:p-8 min-h-[500px]">
               {children}
             </div>

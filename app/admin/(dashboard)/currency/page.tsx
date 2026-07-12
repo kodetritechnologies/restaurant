@@ -5,6 +5,9 @@ import { Plus, Loader2, Trash2, Edit2, CheckCircle2, CircleDollarSign, X } from 
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import BasicProvider from "@/utils/BasicProvider";
+import { useRouter, useSearchParams } from "next/navigation";
+import Pagination from "@/components/Pagination";
+import { confirmDelete } from "@/utils/swal";
 
 interface Currency {
   _id: string;
@@ -16,7 +19,15 @@ interface Currency {
 
 export default function CurrencyPage() {
   const { getMethod, postMethod, putMethod, deleteMethod } = BasicProvider();
-  
+  const searchParams = useSearchParams();
+
+  const itemsPerPage = 10;
+  const pageParam = searchParams.get("page");
+  const currentPage = pageParam ? parseInt(pageParam, 10) : 1;
+
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
   const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -33,14 +44,16 @@ export default function CurrencyPage() {
 
   useEffect(() => {
     fetchCurrencies();
-  }, []);
+  }, [currentPage]);
 
   const fetchCurrencies = async () => {
     setLoading(true);
     try {
-      const res = await getMethod("/api/currency");
+      const res = await getMethod(`/api/currency?page=${currentPage}&limit=${itemsPerPage}`);
       if (res?.success) {
         setCurrencies(res.currencies);
+        setTotalPages(res.totalPages || 1);
+        setTotalCount(res.totalCount || res.currencies.length);
       } else {
         toast.error(res?.message || "Failed to fetch currencies");
       }
@@ -132,38 +145,22 @@ export default function CurrencyPage() {
   };
 
   const handleDelete = async (id: string) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
-      background: "#111",
-      color: "#fff",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const res = await deleteMethod(`/api/currency/${id}`);
-          if (res?.success) {
-            Swal.fire({
-              title: "Deleted!",
-              text: "Currency has been deleted.",
-              icon: "success",
-              background: "#111",
-              color: "#fff",
-            });
-            fetchCurrencies();
-          } else {
-            toast.error(res?.message || "Failed to delete currency");
-          }
-        } catch (error) {
-          console.error(error);
-          toast.error("An error occurred while deleting");
+    const result = await confirmDelete("You won't be able to revert this!");
+
+    if (result.isConfirmed) {
+      try {
+        const res = await deleteMethod(`/api/currency/${id}`);
+        if (res?.success) {
+          toast.success("Currency has been deleted.");
+          fetchCurrencies();
+        } else {
+          toast.error(res?.message || "Failed to delete currency");
         }
+      } catch (error) {
+        console.error(error);
+        toast.error("An error occurred while deleting");
       }
-    });
+    }
   };
 
   return (
@@ -259,10 +256,19 @@ export default function CurrencyPage() {
               </tbody>
             </table>
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex flex-col items-center justify-center pt-6 pb-6 gap-3">
+              <Pagination data={{ currentPage, totalPages }} isAdmin={true} />
+              <span className="text-xs text-muted-foreground">
+                Showing {currencies.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to{" "}
+                {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} currencies
+              </span>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Add/Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="bg-[#111] border border-foreground/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
