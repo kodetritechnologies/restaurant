@@ -95,12 +95,14 @@ export default function OrderStatusPage() {
           >
             {content.actionText}
           </button>
-          <button
-            onClick={() => router.push("/")}
-            className="px-8 py-3 rounded-full border border-foreground/10 hover:border-gold/40 text-muted-foreground hover:text-gold font-semibold text-sm transition-colors"
-          >
-            Back to Home
-          </button>
+          {orderId && (
+            <button
+              onClick={() => router.push("/order/active")}
+              className="px-8 py-3 rounded-full border border-foreground/10 hover:border-gold/40 text-muted-foreground hover:text-gold font-semibold text-sm transition-colors"
+            >
+              Check Order Status
+            </button>
+          )}
         </div>
       </motion.div>
     </main>

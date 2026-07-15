@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Info, Lock, Phone, Mail, MapPin, Clock, MessageSquare, Truck } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Info, Lock, Phone, Mail, MapPin, Clock, MessageSquare, Truck, QrCode, Download } from "lucide-react";
+import { QRCodeCanvas } from 'qrcode.react';
 import BasicProvider from "@/utils/BasicProvider";
 import toast from "react-hot-toast";
 
@@ -26,11 +27,17 @@ export default function SettingsManager() {
   const [twitterUsername, setTwitterUsername] = useState("");
   const [deliveryFee, setDeliveryFee] = useState<number | string>(0);
   const [isDeliveryFeeActive, setIsDeliveryFeeActive] = useState(false);
+  const [tableCount, setTableCount] = useState<number | string>(10);
+  const [cancellationTimeLimit, setCancellationTimeLimit] = useState<number | string>(5);
   
   // Password state
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  
+  // QR Code State
+  const [qrTableNumber, setQrTableNumber] = useState<number | "">("");
+  const qrRef = useRef<HTMLCanvasElement>(null);
   
   const [loading, setLoading] = useState(true);
   const [passwordLoading, setPasswordLoading] = useState(false);
@@ -60,6 +67,8 @@ export default function SettingsManager() {
         setTwitterUsername(s.twitterUsername || "");
         setDeliveryFee(s.deliveryFee || 0);
         setIsDeliveryFeeActive(!!s.isDeliveryFeeActive);
+        setTableCount(s.tableCount || 10);
+        setCancellationTimeLimit(s.cancellationTimeLimit ?? 5);
       }
     } catch (error) {
       console.error("Error loading settings:", error);
@@ -111,12 +120,28 @@ export default function SettingsManager() {
     }
   };
 
+  const handleSaveStorePolicies = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const data = await postMethod("/api/settings", {
+        tableCount: Number(tableCount) || 10,
+        cancellationTimeLimit: Number(cancellationTimeLimit) || 5,
+      });
+      if (data && data.success) {
+        toast.success("Store policies saved successfully.");
+      } else {
+        toast.error(data.message || "Failed to update store policies.");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "An error occurred.");
+    }
+  };
+
   const handleSaveOperational = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const newErrors: Record<string, string> = {};
     
-    // Phone validation (exactly 10 digits)
     if (!shopPhone.trim()) {
       newErrors.shopPhone = "Phone number is required";
     } else if (!/^\d{10}$/.test(shopPhone.trim())) {
@@ -233,6 +258,16 @@ export default function SettingsManager() {
     } finally {
       setPasswordLoading(false);
     }
+  };
+
+  const handleDownloadQr = () => {
+    if (!qrRef.current) return;
+    const canvas = qrRef.current;
+    const pngUrl = canvas.toDataURL("image/png");
+    const downloadLink = document.createElement("a");
+    downloadLink.download = `table-${qrTableNumber}-qr.png`;
+    downloadLink.href = pngUrl;
+    downloadLink.click();
   };
 
   if (loading) {
@@ -419,9 +454,9 @@ export default function SettingsManager() {
               </div>
 
 
+
             </div>
 
-            {/* Opening Hours */}
             <div className="space-y-4">
               <h4 className="text-xs font-bold uppercase tracking-wider text-gold/80">Opening Hours</h4>
 
@@ -617,7 +652,67 @@ export default function SettingsManager() {
             </button>
           </form>
 
-          {/* Delivery Fee Config */}
+          <form onSubmit={handleSaveStorePolicies} className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6">
+            <h3 className="font-serif text-lg font-bold text-foreground border-b border-foreground/5 pb-2.5 flex items-center gap-2">
+              <svg viewBox="0 0 24 24" className="h-5 w-5 text-gold" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                <path d="M3 9h18" />
+                <path d="M9 21V9" />
+              </svg>
+              Store Policies
+            </h3>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold uppercase tracking-widest text-gold">
+                  Number of Tables
+                </label>
+                <div className="relative">
+                  <span className="absolute top-2.5 left-3.5 flex items-start pointer-events-none text-muted-foreground">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                      <path d="M3 9h18" />
+                      <path d="M9 21V9" />
+                    </svg>
+                  </span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={tableCount}
+                    onChange={(e) => setTableCount(e.target.value === "" ? "" : Number(e.target.value))}
+                    className="w-full bg-background/50 border border-foreground/10 pl-10 pr-4 py-2.5 rounded-full text-xs text-foreground outline-none transition-colors focus:border-gold"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold uppercase tracking-widest text-gold">
+                  Order Cancellation Time Limit (minutes)
+                </label>
+                <div className="relative">
+                  <span className="absolute top-2.5 left-3.5 flex items-start pointer-events-none text-muted-foreground">
+                    <Clock className="h-4 w-4" />
+                  </span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={cancellationTimeLimit}
+                    onChange={(e) => setCancellationTimeLimit(e.target.value === "" ? "" : Number(e.target.value))}
+                    className="w-full bg-background/50 border border-foreground/10 pl-10 pr-4 py-2.5 rounded-full text-xs text-foreground outline-none transition-colors focus:border-gold"
+                  />
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-1">Set to 0 to disable order cancellations.</p>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full rounded-full bg-gradient-gold px-6 py-3 text-xs font-semibold text-primary-foreground shadow-gold transition-all duration-300 hover:scale-[1.01]"
+            >
+              Save Store Policies
+            </button>
+          </form>
+
           <form onSubmit={handleSaveDeliveryFee} className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6">
             <h3 className="font-serif text-lg font-bold text-foreground border-b border-foreground/5 pb-2.5 flex items-center gap-2">
               <Truck className="h-5 w-5 text-gold" />
@@ -673,7 +768,6 @@ export default function SettingsManager() {
             </button>
           </form>
 
-          {/* Change Admin Password */}
           <form onSubmit={handleChangePassword} className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6">
             <h3 className="font-serif text-lg font-bold text-foreground border-b border-foreground/5 pb-2.5">
               Update Admin Password
@@ -756,6 +850,60 @@ export default function SettingsManager() {
               )}
             </button>
           </form>
+          
+          <div className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6">
+            <h3 className="font-serif text-lg font-bold text-foreground border-b border-foreground/5 pb-2.5 flex items-center gap-2">
+              <QrCode className="h-5 w-5 text-gold" />
+              Table QR Generator
+            </h3>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold uppercase tracking-widest text-gold">
+                  Generate for Table Number
+                </label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                    <QrCode className="h-4 w-4" />
+                  </span>
+                  <input
+                    type="number"
+                    min="1"
+                    max={tableCount || 100}
+                    value={qrTableNumber}
+                    onChange={(e) => setQrTableNumber(e.target.value === "" ? "" : Number(e.target.value))}
+                    placeholder="e.g. 5"
+                    className="w-full bg-background/50 border border-foreground/10 pl-10 pr-4 py-2.5 rounded-full text-xs text-foreground outline-none transition-colors focus:border-gold"
+                  />
+                </div>
+              </div>
+
+              {qrTableNumber !== "" && (
+                <div className="flex flex-col items-center justify-center pt-4 space-y-4">
+                  <div className="p-4 bg-white rounded-xl border border-foreground/10">
+                    <QRCodeCanvas
+                      id="qr-code"
+                      value={`${typeof window !== "undefined" ? window.location.origin : ""}/scan?table=${qrTableNumber}`}
+                      size={180}
+                      bgColor={"#ffffff"}
+                      fgColor={"#000000"}
+                      level={"H"}
+                      includeMargin={false}
+                      ref={qrRef}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleDownloadQr}
+                    className="flex items-center gap-2 px-6 py-2.5 text-xs font-semibold rounded-full bg-foreground/5 border border-foreground/10 hover:bg-gold/10 hover:border-gold/30 hover:text-gold transition-colors text-foreground"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download QR Code
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

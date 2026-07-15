@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import CallWaiterModal from "./CallWaiterModal";
+import { ClipboardList } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
+import BasicProvider from "@/utils/BasicProvider";
+import Cookies from "js-cookie";
 
 interface FloatingButtonsProps {
   settings?: {
@@ -11,6 +16,35 @@ interface FloatingButtonsProps {
 
 export default function FloatingButtons({ settings }: FloatingButtonsProps) {
   const [showTop, setShowTop] = useState(false);
+  const [isWaiterModalOpen, setIsWaiterModalOpen] = useState(false);
+  const [hasActiveOrders, setHasActiveOrders] = useState(false);
+  const [hasTableNumber, setHasTableNumber] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const { getMethod } = BasicProvider();
+
+  useEffect(() => {
+    if (Cookies.get("tableNumber")) {
+      setHasTableNumber(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    const checkActiveOrders = async () => {
+      const data = await getMethod("/api/customer/orders?limit=10");
+      if (data && data.success && data.orders) {
+        const active = data.orders.filter(
+          (o: any) => o.status !== "delivered" && o.status !== "cancelled"
+        );
+        setHasActiveOrders(active.length > 0);
+      }
+    };
+    
+    // Only check if not on admin routes
+    if (!pathname?.startsWith("/admin")) {
+      checkActiveOrders();
+    }
+  }, [pathname]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -66,12 +100,30 @@ export default function FloatingButtons({ settings }: FloatingButtonsProps) {
           </button>
         )}
       </div>
-      <button
-        onClick={() => alert("Waiter has been called to your table!")}
-        className="fixed bottom-6 left-6 z-40 rounded-full bg-gradient-gold px-5 py-3 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-gold)] md:hidden flex items-center gap-2"
-      >
-        <span>🔔</span> Call Waiter
-      </button>
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
+        {hasActiveOrders && (
+          <button
+            onClick={() => router.push("/order/active")}
+            className="rounded-full bg-background/90 border border-gold/40 px-4 py-2.5 text-sm font-semibold text-gold shadow-lg backdrop-blur flex items-center gap-2 hover:bg-gold hover:text-primary-foreground transition-colors whitespace-nowrap"
+          >
+            <ClipboardList className="w-4 h-4" /> Check Order Status
+          </button>
+        )}
+      </div>
+      {hasTableNumber && (
+        <>
+          <button
+            onClick={() => setIsWaiterModalOpen(true)}
+            className="fixed bottom-6 left-6 z-40 rounded-full bg-gradient-gold px-5 py-3 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-gold)] md:hidden flex items-center gap-2"
+          >
+            <span>🔔</span> Call Waiter
+          </button>
+          <CallWaiterModal 
+            isOpen={isWaiterModalOpen} 
+            onClose={() => setIsWaiterModalOpen(false)} 
+          />
+        </>
+      )}
     </>
   );
 }

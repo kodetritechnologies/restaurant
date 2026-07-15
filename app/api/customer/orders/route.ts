@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { generateToken } from "@/utils/lib/jwt";
 import dbConnect from "@/utils/lib/dbConnect";
 import Order from "@/utils/models/Order";
 import Customer from "@/utils/models/Customer";
@@ -127,7 +129,20 @@ export async function POST(req: Request) {
       ...(paymentResult.transactionId && { transactionId: paymentResult.transactionId }),
     });
 
-    return NextResponse.json({ success: true, message: "Order placed successfully", order: newOrder }, { status: 201 });
+    let token = null;
+    const existingToken = req.headers.get("x-customer-id");
+    if (!existingToken && customerId) {
+      token = generateToken({ id: customerId, email: customer.email });
+      const cookieStore = await cookies();
+      cookieStore.set("customerToken", token, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      });
+    }
+
+    return NextResponse.json({ success: true, message: "Order placed successfully", order: newOrder, token }, { status: 201 });
   } catch (error: any) {
     console.error("Create Order Error:", error);
     return NextResponse.json({ success: false, message: "Failed to place order", error: error.message }, { status: 500 });

@@ -29,6 +29,8 @@ export async function GET(req: Request) {
         shopDescription: "A modern sanctuary of fine dining. Since 2012.",
         deliveryFee: 0,
         isDeliveryFeeActive: false,
+        tableCount: 10,
+        cancellationTimeLimit: 5,
       });
     }
 

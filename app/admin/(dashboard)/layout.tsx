@@ -21,13 +21,17 @@ import {
   Package,
   ChevronDown,
   ChevronUp,
-  User,
   Key,
   CircleDollarSign,
-  ShoppingBag
+  ShoppingBag,
+  Bell,
+  CheckCheck,
+  User
 } from "lucide-react";
 import Cookies from "js-cookie";
 import BasicProvider from "@/utils/BasicProvider";
+import socket from "@/utils/socket";
+import toast from "react-hot-toast";
 
 export default function AdminDashboardLayout({
   children,
@@ -43,6 +47,109 @@ export default function AdminDashboardLayout({
   const [showBanner, setShowBanner] = useState(false);
   const [bannerText, setBannerText] = useState("");
   const [openDropdowns, setOpenDropdowns] = useState<string[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  const markAllAsRead = async () => {
+    try {
+      const { patchMethod } = BasicProvider();
+      await patchMethod("/api/notifications", {});
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    } catch (err) {
+      console.error("Failed to mark as read", err);
+    }
+  };
+
+  useEffect(() => {
+    const playNotificationSound = () => {
+      try {
+        const audio = new Audio('/notification.wav');
+        let playCount = 0;
+        
+        audio.addEventListener('ended', () => {
+          playCount++;
+          if (playCount < 2) {
+            // Add a small 500ms delay between rings so it sounds natural
+            setTimeout(() => {
+              audio.currentTime = 0;
+              audio.play().catch(e => console.error("Audio playback failed:", e));
+            }, 500);
+          }
+        });
+        
+        audio.play().catch(e => console.error("Audio playback failed:", e));
+      } catch (e) {
+        console.error("Audio playback failed:", e);
+      }
+    };
+
+    const handleWaiterCalled = (data: { _id?: string, message: string, timestamp?: string }) => {
+      setNotifications(prev => [{
+        _id: data._id || Math.random().toString(),
+        message: data.message,
+        isRead: false,
+        createdAt: data.timestamp || new Date().toISOString()
+      }, ...prev]);
+      
+      playNotificationSound();
+      toast.custom(
+        (t) => (
+          <div
+            className={`${
+              t.visible ? 'animate-enter' : 'animate-leave'
+            } max-w-md w-full bg-[#1a0b0b] shadow-[var(--shadow-gold)] border border-gold/30 rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+          >
+            <div className="flex-1 w-0 p-4">
+              <div className="flex items-start">
+                <div className="flex-shrink-0 pt-0.5 text-4xl">
+                  🔔
+                </div>
+                <div className="ml-3 flex-1">
+                  <p className="text-sm font-medium text-white">
+                    Waiter Called!
+                  </p>
+                  <p className="mt-1 text-sm text-gray-300">
+                    Table needs: <span className="font-bold text-gold">{data.message}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex border-l border-red-900/30">
+              <button
+                onClick={() => toast.dismiss(t.id)}
+                className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-red-400 hover:text-red-300 focus:outline-none transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        ),
+        { duration: 10000, position: "top-right" }
+      );
+    };
+
+    socket.on("waiter_called", handleWaiterCalled);
+
+    return () => {
+      socket.off("waiter_called", handleWaiterCalled);
+    };
+  }, []);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const data = await getMethod("/api/notifications");
+        if (data && data.success) {
+          setNotifications(data.notifications);
+        }
+      } catch (err) {
+        console.error("Failed to fetch notifications", err);
+      }
+    };
+    fetchNotifications();
+  }, [pathname]);
 
   const toggleDropdown = (label: string) => {
     setOpenDropdowns(prev => 
@@ -406,7 +513,60 @@ export default function AdminDashboardLayout({
         )}
       </AnimatePresence>
 
-      <main className="flex-1 p-4 sm:p-6 lg:p-10 overflow-y-auto max-w-7xl mx-auto w-full flex flex-col gap-8">
+      <main className="flex-1 p-4 sm:p-6 lg:p-10 overflow-y-auto max-w-7xl mx-auto w-full flex flex-col gap-8 relative">
+        <div className="flex justify-end items-center -mb-4 z-40">
+          <div className="relative">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="relative p-2 text-foreground/70 hover:text-gold transition-colors bg-surface/50 rounded-full border border-foreground/5 backdrop-blur-md"
+            >
+              <Bell className="w-5 h-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-background">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+            <AnimatePresence>
+              {showNotifications && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="absolute right-0 mt-2 w-80 sm:w-96 bg-[#1a0b0b] border border-gold/30 rounded-xl shadow-[var(--shadow-gold)] overflow-hidden z-50 flex flex-col max-h-[80vh]"
+                >
+                  <div className="p-4 border-b border-red-900/30 flex justify-between items-center bg-red-950/20">
+                    <h3 className="font-serif font-bold text-gold">Notifications</h3>
+                    {unreadCount > 0 && (
+                      <button 
+                        onClick={markAllAsRead}
+                        className="text-xs flex items-center gap-1 text-foreground/60 hover:text-gold transition-colors"
+                      >
+                        <CheckCheck className="w-3 h-3" /> Mark all read
+                      </button>
+                    )}
+                  </div>
+                  <div className="overflow-y-auto flex-1 p-2 space-y-2 custom-scrollbar">
+                    {notifications.length === 0 ? (
+                      <p className="text-sm text-center text-foreground/50 py-8">No notifications yet</p>
+                    ) : (
+                      notifications.map(notif => (
+                        <div key={notif._id} className={`p-3 rounded-lg border ${notif.isRead ? 'bg-surface/30 border-foreground/5' : 'bg-red-950/20 border-red-900/30'} flex flex-col gap-1 transition-colors`}>
+                          <div className="flex justify-between items-start">
+                            <span className={`font-semibold text-sm ${notif.isRead ? 'text-foreground/70' : 'text-gold'}`}>Waiter Called</span>
+                            <span className="text-[10px] text-foreground/40">{new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                          <p className={`text-sm ${notif.isRead ? 'text-foreground/50' : 'text-foreground/90'}`}>Table needs: <span className="font-bold">{notif.message}</span></p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
         {showBanner && bannerText && (
           <div className="relative overflow-hidden rounded-2xl bg-gradient-gold p-4 text-primary-foreground font-semibold flex items-center justify-between shadow-gold shrink-0">
             <div className="flex items-center gap-2 pr-8">

@@ -70,6 +70,7 @@ export default function CheckoutPage() {
     note: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [hasScannedTable, setHasScannedTable] = useState(false);
 
   useEffect(() => {
     const methods: PaymentMethod[] = [];
@@ -96,7 +97,7 @@ export default function CheckoutPage() {
       try {
         const [currData, settingsData, paymentData] = await Promise.all([
           getMethod("/api/currency?default=true"),
-          getMethod("/api/settings?field=deliveryFee"),
+          getMethod("/api/settings"),
           getMethod("/api/payment-methods"),
         ]);
 
@@ -108,6 +109,12 @@ export default function CheckoutPage() {
         }
         if (paymentData?.success && paymentData.paymentMethods) {
           setPaymentConfig(paymentData.paymentMethods);
+          
+          const Cookies = require("js-cookie");
+          const scannedTable = Cookies.get("scannedTableNumber");
+          if (scannedTable && paymentData.paymentMethods.payLater) {
+            setDeliveryType("dinein");
+          }
         }
       } catch { }
       setLoading(false);
@@ -116,6 +123,13 @@ export default function CheckoutPage() {
 
     try {
       const Cookies = require("js-cookie");
+      
+      const scannedTable = Cookies.get("scannedTableNumber");
+      if (scannedTable) {
+        setForm((prev) => ({ ...prev, tableNumber: scannedTable }));
+        setHasScannedTable(true);
+      }
+      
       const token = Cookies.get("customerToken");
       if (token) {
         getMethod("/api/customer/me")
@@ -201,6 +215,16 @@ export default function CheckoutPage() {
       if (!String(form.address || "").trim()) {
         newErrors.address = "Delivery address is required";
       }
+    } else if (deliveryType === "dinein") {
+      if (!form.tableNumber) {
+        newErrors.tableNumber = "Table number is required";
+      } else {
+        const maxTables = settings?.tableCount || 10;
+        const tNum = parseInt(form.tableNumber, 10);
+        if (isNaN(tNum) || tNum < 1 || tNum > maxTables) {
+          newErrors.tableNumber = `Valid table number required (1 - ${maxTables})`;
+        }
+      }
     }
 
     if (!deliveryType) {
@@ -216,10 +240,6 @@ export default function CheckoutPage() {
 
     if (cartItems.length === 0) {
       toast.error("Your cart is empty.");
-      return;
-    }
-    if (deliveryType === "dinein" && !form.tableNumber) {
-      toast.error("Please enter your table number.");
       return;
     }
 
@@ -241,7 +261,7 @@ export default function CheckoutPage() {
         };
       });
 
-      if (paymentMethod === "cod") {
+      if (paymentMethod === "cod" || paymentMethod === "payLater") {
         const payload = {
           cartItems: orderItems,
           customerDetails: form,
@@ -257,6 +277,10 @@ export default function CheckoutPage() {
           toast.error(data?.message || "Failed to place order.");
           setPlacing(false);
           return;
+        }
+        if (data.token) {
+          const Cookies = require("js-cookie");
+          Cookies.set("customerToken", data.token, { expires: 7 });
         }
         await clearCart();
         router.push(`/order/success?orderId=${data.order._id}`);
@@ -313,6 +337,10 @@ export default function CheckoutPage() {
                 toast.error(data?.message || "Order could not be saved after payment.");
                 reject(new Error(data?.message));
                 return;
+              }
+              if (data.token) {
+                const Cookies = require("js-cookie");
+                Cookies.set("customerToken", data.token, { expires: 7 });
               }
               await clearCart();
               router.push(`/order/success?orderId=${data.order._id}`);
@@ -552,19 +580,33 @@ export default function CheckoutPage() {
                             <div className="relative">
                               <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                               <input
-                                type="text"
-                                placeholder="e.g. 7"
+                                type="number"
+                                placeholder={`e.g. 7 (Max ${settings?.tableCount || 10})`}
                                 required={deliveryType === "dinein"}
+                                min="1"
+                                max={settings?.tableCount || 10}
                                 value={form.tableNumber}
-                                onChange={(e) =>
+                                disabled={hasScannedTable}
+                                onChange={(e) => {
+                                  if (hasScannedTable) return;
+                                  let val = e.target.value;
+                                  const maxTables = settings?.tableCount || 10;
+                                  if (val !== "") {
+                                    const num = parseInt(val, 10);
+                                    if (num > maxTables) val = String(maxTables);
+                                    if (num < 1) val = "1";
+                                  }
                                   setForm((f) => ({
                                     ...f,
-                                    tableNumber: e.target.value,
-                                  }))
-                                }
-                                className={INPUT_CLASS + " pl-11"}
+                                    tableNumber: val,
+                                  }));
+                                  if (errors.tableNumber) setErrors({ ...errors, tableNumber: "" });
+                                }}
+                                className={`${INPUT_CLASS} pl-11 ${errors.tableNumber ? "border-red-500/50 focus:border-red-500" : ""} disabled:opacity-50 disabled:cursor-not-allowed`}
                               />
                             </div>
+                            {hasScannedTable && <span className="text-[10px] text-green-400 mt-1 block">Table number from QR scan</span>}
+                            {errors.tableNumber && !hasScannedTable && <span className="text-[10px] text-red-400 mt-1 block">{errors.tableNumber}</span>}
                           </motion.div>
                         )}
                       </AnimatePresence>

@@ -72,6 +72,14 @@ const SettingSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    cancellationTimeLimit: {
+      type: Number,
+      default: 5,
+    },
+    tableCount: {
+      type: Number,
+      default: 10,
+    },
   },
   { timestamps: true }
 );

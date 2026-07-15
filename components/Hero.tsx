@@ -1,6 +1,11 @@
 "use client";
 
+import { useState } from "react";
+import CallWaiterModal from "./CallWaiterModal";
+
 export default function Hero() {
+  const [isWaiterModalOpen, setIsWaiterModalOpen] = useState(false);
+
   return (
     <section className="relative min-h-[100vh] w-full overflow-hidden bg-[#0d0404] flex items-center pt-32 pb-20">
       <div className="absolute top-0 right-0 -mr-[10%] -mt-[10%] w-[60%] h-[70%] rounded-full bg-red-800/20 blur-[120px] pointer-events-none" />
@@ -29,7 +34,7 @@ export default function Hero() {
               Browse Menu
             </a>
             <button
-              onClick={() => alert("Waiter has been called to your table!")}
+              onClick={() => setIsWaiterModalOpen(true)}
               className="w-full sm:w-auto rounded-full border border-red-500/30 bg-red-900/20 px-10 py-4 text-base font-bold text-red-100 backdrop-blur-md transition-all hover:bg-red-900/40 hover:border-red-500 hover:-translate-y-1 text-center flex items-center justify-center gap-2"
             >
               <span>🔔</span> Call Waiter
@@ -90,6 +95,10 @@ export default function Hero() {
           </div>
         </div>
       </div>
+      <CallWaiterModal 
+        isOpen={isWaiterModalOpen} 
+        onClose={() => setIsWaiterModalOpen(false)} 
+      />
     </section>
   );
 }

@@ -29,6 +29,14 @@ async function handleCOD(_orderData: OrderPayload): Promise<PaymentResult> {
   };
 }
 
+async function handlePayLater(_orderData: OrderPayload): Promise<PaymentResult> {
+  return {
+    success: true,
+    transactionId: undefined,
+    gatewayResponse: null,
+  };
+}
+
 
 async function handleRazorpay(orderData: OrderPayload): Promise<PaymentResult> {
   const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = orderData;
@@ -68,6 +76,7 @@ type PaymentHandler = (orderData: OrderPayload) => Promise<PaymentResult>;
 const PAYMENT_HANDLERS: Record<string, PaymentHandler> = {
   cod: handleCOD,
   razorpay: handleRazorpay,
+  paylater: handlePayLater,
 };
 export async function processPayment(
   paymentMethod: string,
