@@ -27,7 +27,7 @@ export default function FloatingButtons({ settings }: FloatingButtonsProps) {
     if (Cookies.get("scannedTableNumber")) {
       setHasTableNumber(true);
     }
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     const checkActiveOrders = async () => {
@@ -114,7 +114,7 @@ export default function FloatingButtons({ settings }: FloatingButtonsProps) {
         <>
           <button
             onClick={() => setIsWaiterModalOpen(true)}
-            className="fixed bottom-6 left-6 z-40 rounded-full bg-gradient-gold px-5 py-3 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-gold)] md:hidden flex items-center gap-2"
+            className="fixed bottom-6 left-6 z-40 rounded-full bg-gradient-gold px-5 py-3 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-gold)] flex items-center gap-2"
           >
             <span>🔔</span> Call Waiter
           </button>

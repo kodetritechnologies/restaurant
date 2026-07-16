@@ -1,19 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CallWaiterModal from "./CallWaiterModal";
 import Cookies from "js-cookie";
-import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 export default function Hero() {
   const [isWaiterModalOpen, setIsWaiterModalOpen] = useState(false);
   const [hasTableNumber, setHasTableNumber] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (Cookies.get("scannedTableNumber")) {
       setHasTableNumber(true);
     }
-  }, []);
+  }, [pathname]);
 
   return (
     <section className="relative min-h-[100vh] w-full overflow-hidden bg-[#0d0404] flex items-center pt-32 pb-20">
