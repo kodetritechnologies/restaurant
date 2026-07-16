@@ -68,20 +68,32 @@ export default function AdminDashboardLayout({
         const audio = new Audio('/notification.wav');
         let playCount = 0;
         
+        const attemptPlay = () => {
+          audio.play().catch(e => {
+            if (e.name === "NotAllowedError") {
+              toast("Browser blocked notification sound. Please click anywhere on the page to enable sounds.", {
+                icon: "🔇",
+                id: "audio-blocked-toast"
+              });
+            } else {
+              console.error("Audio playback failed:", e);
+            }
+          });
+        };
+
         audio.addEventListener('ended', () => {
           playCount++;
           if (playCount < 2) {
-            // Add a small 500ms delay between rings so it sounds natural
             setTimeout(() => {
               audio.currentTime = 0;
-              audio.play().catch(e => console.error("Audio playback failed:", e));
+              attemptPlay();
             }, 500);
           }
         });
         
-        audio.play().catch(e => console.error("Audio playback failed:", e));
+        attemptPlay();
       } catch (e) {
-        console.error("Audio playback failed:", e);
+        console.error("Audio playback setup failed:", e);
       }
     };
 
