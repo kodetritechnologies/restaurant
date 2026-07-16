@@ -2,9 +2,18 @@
 
 import { useState } from "react";
 import CallWaiterModal from "./CallWaiterModal";
+import Cookies from "js-cookie";
+import { useEffect } from "react";
 
 export default function Hero() {
   const [isWaiterModalOpen, setIsWaiterModalOpen] = useState(false);
+  const [hasTableNumber, setHasTableNumber] = useState(false);
+
+  useEffect(() => {
+    if (Cookies.get("scannedTableNumber")) {
+      setHasTableNumber(true);
+    }
+  }, []);
 
   return (
     <section className="relative min-h-[100vh] w-full overflow-hidden bg-[#0d0404] flex items-center pt-32 pb-20">
@@ -33,12 +42,14 @@ export default function Hero() {
             >
               Browse Menu
             </a>
-            <button
-              onClick={() => setIsWaiterModalOpen(true)}
-              className="w-full sm:w-auto rounded-full border border-red-500/30 bg-red-900/20 px-10 py-4 text-base font-bold text-red-100 backdrop-blur-md transition-all hover:bg-red-900/40 hover:border-red-500 hover:-translate-y-1 text-center flex items-center justify-center gap-2"
-            >
-              <span>🔔</span> Call Waiter
-            </button>
+            {hasTableNumber && (
+              <button
+                onClick={() => setIsWaiterModalOpen(true)}
+                className="w-full sm:w-auto rounded-full border border-red-500/30 bg-red-900/20 px-10 py-4 text-base font-bold text-red-100 backdrop-blur-md transition-all hover:bg-red-900/40 hover:border-red-500 hover:-translate-y-1 text-center flex items-center justify-center gap-2"
+              >
+                <span>🔔</span> Call Waiter
+              </button>
+            )}
           </div>
 
           <div className="reveal mt-12 flex flex-wrap items-center justify-center lg:justify-start gap-8 border-t border-red-900/30 pt-8 w-full">

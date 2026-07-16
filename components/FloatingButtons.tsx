@@ -24,7 +24,7 @@ export default function FloatingButtons({ settings }: FloatingButtonsProps) {
   const { getMethod } = BasicProvider();
 
   useEffect(() => {
-    if (Cookies.get("tableNumber")) {
+    if (Cookies.get("scannedTableNumber")) {
       setHasTableNumber(true);
     }
   }, []);
