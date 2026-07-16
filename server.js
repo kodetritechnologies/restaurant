@@ -9,13 +9,11 @@ const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
 app.prepare().then(() => {
-  const nextServer = createServer(handler);
-  nextServer.listen(port, () => {
-    console.log(`> Next.js ready on http://${hostname}:${port}`);
-  });
+  // Create a single HTTP server handling both Next.js and Socket.IO
+  const httpServer = createServer(handler);
 
-  const socketServer = createServer();
-  const io = new Server(socketServer, {
+  // Attach Socket.IO to the same server
+  const io = new Server(httpServer, {
     cors: {
       origin: "*",
       methods: ["GET", "POST"]
@@ -28,7 +26,10 @@ app.prepare().then(() => {
     });
   });
 
-  socketServer.listen(3001, () => {
-    console.log(`> Socket.IO ready on http://${hostname}:3001`);
+  // Render uses process.env.PORT, fallback to 3000 locally
+  const currentPort = process.env.PORT || port;
+
+  httpServer.listen(currentPort, () => {
+    console.log(`> Ready on http://${hostname}:${currentPort}`);
   });
 });
