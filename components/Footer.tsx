@@ -47,9 +47,9 @@ export default function Footer({ settings }: FooterProps) {
         <div>
           <h4 className="font-serif text-lg text-gold">Opening Hours</h4>
           <ul className="mt-4 grid gap-2 text-sm text-foreground/70">
-            <li>{tueFri}</li>
-            <li>{satSun}</li>
-            <li>{mon}</li>
+            {tueFri && <li>{tueFri}</li>}
+            {satSun && <li>{satSun}</li>}
+            {mon && <li>{mon}</li>}
           </ul>
         </div>
       </div>

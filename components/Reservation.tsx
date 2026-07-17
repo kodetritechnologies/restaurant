@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import toast from "react-hot-toast";
 import BasicProvider from "@/utils/BasicProvider";
+import socket from "@/utils/socket";
 
 const hero = "/assets/hero.jpg";
 
@@ -78,6 +79,18 @@ export default function Reservation() {
       const data = await postMethod("/api/reservations", formData);
       if (data && data.success) {
         toast.success("Reservation request sent! We will confirm shortly.");
+        try {
+          const finalMessage = `New Reservation by ${formData.name} for ${formData.guests} guests`;
+          const resNotif = await postMethod("/api/notifications", { message: finalMessage });
+          const notif = resNotif?.notification;
+          socket.emit("call_waiter", { 
+            _id: notif?._id,
+            message: finalMessage, 
+            timestamp: notif?.createdAt || new Date().toISOString() 
+          });
+        } catch (e) {
+          console.error("Failed to emit notification:", e);
+        }
         setFormData({ name: "", phone: "", email: "", guests: "", date: "", time: "", request: "" });
       } else {
         toast.error(data.message || "Failed to create reservation.");

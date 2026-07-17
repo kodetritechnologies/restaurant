@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { generateToken } from "@/utils/lib/jwt";
+import { generateToken, verifyToken } from "@/utils/lib/jwt";
 import dbConnect from "@/utils/lib/dbConnect";
 import Order from "@/utils/models/Order";
 import Customer from "@/utils/models/Customer";
@@ -58,6 +58,20 @@ export async function GET(req: Request) {
 
     if (!customerDetails || !customerDetails.phone) {
       return NextResponse.json({ success: false, message: "Phone number is required to place an order." }, { status: 400 });
+    }
+
+    if (deliveryType === "dinein") {
+      const cookieStore = await cookies();
+      const tableToken = cookieStore.get("tableToken")?.value;
+      if (!tableToken) {
+        return NextResponse.json({ success: false, message: "No active table session found" }, { status: 403 });
+      }
+      try {
+        const decoded: any = verifyToken(tableToken);
+        customerDetails.tableNumber = decoded.table;
+      } catch (err) {
+        return NextResponse.json({ success: false, message: "Invalid table session" }, { status: 403 });
+      }
     }
 
     // --- SECURE PRICING CALCULATION ---

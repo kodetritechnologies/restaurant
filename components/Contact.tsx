@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import toast from "react-hot-toast";
 import BasicProvider from "@/utils/BasicProvider";
+import socket from "@/utils/socket";
 import { FaInstagram, FaFacebook } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 
@@ -81,6 +82,18 @@ export default function Contact({ settings }: ContactProps) {
         toast.success("Message sent! We will read it shortly.");
         form.reset();
         setErrors({});
+        try {
+          const finalMessage = `New Contact Message from ${payload.name}`;
+          const resNotif = await postMethod("/api/notifications", { message: finalMessage });
+          const notif = resNotif?.notification;
+          socket.emit("call_waiter", { 
+            _id: notif?._id,
+            message: finalMessage, 
+            timestamp: notif?.createdAt || new Date().toISOString() 
+          });
+        } catch (e) {
+          console.error("Failed to emit notification:", e);
+        }
       } else {
         toast.error(data.message || "Failed to send message.");
       }
@@ -96,7 +109,7 @@ export default function Contact({ settings }: ContactProps) {
   const phone = settings?.shopPhone || "+33 1 45 67 89 00";
   const whatsapp = settings?.whatsappNumber || "+33145678900";
   const emailProp = settings?.shopEmail || "reserve@aurea.dining";
-  const hours = settings?.shortHours || "Tue–Sun · 17:00 – 23:30";
+  const hours = settings?.shortHours || "";
 
   const instagram = settings?.instagramUsername 
     ? (settings.instagramUsername.startsWith("http") ? settings.instagramUsername : `https://instagram.com/${settings.instagramUsername}`)
@@ -124,9 +137,10 @@ export default function Contact({ settings }: ContactProps) {
         <div className="reveal glass overflow-hidden rounded-3xl">
           <iframe
             title="Map"
-            src="https://www.openstreetmap.org/export/embed.html?bbox=2.32%2C48.85%2C2.36%2C48.87&layer=mapnik"
-            className="h-72 w-full border-0 grayscale"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3680.2533077944454!2d75.89635657435785!3d22.718824427597035!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3962fd9ddd344e01%3A0xa7f912271ea81f68!2sNew%20udipi%20restaurant!5e0!3m2!1sen!2sin!4v1784314321484!5m2!1sen!2sin"
+            className="h-72 w-full border-0"
             loading="lazy"
+            referrerPolicy="strict-origin-when-cross-origin"
           />
           <div className="grid gap-4 p-5 sm:p-8">
             {[
@@ -135,7 +149,7 @@ export default function Contact({ settings }: ContactProps) {
               ["WhatsApp", whatsapp],
               ["Email", emailProp],
               ["Hours", hours],
-            ].map(([k, v]) => (
+            ].filter(([, v]) => v).map(([k, v]) => (
               <div key={k} className="flex flex-col sm:flex-row sm:items-start justify-between gap-1 sm:gap-4 border-b border-foreground/5 pb-3 last:border-0">
                 <span className="text-xs uppercase tracking-widest text-foreground/60 shrink-0">{k}</span>
                 <span className="text-left sm:text-right text-foreground/90 break-words">{v}</span>

@@ -222,7 +222,7 @@ function ReviewsContent() {
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div>
-          <h2 className="font-serif text-3xl font-extrabold text-gradient-gold leading-none">
+          <h2 className="font-serif text-2xl sm:text-3xl font-extrabold text-gradient-gold leading-none">
             Cherished Reviews
           </h2>
           <p className="text-xs text-muted-foreground uppercase tracking-widest mt-2">
@@ -233,7 +233,7 @@ function ReviewsContent() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Upload/Add Form */}
-        <form noValidate onSubmit={handleSaveReview} className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6 h-fit">
+        <form noValidate onSubmit={handleSaveReview} className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6 h-fit min-w-0">
           <h3 className="font-serif text-lg font-bold text-foreground border-b border-foreground/5 pb-2.5">
             {editingId ? "Edit Review" : "Add New Review"}
           </h3>
@@ -333,7 +333,7 @@ function ReviewsContent() {
             </div>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <button
               type="submit"
               disabled={saving}
@@ -368,7 +368,7 @@ function ReviewsContent() {
         </form>
 
         {/* Reviews List */}
-        <div className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6 lg:col-span-2">
+        <div className="glass p-6 sm:p-8 rounded-3xl shadow-elegant space-y-6 lg:col-span-2 min-w-0">
           <h3 className="font-serif text-lg font-bold text-foreground border-b border-foreground/5 pb-2.5">
             Active Reviews
           </h3>
@@ -384,9 +384,9 @@ function ReviewsContent() {
               No reviews added yet. Use the form on the left to start adding some!
             </p>
           ) : (
-            <div className="space-y-4">
-              <div className="overflow-x-auto rounded-xl border border-foreground/10">
-                <table className="w-full text-left text-sm text-foreground/80">
+            <div className="space-y-4 w-full">
+              <div className="overflow-x-auto rounded-xl border border-foreground/10 w-full">
+                <table className="w-full text-left text-sm text-foreground/80 min-w-[800px]">
                   <thead className="bg-foreground/5 text-xs uppercase text-foreground/60">
                     <tr>
                       <th className="px-4 py-3">Guest</th>
@@ -398,9 +398,11 @@ function ReviewsContent() {
                   <tbody className="divide-y divide-foreground/10">
                     {currentReviews.map((review) => (
                       <tr key={review._id} className="hover:bg-foreground/5 transition-colors">
-                        <td className="px-4 py-3 flex items-center gap-3">
-                          <img src={review.imgUrl || "/assets/no-image-customer.png"} alt={review.name} className="w-8 h-8 rounded-full border border-gold/40 object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/assets/no-image-customer.png"; }} />
-                          <span className="font-medium text-foreground whitespace-nowrap">{review.name}</span>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <img src={review.imgUrl || "/assets/no-image-customer.png"} alt={review.name} className="w-8 h-8 rounded-full border border-gold/40 object-cover shrink-0" onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/assets/no-image-customer.png"; }} />
+                            <span className="font-medium text-foreground whitespace-nowrap">{review.name}</span>
+                          </div>
                         </td>
                         <td className="px-4 py-3 text-gold whitespace-nowrap">
                           {"★".repeat(review.rating)}

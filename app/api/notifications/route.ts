@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import dbConnect from "@/utils/lib/dbConnect";
 import Notification from "@/utils/models/Notification";
 import { verifyAdmin } from "@/utils/lib/auth";
+import { verifyToken } from "@/utils/lib/jwt";
 
 export async function GET(req: Request) {
   try {
@@ -24,13 +26,31 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     await dbConnect();
-    const { message } = await req.json();
+    const { message, isWaiterCall } = await req.json();
 
     if (!message) {
       return NextResponse.json({ success: false, message: "Message is required" }, { status: 400 });
     }
 
-    const notification = await Notification.create({ message });
+    let finalMessage = message;
+
+    if (isWaiterCall) {
+      const cookieStore = await cookies();
+      const tableToken = cookieStore.get("tableToken")?.value;
+      
+      if (!tableToken) {
+         return NextResponse.json({ success: false, message: "No active table session found" }, { status: 403 });
+      }
+
+      try {
+        const decoded: any = verifyToken(tableToken);
+        finalMessage = `Table ${decoded.table}: ${message}`;
+      } catch (err) {
+        return NextResponse.json({ success: false, message: "Invalid table session" }, { status: 403 });
+      }
+    }
+
+    const notification = await Notification.create({ message: finalMessage });
     return NextResponse.json({ success: true, notification }, { status: 201 });
   } catch (error: any) {
     console.error("Create Notification Error:", error);

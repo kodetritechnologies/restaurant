@@ -13,13 +13,33 @@ function ScanContent() {
   useEffect(() => {
     const tableNumber = searchParams.get("table");
     
+    let timer: NodeJS.Timeout;
+    
     if (tableNumber) {
       Cookies.set("scannedTableNumber", tableNumber, { expires: 1 });
+      
+      fetch("/api/table/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tableNumber })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.token) {
+          Cookies.set("tableToken", data.token, { expires: 1 });
+        }
+      })
+      .catch(err => console.error("Failed to secure table:", err))
+      .finally(() => {
+        timer = setTimeout(() => {
+          router.push("/menu");
+        }, 2500);
+      });
+    } else {
+      timer = setTimeout(() => {
+        router.push("/menu");
+      }, 2500);
     }
-    
-    const timer = setTimeout(() => {
-      router.push("/menu");
-    }, 2500);
     
     return () => clearTimeout(timer);
   }, [searchParams, router]);

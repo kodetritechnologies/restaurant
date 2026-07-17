@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import socket from "@/utils/socket";
 
 
 
@@ -283,6 +284,20 @@ export default function CheckoutPage() {
           Cookies.set("customerToken", data.token, { expires: 7 });
         }
         await clearCart();
+        try {
+          const baseMsg = `New Order Placed! (ID: ${data.order._id.substring(0, 6)})`;
+          const isDineIn = deliveryType === "dinein";
+          const payload = isDineIn ? { message: baseMsg, isWaiterCall: true } : { message: baseMsg };
+          const resNotif = await postMethod("/api/notifications", payload);
+          const notif = resNotif?.notification;
+          socket.emit("call_waiter", { 
+            _id: notif?._id,
+            message: notif?.message || baseMsg, 
+            timestamp: notif?.createdAt || new Date().toISOString() 
+          });
+        } catch (e) {
+          console.error("Failed to emit notification:", e);
+        }
         router.push(`/order/success?orderId=${data.order._id}`);
         return;
       }
@@ -344,6 +359,20 @@ export default function CheckoutPage() {
                 Cookies.set("customerToken", data.token, { expires: 7 });
               }
               await clearCart();
+              try {
+                const baseMsg = `New Order Placed! (ID: ${data.order._id.substring(0, 6)})`;
+                const isDineIn = deliveryType === "dinein";
+                const payload = isDineIn ? { message: baseMsg, isWaiterCall: true } : { message: baseMsg };
+                const resNotif = await postMethod("/api/notifications", payload);
+                const notif = resNotif?.notification;
+                socket.emit("call_waiter", { 
+                  _id: notif?._id,
+                  message: notif?.message || baseMsg, 
+                  timestamp: notif?.createdAt || new Date().toISOString() 
+                });
+              } catch (e) {
+                console.error("Failed to emit notification:", e);
+              }
               router.push(`/order/success?orderId=${data.order._id}`);
               resolve();
             },

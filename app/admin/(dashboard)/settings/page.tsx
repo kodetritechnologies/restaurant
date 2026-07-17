@@ -472,7 +472,7 @@ export default function SettingsManager() {
                     type="text"
                     value={shortHours}
                     onChange={(e) => setShortHours(e.target.value)}
-                    placeholder="Tue–Sun · 17:00 – 23:30"
+                    placeholder="Mon–Sun · 10:00 – 23:30"
                     className="w-full bg-background/50 border border-foreground/10 pl-9 pr-4 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
                   />
                 </div>
@@ -486,7 +486,7 @@ export default function SettingsManager() {
                   type="text"
                   value={openHoursTueFri}
                   onChange={(e) => setOpenHoursTueFri(e.target.value)}
-                  placeholder="Tuesday – Friday · 17:00 – 23:00"
+                  placeholder="Monday – Friday · 10:00 – 23:30"
                   className="w-full bg-background/50 border border-foreground/10 px-3 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
                 />
               </div>
@@ -499,7 +499,7 @@ export default function SettingsManager() {
                   type="text"
                   value={openHoursSatSun}
                   onChange={(e) => setOpenHoursSatSun(e.target.value)}
-                  placeholder="Saturday – Sunday · 12:00 – 23:30"
+                  placeholder="Saturday – Sunday · 10:00 – 23:30"
                   className="w-full bg-background/50 border border-foreground/10 px-3 py-2.5 rounded-xl text-xs text-foreground outline-none focus:border-gold"
                 />
               </div>

@@ -2,11 +2,12 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, Minus, Plus, X, ShoppingCart } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 
 export default function CartDrawer() {
   const router = useRouter();
+  const pathname = usePathname();
   const { 
     items: cartItems, 
     subtotalAmount, 
@@ -20,7 +21,7 @@ export default function CartDrawer() {
 
   return (
     <>
-      {cartTotalItems > 0 && (
+      {cartTotalItems > 0 && pathname !== "/checkout" && (
         <button
           onClick={() => setIsCartOpen(true)}
           className="fixed bottom-24 left-6 z-[45] flex h-14 w-14 items-center justify-center rounded-full bg-gold text-primary-foreground shadow-lg transition-transform hover:scale-110 md:bottom-6 md:left-6"

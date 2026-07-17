@@ -43,13 +43,11 @@ export default function CallWaiterModal({ isOpen, onClose }: CallWaiterModalProp
     }
     
     try {
-      const table = Cookies.get("scannedTableNumber");
-      const finalMessage = table ? `Table ${table}: ${option}` : option;
-      const res = await axios.post("/api/notifications", { message: finalMessage });
+      const res = await axios.post("/api/notifications", { message: option, isWaiterCall: true });
       const notif = res.data?.notification;
       socket.emit("call_waiter", { 
         _id: notif?._id,
-        message: finalMessage, 
+        message: notif?.message || option, 
         timestamp: notif?.createdAt || new Date().toISOString() 
       });
       toast.success("Waiter called successfully!");
@@ -103,13 +101,11 @@ export default function CallWaiterModal({ isOpen, onClose }: CallWaiterModalProp
                 onClick={async () => {
                   if (otherText.trim()) {
                     try {
-                      const table = Cookies.get("scannedTableNumber");
-                      const finalMessage = table ? `Table ${table}: ${otherText.trim()}` : otherText.trim();
-                      const res = await axios.post("/api/notifications", { message: finalMessage });
+                      const res = await axios.post("/api/notifications", { message: otherText.trim(), isWaiterCall: true });
                       const notif = res.data?.notification;
                       socket.emit("call_waiter", { 
                         _id: notif?._id,
-                        message: finalMessage, 
+                        message: notif?.message || otherText.trim(), 
                         timestamp: notif?.createdAt || new Date().toISOString() 
                       });
                       toast.success("Waiter called successfully!");
