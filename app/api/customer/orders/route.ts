@@ -4,6 +4,8 @@ import { generateToken } from "@/utils/lib/jwt";
 import dbConnect from "@/utils/lib/dbConnect";
 import Order from "@/utils/models/Order";
 import Customer from "@/utils/models/Customer";
+import Product from "@/utils/models/Product";
+import ProductVariant from "@/utils/models/ProductVariant";
 import { getPaginatedData } from "@/utils/lib/pagination";
 import { processPayment } from "@/utils/lib/paymentHandlers";
 export async function GET(req: Request) {
@@ -36,19 +38,17 @@ export async function GET(req: Request) {
     });
   } catch (error: any) {
     console.error("Get Orders Error:", error);
-    return NextResponse.json({ success: false, message: "Server error", error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
 }
 
-export async function POST(req: Request) {
+  export async function POST(req: Request) {
   try {
     let customerId = req.headers.get("x-customer-id") || null;
     let customerEmail = req.headers.get("x-customer-email") || null;
 
-
     const body = await req.json();
-    const { cartItems, customerDetails, deliveryType, paymentMethod, subtotal, deliveryFee, totalAmount } = body;
-
+    const { cartItems, customerDetails, deliveryType, paymentMethod, deliveryFee } = body;
 
     if (!cartItems || cartItems.length === 0) {
       return NextResponse.json({ success: false, message: "Cart is empty" }, { status: 400 });
@@ -59,6 +59,37 @@ export async function POST(req: Request) {
     if (!customerDetails || !customerDetails.phone) {
       return NextResponse.json({ success: false, message: "Phone number is required to place an order." }, { status: 400 });
     }
+
+    // --- SECURE PRICING CALCULATION ---
+    let calculatedSubtotal = 0;
+    const securedCartItems = [];
+
+    for (const item of cartItems) {
+      if (!item.productId) {
+        return NextResponse.json({ success: false, message: "Invalid cart item" }, { status: 400 });
+      }
+
+      let price = 0;
+
+      if (item.variantId) {
+        const variant = await ProductVariant.findById(item.variantId);
+        if (!variant) return NextResponse.json({ success: false, message: "Variant not found" }, { status: 400 });
+        price = variant.salePrice > 0 ? variant.salePrice : variant.regularPrice;
+      } else {
+        const product = await Product.findById(item.productId);
+        if (!product) return NextResponse.json({ success: false, message: "Product not found" }, { status: 400 });
+        price = product.salePrice > 0 ? product.salePrice : product.regularPrice;
+      }
+
+      calculatedSubtotal += price * (item.quantity || 1);
+      securedCartItems.push({
+        ...item,
+        price,
+      });
+    }
+
+    const calculatedTotalAmount = calculatedSubtotal + (Number(deliveryFee) || 0);
+    // ----------------------------------
 
     let customer = await Customer.findOne({ phone: customerDetails.phone });
 
@@ -97,14 +128,14 @@ export async function POST(req: Request) {
       customerId = customer._id;
     }
 
- const paymentPayload = {
-      cartItems,
+    const paymentPayload = {
+      cartItems: securedCartItems,
       customerDetails,
       deliveryType,
       paymentMethod,
-      subtotal,
+      subtotal: calculatedSubtotal,
       deliveryFee,
-      totalAmount,
+      totalAmount: calculatedTotalAmount,
       ...body, 
     };
 
@@ -119,13 +150,13 @@ export async function POST(req: Request) {
 
     const newOrder = await Order.create({
       customerId,
-      items: cartItems,
+      items: securedCartItems,
       deliveryType,
       paymentMethod,
       customerDetails,
-      subtotal,
+      subtotal: calculatedSubtotal,
       deliveryFee,
-      totalAmount,
+      totalAmount: calculatedTotalAmount,
       ...(paymentResult.transactionId && { transactionId: paymentResult.transactionId }),
     });
 
@@ -145,6 +176,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, message: "Order placed successfully", order: newOrder, token }, { status: 201 });
   } catch (error: any) {
     console.error("Create Order Error:", error);
-    return NextResponse.json({ success: false, message: "Failed to place order", error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Failed to place order" }, { status: 500 });
   }
 }

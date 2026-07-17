@@ -66,7 +66,8 @@ async function verifyJwt(token: string, secret: string): Promise<any | null> {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isAdminRoute = pathname.startsWith('/admin');
+  const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/api/admin');
+  const isApiRoute = pathname.startsWith('/api/');
 
   if (isAdminRoute) {
     const adminToken = request.cookies.get('adminToken')?.value;
@@ -82,6 +83,9 @@ export async function middleware(request: NextRequest) {
     }
 
     if (!isAdminValid) {
+      if (isApiRoute) {
+        return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+      }
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
 
@@ -130,6 +134,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/admin/:path*',
+    '/api/admin/:path*',
     '/profile/:path*',
     '/api/customer/:path*',
   ],

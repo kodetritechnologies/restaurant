@@ -296,7 +296,8 @@ export default function CheckoutPage() {
         }
 
         const rzpOrderRes = await postMethod("/api/razorpay/create-order", {
-          amount: total,
+          cartItems: orderItems,
+          deliveryFee: deliveryFee,
         });
 
         if (!rzpOrderRes?.success) {
