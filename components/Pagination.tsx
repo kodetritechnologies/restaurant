@@ -3,7 +3,9 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-const Pagination = ({ data, isAdmin = false }: any) => {
+import { Suspense } from "react";
+
+const PaginationContent = ({ data, isAdmin = false }: any) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -75,4 +77,13 @@ const Pagination = ({ data, isAdmin = false }: any) => {
   );
 };
 
+const Pagination = (props: any) => {
+  return (
+    <Suspense fallback={null}>
+      <PaginationContent {...props} />
+    </Suspense>
+  );
+};
+
 export default Pagination;
+

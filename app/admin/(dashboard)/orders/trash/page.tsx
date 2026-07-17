@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Loader2, Trash2, ShoppingBag, Search, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -33,7 +33,7 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: "text-red-400 bg-red-400/10 border-red-400/20",
 };
 
-export default function AdminOrdersTrashPage() {
+function AdminOrdersTrashContent() {
   const { getMethod, patchMethod, deleteMethod } = BasicProvider();
   const searchParams = useSearchParams();
 
@@ -101,61 +101,69 @@ export default function AdminOrdersTrashPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <Trash2 className="text-gold" />
             Orders Trash
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Soft-deleted orders. Restore or permanently delete them.
+          <p className="text-muted-foreground text-sm mt-1">
+            Manage deleted orders. You can restore them or delete them permanently.
           </p>
         </div>
         <Link
           href="/admin/orders"
-          className="flex items-center gap-2 border border-foreground/10 hover:border-gold/40 text-muted-foreground hover:text-gold font-semibold px-4 py-2 rounded-xl transition-all w-fit text-sm"
+          className="px-4 py-2 bg-foreground/10 hover:bg-foreground/20 text-white rounded-lg flex items-center gap-2 text-sm transition-colors border border-foreground/10"
         >
-          <ShoppingBag size={16} /> All Orders
+          <RotateCcw size={16} />
+          Back to Active Orders
         </Link>
       </div>
 
-      <div className="glass p-6 rounded-2xl border border-foreground/10 min-h-[500px]">
-        <div className="mb-6">
-          <div className="relative w-full md:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+      <div className="bg-[#111] rounded-xl border border-foreground/10 overflow-hidden shadow-2xl">
+        <div className="p-4 border-b border-foreground/10 flex justify-between items-center bg-foreground/5">
+          <div className="relative max-w-sm w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search by name, phone, email..."
+              placeholder="Search by ID or customer..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-surface/50 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-gold transition-colors"
+              className="w-full bg-black/20 border border-foreground/10 rounded-lg pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-gold/50 transition-colors"
             />
           </div>
         </div>
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
-            <Loader2 className="w-8 h-8 animate-spin mb-2" />
-            <p>Loading...</p>
+          <div className="flex flex-col items-center justify-center h-64 gap-4">
+            <Loader2 className="w-8 h-8 animate-spin text-gold" />
+            <p className="text-muted-foreground text-sm uppercase tracking-widest animate-pulse">
+              Loading trash...
+            </p>
           </div>
         ) : orders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-muted-foreground border-2 border-dashed border-foreground/10 rounded-xl">
+          <div className="flex flex-col items-center justify-center h-64 text-center">
             <Trash2 className="w-12 h-12 mb-2 opacity-50" />
             <p>Trash is empty.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-foreground/10 text-muted-foreground text-sm">
-                  <th className="py-3 px-4 font-medium">Customer</th>
-                  <th className="py-3 px-4 font-medium">Delivery</th>
-                  <th className="py-3 px-4 font-medium">Items</th>
-                  <th className="py-3 px-4 font-medium">Total</th>
-                  <th className="py-3 px-4 font-medium">Status</th>
-                  <th className="py-3 px-4 font-medium">Date</th>
-                  <th className="py-3 px-4 font-medium text-right">Actions</th>
+            <table className="w-full">
+              <thead className="bg-foreground/5 border-b border-foreground/10">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Order Details
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-6 py-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -220,5 +228,13 @@ export default function AdminOrdersTrashPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function AdminOrdersTrashPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-gold"><Loader2 className="w-8 h-8 animate-spin mx-auto" /></div>}>
+      <AdminOrdersTrashContent />
+    </Suspense>
   );
 }
