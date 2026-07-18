@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Loader2, Trash2, ShoppingBag, Search, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -33,7 +33,7 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: "text-red-400 bg-red-400/10 border-red-400/20",
 };
 
-export default function AdminOrdersTrashPage() {
+function OrdersTrashContent() {
   const { getMethod, patchMethod, deleteMethod } = BasicProvider();
   const searchParams = useSearchParams();
 
@@ -220,5 +220,13 @@ export default function AdminOrdersTrashPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function AdminOrdersTrashPage() {
+  return (
+    <Suspense fallback={<div className="flex flex-col items-center justify-center h-64 text-muted-foreground"><Loader2 className="w-8 h-8 animate-spin mb-2" /><p>Loading...</p></div>}>
+      <OrdersTrashContent />
+    </Suspense>
   );
 }
