@@ -23,16 +23,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Generate a 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // In a real production application, you should save the OTP and its expiry
-    // to the database (e.g., in the Admin model) to verify it later.
-    // admin.otp = otp;
-    // admin.otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
-    // await admin.save();
-
-    // Send the email using the generic sendMail utility and hbs template
     const Setting = (await import("@/utils/models/Setting")).default;
     const setting = await Setting.findOne();
     
@@ -40,8 +31,9 @@ export async function POST(req: Request) {
     const appName = process.env.APP_NAME; 
     const logoUrl = setting?.restaurantLogo;
 
-    // Reverting to await because Next.js might be killing background promises before they finish
-    const mailResponse = await sendMail({
+    const { redisClient } = await import("@/utils/lib/redis");
+    
+    const emailJobData = {
       to: email,
       subject: `Your Login OTP - ${appName}`,
       templateName: "otp",
@@ -52,14 +44,9 @@ export async function POST(req: Request) {
         appName,
         logoUrl,
       },
-    });
+    };
 
-    if (!mailResponse.success) {
-      return NextResponse.json(
-        { success: false, message: "Failed to send OTP email.", error: mailResponse.error },
-        { status: 500 }
-      );
-    }
+    await redisClient.lPush("email_queue", JSON.stringify(emailJobData));
 
     return NextResponse.json(
       { success: true, message: "OTP sent successfully." },

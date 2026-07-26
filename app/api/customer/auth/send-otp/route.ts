@@ -43,7 +43,6 @@ export async function POST(req: Request) {
       });
     }
 
-    // Import and call sendMail
     const { sendMail } = await import("@/utils/sendMail");
     const Setting = (await import("@/utils/models/Setting")).default;
     
@@ -53,8 +52,9 @@ export async function POST(req: Request) {
     const appName = process.env.APP_NAME; 
     const logoUrl = setting?.restaurantLogo;
 
-    // Reverting to await because Next.js might be killing background promises before they finish
-    const mailResponse = await sendMail({
+    const { redisClient } = await import("@/utils/lib/redis");
+    
+    const emailJobData = {
       to: email,
       subject: `Your Login OTP - ${appName}`,
       templateName: "otp",
@@ -65,15 +65,9 @@ export async function POST(req: Request) {
         appName,
         logoUrl,
       },
-    });
+    };
 
-    if (!mailResponse.success) {
-      console.error("Failed to send email via sendMail:", mailResponse.error);
-      return NextResponse.json(
-        { success: false, message: "Failed to send OTP email" },
-        { status: 500 }
-      );
-    }
+    await redisClient.lPush("email_queue", JSON.stringify(emailJobData));
 
     return NextResponse.json(
       { 
