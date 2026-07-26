@@ -43,6 +43,37 @@ export async function POST(req: Request) {
       });
     }
 
+    // Import and call sendMail
+    const { sendMail } = await import("@/utils/sendMail");
+    const Setting = (await import("@/utils/models/Setting")).default;
+    
+    const setting = await Setting.findOne();
+    
+    const baseUrl = process.env.base_url;
+    const appName = process.env.APP_NAME; 
+    const logoUrl = setting?.restaurantLogo;
+
+    const mailResponse = await sendMail({
+      to: email,
+      subject: `Your Login OTP - ${appName}`,
+      templateName: "otp",
+      context: {
+        name: customer.name || "Customer",
+        otp,
+        year: new Date().getFullYear(),
+        appName,
+        logoUrl,
+      },
+    });
+
+    if (!mailResponse.success) {
+      console.error("Failed to send email via sendMail:", mailResponse.error);
+      return NextResponse.json(
+        { success: false, message: "Failed to send OTP email" },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
       { 
         success: true, 
