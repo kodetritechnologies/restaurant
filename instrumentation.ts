@@ -1,18 +1,16 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
-    const { redisClient } = await import('./utils/lib/redis');
+    console.log("🚀 Starting Redis email background worker...");
+    
+    const { getRedisClient } = await import('./utils/lib/redis');
     const { sendMail } = await import('./utils/sendMail');
 
-    if (!redisClient.isOpen) {
-      await redisClient.connect().catch(() => {});
-    }
-
-    console.log("🚀 Starting Redis email background worker...");
-
     const startWorker = async () => {
+      // Connect to redis inside the worker loop so it doesn't block server startup
+      const redis = await getRedisClient();
       while (true) {
         try {
-          const result = await redisClient.brPop('email_queue', 0);
+          const result = await redis.brPop('email_queue', 0);
           if (result) {
             const { element } = result;
             const emailData = JSON.parse(element);

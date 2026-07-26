@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import Admin from "@/utils/models/Admin";
 import dbConnect from "@/utils/lib/dbConnect";
 import { sendMail } from "@/utils/sendMail";
+import Setting from "@/utils/models/Setting";
+import { getRedisClient } from "@/utils/lib/redis";
 
 export async function POST(req: Request) {
   try {
@@ -24,14 +26,11 @@ export async function POST(req: Request) {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const Setting = (await import("@/utils/models/Setting")).default;
     const setting = await Setting.findOne();
     
     const baseUrl = process.env.base_url || "http://localhost:3000";
     const appName = process.env.APP_NAME; 
     const logoUrl = setting?.restaurantLogo;
-
-    const { redisClient } = await import("@/utils/lib/redis");
     
     const emailJobData = {
       to: email,
@@ -46,7 +45,9 @@ export async function POST(req: Request) {
       },
     };
 
-    await redisClient.lPush("email_queue", JSON.stringify(emailJobData));
+    const redis = await getRedisClient();
+    await redis.lPush("email_queue", JSON.stringify(emailJobData));
+    await redis.disconnect();
 
     return NextResponse.json(
       { success: true, message: "OTP sent successfully." },
