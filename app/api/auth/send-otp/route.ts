@@ -40,7 +40,8 @@ export async function POST(req: Request) {
     const appName = process.env.APP_NAME; 
     const logoUrl = setting?.restaurantLogo;
 
-    const mailResponse = await sendMail({
+    // Fire and forget email sending so it doesn't block the API response
+    sendMail({
       to: email,
       subject: `Your Login OTP - ${appName}`,
       templateName: "otp",
@@ -51,14 +52,9 @@ export async function POST(req: Request) {
         appName,
         logoUrl,
       },
+    }).catch((error: any) => {
+      console.error("Failed to send email via sendMail in background:", error);
     });
-
-    if (!mailResponse.success) {
-      return NextResponse.json(
-        { success: false, message: "Failed to send OTP email.", error: mailResponse.error },
-        { status: 500 }
-      );
-    }
 
     return NextResponse.json(
       { success: true, message: "OTP sent successfully." },
