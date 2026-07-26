@@ -53,8 +53,8 @@ export async function POST(req: Request) {
     const appName = process.env.APP_NAME; 
     const logoUrl = setting?.restaurantLogo;
 
-    // Fire and forget email sending so it doesn't block the API response
-    sendMail({
+    // Reverting to await because Next.js might be killing background promises before they finish
+    const mailResponse = await sendMail({
       to: email,
       subject: `Your Login OTP - ${appName}`,
       templateName: "otp",
@@ -65,9 +65,15 @@ export async function POST(req: Request) {
         appName,
         logoUrl,
       },
-    }).catch((error: any) => {
-      console.error("Failed to send email via sendMail in background:", error);
     });
+
+    if (!mailResponse.success) {
+      console.error("Failed to send email via sendMail:", mailResponse.error);
+      return NextResponse.json(
+        { success: false, message: "Failed to send OTP email" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(
       { 
